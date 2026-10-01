@@ -68,6 +68,7 @@ namespace GuMaGoChi {
                 var down=typeof(PetWindow).GetMethod("Down",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);var up=typeof(PetWindow).GetMethod("Up",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
                 down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(w.Capture,"Direct body press captures pointer without move menu");initialX=w.Left;w.Step(.5,true);Check(w.Left==initialX,"Holding body suspends autonomous walking");up.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(!w.Capture,"Releasing body releases pointer capture");
                 var closingMenu=app.MenuFor(pet);closingMenu.Show(w,new System.Drawing.Point(30,90));Application.DoEvents();closingMenu.Close(ToolStripDropDownCloseReason.ItemClicked);
+                var outsideMenu=(DismissibleMenu)app.MenuFor(pet);outsideMenu.Show(w,new System.Drawing.Point(30,90));Application.DoEvents();outsideMenu.DismissOutside(new System.Drawing.Point(outsideMenu.Left+8,outsideMenu.Top+8));Check(outsideMenu.Visible,"Click inside menu preserves it");outsideMenu.DismissOutside(new System.Drawing.Point(outsideMenu.Left-30,outsideMenu.Top-30));Check(!outsideMenu.Visible&&!outsideMenu.IsDisposed,"Click outside closes menu without disposing item actions");closingMenu=outsideMenu;
                 Check(!closingMenu.IsDisposed,"Menu survives Closed while item-click dispatch is pending");
                 Find(closingMenu,"쓰다듬기").PerformClick();Check(pet.Affection==1,"Item action still runs after menu closes");
                 var replacementMenu=app.MenuFor(pet);Check(closingMenu.IsDisposed&&!replacementMenu.IsDisposed,"Previous menu released on next opening");
@@ -99,7 +100,7 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 215 UI checks\r\nWindows, pet list names, selected preview, direct drag, XY walking, pet-height ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
+                return "PASS: 217 UI checks\r\nOutside-click menu dismissal, Windows, pet list names, selected preview, direct drag, XY walking, pet-height ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
             }finally {app.Exit();}
         }
     }

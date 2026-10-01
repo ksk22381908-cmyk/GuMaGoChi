@@ -17,6 +17,7 @@ namespace GuMaGoChi {
         [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h,out uint pid);
         [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
         [DllImport("user32.dll")] public static extern bool DestroyIcon(IntPtr h);
+        [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int key);
         public static bool FullScreen() {
             IntPtr h=GetForegroundWindow();uint pid;GetWindowThreadProcessId(h,out pid);
             if(h==IntPtr.Zero || pid==(uint)Process.GetCurrentProcess().Id)return false;
@@ -26,6 +27,19 @@ namespace GuMaGoChi {
             Rectangle b=Screen.FromHandle(h).Bounds;
             return r.Left<=b.Left && r.Top<=b.Top && r.Right>=b.Right && r.Bottom>=b.Bottom;
         }
+    }
+    public class DismissibleMenu:ContextMenuStrip {
+        Timer outsideClicks=new Timer {Interval=20};bool leftDown,rightDown;
+        public DismissibleMenu(){AutoClose=true;outsideClicks.Tick+=(s,e)=>{
+            short left=Native.GetAsyncKeyState(1),right=Native.GetAsyncKeyState(2);bool l=(left&0x8000)!=0,r=(right&0x8000)!=0;
+            bool clicked=(l&&!leftDown)||(r&&!rightDown)||(left&1)!=0||(right&1)!=0;leftDown=l;rightDown=r;
+            if(clicked)DismissOutside(Cursor.Position);
+        };}
+        public static bool ContainsMenu(ToolStripDropDown menu,Point point){if(menu.Visible&&menu.Bounds.Contains(point))return true;foreach(ToolStripItem item in menu.Items){var child=item as ToolStripDropDownItem;if(child!=null&&child.HasDropDownItems&&ContainsMenu(child.DropDown,point))return true;}return false;}
+        public void DismissOutside(Point point){if(Visible&&!ContainsMenu(this,point))Close(ToolStripDropDownCloseReason.AppClicked);}
+        protected override void OnOpened(EventArgs e){leftDown=(Native.GetAsyncKeyState(1)&0x8000)!=0;rightDown=(Native.GetAsyncKeyState(2)&0x8000)!=0;base.OnOpened(e);outsideClicks.Start();}
+        protected override void OnClosed(ToolStripDropDownClosedEventArgs e){outsideClicks.Stop();base.OnClosed(e);}
+        protected override void Dispose(bool disposing){if(disposing)outsideClicks.Dispose();base.Dispose(disposing);}
     }
     public static class Art {
         public static readonly Color Ink=Color.FromArgb(65,48,55), Cream=Color.FromArgb(255,246,221), Green=Color.FromArgb(91,126,74), Pink=Color.FromArgb(188,112,145);
@@ -239,7 +253,7 @@ namespace GuMaGoChi {
                 if(previousMenu.Visible)return previousMenu;
                 if(!previousMenu.IsDisposed)previousMenu.Dispose();
             }
-            var menu=new ContextMenuStrip {Font=new Font("맑은 고딕",9)};petMenus[p.Id]=menu;
+            var menu=new DismissibleMenu {Font=new Font("맑은 고딕",9)};petMenus[p.Id]=menu;
             menu.Items.Add(Item(p.Name+" · "+p.Kind,()=>OpenHome(p)));
             menu.Items.Add(new ToolStripLabel("배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+" · 피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)));
             menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Engine.CanCare(p);
