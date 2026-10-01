@@ -169,5 +169,3 @@ namespace GuMaGoChi {
         public static void Save(SaveData d) {Directory.CreateDirectory(Folder);string tmp=PathName+".tmp";File.WriteAllText(tmp,Encode(d),System.Text.Encoding.UTF8);if(File.Exists(PathName))File.Replace(tmp,PathName,PathName+".bak");else File.Move(tmp,PathName);}
     }
 }
-
-
