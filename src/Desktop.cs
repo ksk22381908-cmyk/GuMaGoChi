@@ -209,6 +209,7 @@ namespace GuMaGoChi {
             }
         }
         string Talk(Pet p) {
+            if(p.SpeciesId==30){if(p.Hunger>60)return "배가 고프구마~";if(p.Illness>20)return "몸이 으슬으슬하구마.";if(p.Fatigue>75)return "잠깐 눈 붙이겠구마.";string[] spyLines={"아 날씨 좋구마!","나도 분명 고구마구마.","감자? 여기엔 그런 거 없구마!","싹은 건드리지 말아주구마."};return spyLines[Engine.Random.Next(spyLines.Length)];}
             if(p.Hunger>60)return "배가 슬슬 고파요…";if(p.Illness>20)return "몸이 조금 무거워요.";if(p.Fatigue>75)return "땅속 잠자리가 생각나요.";
             if(p.Age>=90*3600)return "너와 함께한 시간이 참 따뜻했어.";
             if(p.SpeciesId<0)return Engine.Hint(p);
@@ -238,7 +239,7 @@ namespace GuMaGoChi {
             }
             foreach(var pair in Windows.ToArray())if(!Engine.Data.Pets.Contains(pair.Value.Pet)){pair.Value.Close();Windows.Remove(pair.Key);}
         }
-        public void Say(Pet p,string text) {PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
+        public void Say(Pet p,string text) {if(p.SpeciesId==30)text=String.Join("\n",text.Split('\n').Select(line=>line.Contains("구마")?line:line.TrimEnd('!','.','~')+"구마."));PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
         public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
         public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,"짜잔! "+p.Kind+"로 자랐어요!\n이름은 여전히 "+p.Name+"예요.");}});}

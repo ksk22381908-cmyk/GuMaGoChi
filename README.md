@@ -1,6 +1,6 @@
 # GuMaGoChi
 
-윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.11: 첫 플레이 가능 버전**입니다.
+윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.12: 첫 플레이 가능 버전**입니다.
 
 ## 실행
 
@@ -34,8 +34,8 @@
 
 ```powershell
 ./build.ps1     # bin/GuMaGoChi.exe
-./test.ps1      # 모델 28개 + UI 219개 검증과 화면 렌더링
-./package.ps1   # release/GuMaGoChi-0.1.11-windows.zip
+./test.ps1      # 모델 28개 + UI 226개 검증과 화면 렌더링
+./package.ps1   # release/GuMaGoChi-0.1.12-windows.zip
 ```
 
 테스트와 렌더링은 고정 테스트 개체를 사용하며 실제 육성 저장 파일을 변경하지 않습니다. `bin/home-preview.png`와 `bin/sprites-preview.png`로 렌더링 결과를 확인할 수 있습니다.
@@ -60,3 +60,7 @@
 ## 다른 PC에서 Git으로 실행
 
 저장소 루트의 GuMaGoChi.exe와 assets 폴더를 함께 Git에 포함합니다. Windows에서 git clone 후 루트의 GuMaGoChi.exe를 실행하면 최신 디자인을 사용합니다. 업데이트는 프로그램을 종료하고 git pull 후 다시 실행합니다. .NET Framework 4.8이 필요하며 다른 PC의 육성 저장은 해당 PC에 별도로 생성됩니다.
+
+## 간첩마
+
+v0.1.12부터 31번째 성체 성장 후보에 간첩마를 추가했습니다. 둥근 감자가 가짜 새싹을 붙여 고구마 행세를 하며 대표 특기는 집중입니다. 전용 정지·걷기·먹기·발사·수면·땅속 들어가기 시트를 하나의 공통 배율로 표시합니다. 기존 성체는 유지되고 새 아기가 성장할 때 후보에 포함됩니다.

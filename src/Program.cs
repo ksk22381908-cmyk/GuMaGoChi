@@ -50,7 +50,7 @@ namespace GuMaGoChi {
             var economy=new SaveData();var basic=new Engine(economy,5);var baby=basic.Adopt("기본돌봄",true);
             for(int hour=0;hour<8;hour++){for(int minute=0;minute<60;minute++){basic.Tick(60);while(baby.Waste>0&&!baby.GrowthReady)basic.Clean(baby);}if(hour%2==1&&!baby.GrowthReady)basic.Feed(baby,false);}
             basic.Reveal(baby);Check(economy.Seeds>=Engine.AdoptPrice,"Basic care funds another baby around eight hours");
-            var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==30,"Low interaction retains basic candidates");
+            var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==Catalog.All.Length,"Low interaction retains basic candidates");
             untouchedPet.Training=100;for(int i=0;i<1000;i++)if(untouchedEngine.ChooseSpecies(untouchedPet)==6)throw new Exception("Excluded species selected");Check(true,"Excluded species never selected in repeated draws");
             bool rejected=false;try{Storage.Decode("{\"Version\":2}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
             var disease=new SaveData();var sickEngine=new Engine(disease);var sick=sickEngine.Adopt("아픈고구마",true);sick.Illness=99.99;sick.Hunger=100;sickEngine.Tick(60);Check(sick.Dead&&sick.Cause=="질병","Disease can kill before lifespan");
@@ -94,7 +94,7 @@ namespace GuMaGoChi {
                     g.Clear(System.Drawing.Color.Transparent);Check(Sprites.Draw(g,new System.Drawing.Rectangle(0,0,120,120),key,.625,false),"Sprite loaded: "+key);
                     bool visible=false;for(int y=0;y<120;y++)for(int x=0;x<120;x++){int alpha=bmp.GetPixel(x,y).A;if(alpha>0)visible=true;if(alpha!=0&&alpha!=255)throw new Exception("Sprite halo alpha was not removed");}Check(visible,"Sprite contains visible silhouette: "+key);
                 }
-                for(int id=0;id<30;id++)using(var first=new System.Drawing.Bitmap(120,120))using(var next=new System.Drawing.Bitmap(120,120))using(var a=System.Drawing.Graphics.FromImage(first))using(var b=System.Drawing.Graphics.FromImage(next)) {
+                for(int id=0;id<Catalog.All.Length;id++)using(var first=new System.Drawing.Bitmap(120,120))using(var next=new System.Drawing.Bitmap(120,120))using(var a=System.Drawing.Graphics.FromImage(first))using(var b=System.Drawing.Graphics.FromImage(next)) {
                     Check(Art.ImageFor(id)!=null,"Adult asset: "+id);
                     foreach(string key in new[]{"walk","eat","throw","sleep","burrow"}) {
                         a.Clear(System.Drawing.Color.Transparent);b.Clear(System.Drawing.Color.Transparent);var p=new Pet {SpeciesId=id,Sleeping=key=="sleep",GrowthReady=key=="burrow"};
@@ -102,7 +102,8 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 219 UI checks\r\nGrowth reveal motion reset, burrow row cleanup, menus, direct drag, XY walking, ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
+                var spy=new Pet {SpeciesId=30,Name="간첩"};var spySave=new SaveData();spySave.Pets.Add(spy);spySave.Discovered.Add(30);Check(Storage.Decode(Storage.Encode(spySave)).Pets[0].SpeciesId==30,"Spy species save roundtrip");
+                return "PASS: 226 UI checks\r\nGrowth, menus, motion and all 31 adult renders including spy save verified.\r\n";
             }finally {app.Exit();}
         }
     }
@@ -113,9 +114,9 @@ namespace GuMaGoChi {
             using(var app=new DesktopApp(data,null,false)) {
                 var home=new HomeWindow(app);home.Show();Application.DoEvents();using(var bmp=new System.Drawing.Bitmap(home.Width,home.Height)){home.DrawToBitmap(bmp,new System.Drawing.Rectangle(0,0,home.Width,home.Height));bmp.Save(Path.Combine(Paths.BaseDirectory,"home-preview.png"));}
                 using(var bmp=new System.Drawing.Bitmap(900,180))using(var g=System.Drawing.Graphics.FromImage(bmp)) {g.Clear(Art.Cream);Art.Pet(g,new Pet(),new System.Drawing.Rectangle(10,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=23},new System.Drawing.Rectangle(190,10,150,150),0);Art.Pet(g,new Pet {GrowthReady=true},new System.Drawing.Rectangle(370,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=10,Sleeping=true},new System.Drawing.Rectangle(550,10,150,150),0);Art.Waste(g,new System.Drawing.Rectangle(780,80,40,30));bmp.Save(Path.Combine(Paths.BaseDirectory,"sprites-preview.png"));}
-                using(var bmp=new System.Drawing.Bitmap(840,1800))using(var g=System.Drawing.Graphics.FromImage(bmp)) {
+                using(var bmp=new System.Drawing.Bitmap(840,1920))using(var g=System.Drawing.Graphics.FromImage(bmp)) {
                     g.Clear(Art.Cream);string[] keys={"stand","walk","eat","throw","sleep","burrow"};
-                    for(int id=0;id<30;id++)for(int k=0;k<keys.Length;k++){int x=(id%2)*420+k*70,y=(id/2)*120;Art.Pet(g,new Pet {SpeciesId=id,Sleeping=keys[k]=="sleep",GrowthReady=keys[k]=="burrow"},new System.Drawing.Rectangle(x,y+22,65,85),.875,keys[k]);g.DrawString(id.ToString("00")+" "+keys[k],System.Drawing.SystemFonts.DefaultFont,System.Drawing.Brushes.Black,x,y);}
+                    for(int id=0;id<Catalog.All.Length;id++)for(int k=0;k<keys.Length;k++){int x=(id%2)*420+k*70,y=(id/2)*120;Art.Pet(g,new Pet {SpeciesId=id,Sleeping=keys[k]=="sleep",GrowthReady=keys[k]=="burrow"},new System.Drawing.Rectangle(x,y+22,65,85),.875,keys[k]);g.DrawString(id.ToString("00")+" "+keys[k],System.Drawing.SystemFonts.DefaultFont,System.Drawing.Brushes.Black,x,y);}
                     bmp.Save(Path.Combine(Paths.BaseDirectory,"adult-actions-preview.png"));
                 }
                 home.Dispose();app.Exit(); // Render mode deliberately does not persist fixture data.

@@ -12,6 +12,7 @@ namespace GuMaGoChi {
         public static Image Home {get {if(home==null){string p=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","home","underground-home.png");if(File.Exists(p))using(var source=Image.FromFile(p))home=new Bitmap(source);}return home;}}
         static Clip Load(string key,int species=-1) {
             string cacheKey=species+":"+key;Clip cached;if(clips.TryGetValue(cacheKey,out cached))return cached;
+            if(species==30){LoadSpy();return clips.TryGetValue(cacheKey,out cached)?cached:null;}
             string file=key=="stand"?"baby-reference.png":key+"-sheet.png";
             string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby",file);
             if(species>=0)path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield",key=="stand"?"adults-v2":"adult-actions",species.ToString("00")+(key=="stand"?".png":"-sheet.png"));
@@ -28,6 +29,16 @@ namespace GuMaGoChi {
             }
         }
         // Binary alpha avoids blending generated halos onto the magenta color-key
+        static void LoadSpy(){
+            string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","gancheopma","actions-atlas-draft.png");if(!File.Exists(path))return;
+            string[] keys={"stand","walk","eat","throw","sleep","burrow"};int maxWidth=0,maxHeight=0;
+            using(var source=new Bitmap(path))for(int row=0;row<6;row++){
+                var clip=new Clip {Frames=new Bitmap[4]};int y=row*source.Height/6,bottom=(row+1)*source.Height/6;
+                for(int col=0;col<4;col++){int x=col*source.Width/4,right=(col+1)*source.Width/4;using(var cell=source.Clone(new Rectangle(x,y,right-x,bottom-y),PixelFormat.Format32bppArgb))clip.Frames[col]=Cutout(cell,row==5);maxWidth=Math.Max(maxWidth,clip.Frames[col].Width);maxHeight=Math.Max(maxHeight,clip.Frames[col].Height);}
+                clips["30:"+keys[row]]=clip;
+            }
+            foreach(string key in keys){clips["30:"+key].MaxWidth=maxWidth;clips["30:"+key].MaxHeight=maxHeight;}
+        }
         // window. Remove isolated pixels and align actual silhouettes at the feet.
         public static Bitmap Cutout(Bitmap cell,bool removeTopFragment=false) {
             int w=cell.Width,h=cell.Height;var mask=new bool[w*h];var pixels=new int[w*h];

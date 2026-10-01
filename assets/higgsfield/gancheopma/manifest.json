@@ -1,0 +1,195 @@
+{
+  "character": "간첩마",
+  "referenceJob": "2bf5fb2c-efad-4da1-beb3-e99c4a76cc1f",
+  "jobId": "23772025-952a-4262-81e7-eea93a1ec069",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_054356_23772025-952a-4262-81e7-eea93a1ec069.png",
+  "file": "actions-atlas-draft.png",
+  "width": 1360,
+  "height": 2048,
+  "columns": 4,
+  "rows": 6,
+  "status": "applied-v0.1.12",
+  "scalePolicy": "Use one shared scale for all animations; do not independently fit each motion to its bounding box.",
+  "animations": [
+    {
+      "key": "stand",
+      "row": 0,
+      "frames": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 340,
+          "y": 0,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 680,
+          "y": 0,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 1020,
+          "y": 0,
+          "width": 340,
+          "height": 341
+        }
+      ]
+    },
+    {
+      "key": "walk",
+      "row": 1,
+      "frames": [
+        {
+          "x": 0,
+          "y": 341,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 340,
+          "y": 341,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 680,
+          "y": 341,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 1020,
+          "y": 341,
+          "width": 340,
+          "height": 341
+        }
+      ]
+    },
+    {
+      "key": "eat",
+      "row": 2,
+      "frames": [
+        {
+          "x": 0,
+          "y": 682,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 340,
+          "y": 682,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 680,
+          "y": 682,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 1020,
+          "y": 682,
+          "width": 340,
+          "height": 342
+        }
+      ]
+    },
+    {
+      "key": "throw",
+      "row": 3,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1024,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 340,
+          "y": 1024,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 680,
+          "y": 1024,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 1020,
+          "y": 1024,
+          "width": 340,
+          "height": 341
+        }
+      ]
+    },
+    {
+      "key": "sleep",
+      "row": 4,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1365,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 340,
+          "y": 1365,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 680,
+          "y": 1365,
+          "width": 340,
+          "height": 341
+        },
+        {
+          "x": 1020,
+          "y": 1365,
+          "width": 340,
+          "height": 341
+        }
+      ]
+    },
+    {
+      "key": "burrow",
+      "row": 5,
+      "frames": [
+        {
+          "x": 0,
+          "y": 1706,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 340,
+          "y": 1706,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 680,
+          "y": 1706,
+          "width": 340,
+          "height": 342
+        },
+        {
+          "x": 1020,
+          "y": 1706,
+          "width": 340,
+          "height": 342
+        }
+      ]
+    }
+  ]
+}

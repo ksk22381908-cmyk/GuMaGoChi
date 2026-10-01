@@ -28,7 +28,7 @@ namespace GuMaGoChi {
             new Species(22,"개굴마","장난꾸러기","민첩"),new Species(23,"냥고마","도도한 츤데레","정밀"),
             new Species(24,"멍고마","발끈하는 치와와형","친화"),new Species(25,"토끼마","겁 많지만 빠름","민첩"),
             new Species(26,"당근마","고집 센 노력파","힘"),new Species(27,"민트마","직설적인 시니컬형","정밀"),
-            new Species(28,"초코마","느긋한 승부사","민첩"),new Species(29,"무지개마","표현이 큰 변덕쟁이","민첩")
+            new Species(28,"초코마","느긋한 승부사","민첩"),new Species(29,"무지개마","표현이 큰 변덕쟁이","민첩"),new Species(30,"간첩마","능청스러운 감자 위장꾼","집중")
         };
     }
     public class Pet {
@@ -153,11 +153,11 @@ namespace GuMaGoChi {
             if(d==null || d.Version!=1 || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
             var ids=new HashSet<string>();
             foreach(Pet p in d.Pets) {
-                if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>29 || p.PendingSpecies< -1 || p.PendingSpecies>29 || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");
+                if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>=Catalog.All.Length || p.PendingSpecies< -1 || p.PendingSpecies>=Catalog.All.Length || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");
                 if(new[]{p.Hunger,p.Dirt,p.Fatigue,p.Illness}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)||v<0||v>100) || new[]{p.FoodCooldown,p.MedicineCooldown,p.PetCooldown,p.PlayCooldown,p.TrainCooldown,p.WasteClock,p.SleepClock,p.TalkClock}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)) || p.Waste<0 || p.Waste>6 || (p.GrowthReady && p.PendingSpecies<0))throw new InvalidDataException("상태 정보가 올바르지 않습니다.");
                 if(p.Friends==null)p.Friends=new Dictionary<string,int>();if(p.GrowthHistory==null)p.GrowthHistory=new List<int>();
             }
-            if(d.Discovered.Any(i=>i<0||i>29))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");return d;
+            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");return d;
         }
         public static SaveData Load(out string warning) {
             warning=null;if(!File.Exists(PathName))return new SaveData();
