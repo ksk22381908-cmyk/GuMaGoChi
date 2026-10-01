@@ -67,13 +67,14 @@ namespace GuMaGoChi {
             if(motion=="walk"){double step=Math.Sin(t*Math.PI*4);angle=(float)(step*7);sx=1+(float)Math.Abs(step)*.035f;sy=1-(float)Math.Abs(step)*.06f;lift=(float)Math.Abs(step)*box.Height*.07f;}
             else if(motion=="eat"){double sip=Math.Sin(t*Math.PI*6);sx=1+(float)sip*.04f;sy=1-(float)sip*.04f;angle=(float)(Math.Sin(t*Math.PI*2)*5);}
             else if(motion=="throw"){if(t<.625){angle=(float)(-20*t/.625);sx=1.06f;sy=.94f;}else {double recoil=Math.Max(0,1-(t-.625)/.6);angle=(float)(24*recoil);lift=(float)(box.Height*.08*recoil);}}
-            else if(motion=="sleep"){sx=1.06f+(float)Math.Sin(t*2)*.015f;sy=.88f-(float)Math.Sin(t*2)*.015f;}
+            else if(motion=="sleep"){sx=sy=1+(float)Math.Sin(t*2)*.008f;}
             else if(motion=="burrow"){sy=1-(float)progress*.2f;angle=(float)(Math.Sin(t*22)*8*(1-progress));}
             var state=g.Save();
             if(motion=="burrow")g.SetClip(new Rectangle(box.Left,box.Top,box.Width,Math.Max(1,box.Height-12)));
             g.TranslateTransform(box.Left+box.Width/2f,box.Bottom-lift+(motion=="burrow"?(float)progress*box.Height:0));
             g.ScaleTransform(flip?-sx:sx,sy);g.RotateTransform(angle);
-            g.DrawImage(image,new Rectangle(-box.Width/2,-box.Height,box.Width,box.Height),0,0,image.Width,image.Height,GraphicsUnit.Pixel);g.Restore(state);
+            float scale=Math.Min(box.Width/(float)image.Width,box.Height/(float)image.Height);int drawWidth=Math.Max(1,(int)(image.Width*scale)),drawHeight=Math.Max(1,(int)(image.Height*scale));
+            g.DrawImage(image,new Rectangle(-drawWidth/2,-drawHeight,drawWidth,drawHeight),0,0,image.Width,image.Height,GraphicsUnit.Pixel);g.Restore(state);
             if(motion=="eat"&&t<1.7){int x=flip?box.Left+box.Width/4:box.Left+box.Width*3/4,y=box.Top+box.Height*2/3;g.FillRectangle(Brushes.Sienna,x-8,y,18,17);g.FillRectangle(Brushes.LightSkyBlue,x-6,y,14,4);}
             if(motion=="burrow"){
                 using(var earth=new SolidBrush(Color.FromArgb(126,87,54)))g.FillPolygon(earth,new[]{new Point(box.Left+4,box.Bottom-2),new Point(box.Left+box.Width/3,box.Bottom-25),new Point(box.Left+box.Width*2/3,box.Bottom-28),new Point(box.Right-4,box.Bottom-2)});
