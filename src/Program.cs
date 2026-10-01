@@ -64,7 +64,7 @@ namespace GuMaGoChi {
             Application.EnableVisualStyles();var data=new SaveData {Seeds=150,Dew=1,Medicine=1};var pet=new Pet {Name="테스트",Hunger=70};data.Pets.Add(pet);
             using(var app=new DesktopApp(data,null,false))try {
                 Application.DoEvents();var w=app.Windows[pet.Id];Check(w.Visible&&w.TopMost&&w.TransparencyKey==System.Drawing.Color.Magenta,"Transparent topmost pet window");
-                int initialX=w.Left;w.Say("이동 중에도 말해요");w.Step(.5,true);Check(w.Left!=initialX,"Autonomous walking starts immediately and continues during speech");
+                int initialX=w.Left,initialY=w.Top;w.Say("이동 중에도 말해요");w.Step(.5,true);Check(w.Left!=initialX,"Autonomous walking starts immediately and continues during speech");Check(w.Top!=initialY,"Autonomous walking also changes Y");
                 var down=typeof(PetWindow).GetMethod("Down",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);var up=typeof(PetWindow).GetMethod("Up",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
                 down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(w.Capture,"Direct body press captures pointer without move menu");initialX=w.Left;w.Step(.5,true);Check(w.Left==initialX,"Holding body suspends autonomous walking");up.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(!w.Capture,"Releasing body releases pointer capture");
                 var closingMenu=app.MenuFor(pet);closingMenu.Show(w,new System.Drawing.Point(30,90));Application.DoEvents();closingMenu.Close(ToolStripDropDownCloseReason.ItemClicked);
@@ -81,7 +81,9 @@ namespace GuMaGoChi {
                 using(var menu=app.MenuFor(pet))Find(menu,"비활성화").PerformClick();Check(!pet.Active&&!w.Visible,"Deactivation hides pet");
                 using(var menu=app.MenuFor(pet))Find(menu,"활성화하기").PerformClick();Check(pet.Active&&w.Visible,"Activation restores pet");
                 app.ManualPause=true;app.SyncWindows();Check(!w.Visible,"Global pause hides pet");app.ManualPause=false;app.SyncWindows();
-                app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");app.Activity.SetPaused(true);app.Activity.SetPaused(false);app.Activity.CancelActivity();Check(app.Activity==null,"Activity closes cleanly");
+                w.Top=Screen.FromControl(w).WorkingArea.Top+180;pet.Y=w.Top;app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");
+                var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+164))<1,"Ball starts at relocated pet height");
+                app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
                 pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
                 Check(Sprites.Home!=null,"Underground home background packaged");
@@ -97,7 +99,7 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 212 UI checks\r\nWindows, pet list names, selected preview, direct drag capture, autonomous walking, menus, activities, home, baby clips and all 30 adult action renders verified.\r\n";
+                return "PASS: 215 UI checks\r\nWindows, pet list names, selected preview, direct drag, XY walking, pet-height ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
             }finally {app.Exit();}
         }
     }

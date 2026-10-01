@@ -14,18 +14,20 @@ namespace GuMaGoChi {
             app=owner;Pet=pet;training=train;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;TopMost=true;BackColor=Color.Magenta;TransparencyKey=Color.Magenta;DoubleBuffered=true;Font=new Font("맑은 고딕",10);
             Rectangle area=Screen.FromPoint(new Point(pet.X+90,pet.Y+140)).WorkingArea;Bounds=area;StartPosition=FormStartPosition.Manual;Bounds=area;
             close=new Button {Text="활동 끝내기",Width=120,Height=34,Left=Width-140,Top=18,BackColor=Art.Cream};close.Click+=(s,e)=>CancelActivity();Controls.Add(close);
-            floor=Height-40;ResetBall();timer=new Timer {Interval=25};timer.Tick+=Frame;timer.Start();
+            KeyPreview=true;ResetBall();timer=new Timer {Interval=25};timer.Tick+=Frame;timer.Start();
             MouseDown+=Down;MouseMove+=MoveMouse;MouseUp+=Up;KeyDown+=(s,e)=>{if(e.KeyCode==Keys.Escape)CancelActivity();};
             FormClosed+=(s,e)=>{timer.Stop();timer.Dispose();PetWindow w;if(app.Windows.TryGetValue(Pet.Id,out w))w.Animate("stand");if(app.Activity==this)app.Activity=null;};
         }
         void ResetBall() {
             PetWindow actor;if(app.Windows.TryGetValue(Pet.Id,out actor))actor.Animate("stand");
+            floor=Math.Max(115,Math.Min(Height-12,Pet.Y-Top+194));
             source=new PointF(Math.Max(70,Math.Min(Width-80,Pet.X-Left+88)),(float)floor-30);ball=source;
             int distance=Pet.SpeciesId<0?210:320;bool right=source.X+distance<Width-85;int x=(int)(source.X+(right?distance:-distance));x=Math.Max(30,Math.Min(Width-110,x));
             basket=new Rectangle(x,(int)floor-85,75,85);flying=false;returning=false;dragging=false;Invalidate();
         }
         public void SetPaused(bool value) {paused=value;previous=watch.Elapsed.TotalSeconds;Capture=false;dragging=false;Invalidate();}
         public void CancelActivity() {if(done)return;done=true;Close();}
+        protected override bool ProcessCmdKey(ref Message msg,Keys keyData) {if(keyData==Keys.Escape){CancelActivity();return true;}return base.ProcessCmdKey(ref msg,keyData);}
         void Down(object s,MouseEventArgs e) {if(paused||app.Paused||flying||returning||done)return;if(e.Button==MouseButtons.Left && Distance(e.Location,ball)<28) {dragging=true;dragPoint=e.Location;Capture=true;Invalidate();}}
         void MoveMouse(object s,MouseEventArgs e) {if(!dragging||paused||app.Paused)return;float dx=e.X-source.X,dy=e.Y-source.Y;double length=Math.Sqrt(dx*dx+dy*dy);if(length>140){dx=(float)(dx*140/length);dy=(float)(dy*140/length);}dragPoint=new PointF(source.X+dx,source.Y+dy);Invalidate();}
         void Up(object s,MouseEventArgs e) {
@@ -59,9 +61,10 @@ namespace GuMaGoChi {
             }
             if(returning) {
                 PetWindow petWindow;if(app.Windows.TryGetValue(Pet.Id,out petWindow)) {
-                    int target=Math.Max(Left,Math.Min(Right-petWindow.Width,(int)(ball.X+Left-88)));double speed=Pet.SpeciesId<0?150:Pet.Skill=="민첩"?310:220;
-                    int difference=target-petWindow.Left;petWindow.Animate("walk",difference<0);petWindow.Left+=Math.Sign(difference)*(int)Math.Min(Math.Abs(difference),Math.Max(1,speed*dt));Pet.X=petWindow.Left;Pet.Y=petWindow.Top;
-                    if(Math.Abs(difference)<8) {rounds++;returning=false;
+                    Point target=petWindow.Clamp(new Point((int)(ball.X+Left-88),(int)(ball.Y+Top-164)));double speed=Pet.SpeciesId<0?150:Pet.Skill=="민첩"?310:220;
+                    double dx=target.X-petWindow.Left,dy=target.Y-petWindow.Top,distance=Math.Sqrt(dx*dx+dy*dy);petWindow.Animate("walk",dx<0);
+                    if(distance>0){double step=Math.Min(distance,Math.Max(1,speed*dt));petWindow.Location=new Point(petWindow.Left+(int)Math.Round(dx/distance*step),petWindow.Top+(int)Math.Round(dy/distance*step));}Pet.X=petWindow.Left;Pet.Y=petWindow.Top;
+                    if(distance<8) {rounds++;returning=false;
                         if(rounds>=3) {app.Change(()=>{app.Engine.FinishActivity(Pet,training,goals,rounds);app.Say(Pet,training?"훈련 끝! "+goals+" / 3 골인\n함께 연습해서 좋았어요.":"공을 가져왔어요! 칭찬해 줘요.");});CancelActivity();return;}
                         ResetBall();
                     }

@@ -88,7 +88,7 @@ namespace GuMaGoChi {
     }
     public class PetWindow:Form {
         public Pet Pet; public DesktopApp App; public string Bubble="";double bubbleLeft=0,phase=0;
-        bool pressed=false,drag=false; Point offset,start;int direction=1;double wanderClock=6,walkX;bool wandering=true;
+        bool pressed=false,drag=false; Point offset,start;int direction=1;double wanderClock=6,walkX,walkY,headingX=.8,headingY=-.6;bool wandering=true;
         string motion="stand";double motionTime=0;bool walkingNow=false,growthSeen=false;
         public void Animate(string key,bool faceLeft=false) {if(motion!=key)motionTime=0;motion=key;direction=faceLeft?-1:1;Invalidate();}
         Rectangle Body {get {return new Rectangle(26,74,120,120);}}
@@ -97,7 +97,7 @@ namespace GuMaGoChi {
             StartPosition=FormStartPosition.Manual;
             if(pet.X==0 && pet.Y==0) {Rectangle area=Screen.PrimaryScreen.WorkingArea;pet.X=area.Left+70+(app.Windows.Count%7)*155;pet.Y=area.Bottom-Height;}
             Location=Clamp(new Point(pet.X,pet.Y));Pet.X=Left;Pet.Y=Top;
-            walkX=Left;MouseDown+=Down;MouseMove+=MoveMouse;MouseUp+=Up;MouseCaptureChanged+=(s,e)=>{if(!Capture){pressed=false;drag=false;walkX=Left;}};
+            walkX=Left;walkY=Top;MouseDown+=Down;MouseMove+=MoveMouse;MouseUp+=Up;MouseCaptureChanged+=(s,e)=>{if(!Capture){pressed=false;drag=false;walkX=Left;walkY=Top;}};
         }
         protected override bool ShowWithoutActivation {get{return true;}}
         protected override CreateParams CreateParams {get {var cp=base.CreateParams;cp.ExStyle|=0x08000000|0x80;return cp;}}
@@ -114,10 +114,10 @@ namespace GuMaGoChi {
         void MoveMouse(object sender,MouseEventArgs e) {
             if(!pressed||(e.Button&MouseButtons.Left)==0||App.Paused)return;
             if(!drag && (Math.Abs(Cursor.Position.X-start.X)>=SystemInformation.DragSize.Width/2||Math.Abs(Cursor.Position.Y-start.Y)>=SystemInformation.DragSize.Height/2))drag=true;
-            if(drag){Location=Clamp(new Point(Cursor.Position.X-offset.X,Cursor.Position.Y-offset.Y));Pet.X=Left;Pet.Y=Top;walkX=Left;Invalidate();}
+            if(drag){Location=Clamp(new Point(Cursor.Position.X-offset.X,Cursor.Position.Y-offset.Y));Pet.X=Left;Pet.Y=Top;walkX=Left;walkY=Top;Invalidate();}
         }
         void Up(object sender,MouseEventArgs e) {
-            if(e.Button!=MouseButtons.Left||!pressed)return;bool moved=drag;pressed=false;drag=false;Capture=false;walkX=Left;wanderClock=2;wandering=false;
+            if(e.Button!=MouseButtons.Left||!pressed)return;bool moved=drag;pressed=false;drag=false;Capture=false;walkX=Left;walkY=Top;wanderClock=2;wandering=false;
             if(moved)App.Save();else if(!Pet.GrowthReady&&Body.Contains(e.Location))Say(Pet.Name+" · "+Pet.Kind+"\n배고픔 "+Math.Round(Pet.Hunger)+" / 병세 "+Math.Round(Pet.Illness));
         }
         public void Say(string text) {Bubble=text;bubbleLeft=8;Invalidate();}
@@ -128,10 +128,14 @@ namespace GuMaGoChi {
             walkingNow=false;
             if(walking && !pressed && !Pet.Sleeping && !Pet.GrowthReady && motion=="stand") {
                 wanderClock-=dt;
-                if(wanderClock<=0){wandering=!wandering;wanderClock=wandering?4+App.Engine.Random.NextDouble()*6:1+App.Engine.Random.NextDouble()*2;if(wandering)direction=App.Engine.Random.Next(2)==0?-1:1;}
-                if(wandering){Rectangle area=Screen.FromControl(this).WorkingArea;if(Left<=area.Left+8)direction=1;if(Right>=area.Right-8)direction=-1;
-                    walkX+=direction*(Pet.Skill=="민첩"?48:32)*dt;walkX=Math.Max(area.Left,Math.Min(area.Right-Width,walkX));Left=(int)Math.Round(walkX);Pet.X=Left;Pet.Y=Top;walkingNow=true;}
-            }else walkX=Left;
+                if(wanderClock<=0){wandering=!wandering;wanderClock=wandering?4+App.Engine.Random.NextDouble()*6:1+App.Engine.Random.NextDouble()*2;if(wandering){double angle=App.Engine.Random.NextDouble()*Math.PI*2;headingX=Math.Cos(angle);headingY=Math.Sin(angle);}}
+                if(wandering){Rectangle area=Screen.FromControl(this).WorkingArea;
+                    if(Left<=area.Left+8)headingX=Math.Abs(headingX);if(Right>=area.Right-8)headingX=-Math.Abs(headingX);
+                    if(Top<=area.Top+8)headingY=Math.Abs(headingY);if(Bottom>=area.Bottom-8)headingY=-Math.Abs(headingY);
+                    double speed=Pet.Skill=="민첩"?48:32;walkX+=headingX*speed*dt;walkY+=headingY*speed*dt;
+                    walkX=Math.Max(area.Left,Math.Min(area.Right-Width,walkX));walkY=Math.Max(area.Top,Math.Min(area.Bottom-Height,walkY));
+                    Location=new Point((int)Math.Round(walkX),(int)Math.Round(walkY));if(Math.Abs(headingX)>.05)direction=headingX<0?-1:1;Pet.X=Left;Pet.Y=Top;walkingNow=true;}
+            }else {walkX=Left;walkY=Top;}
             Invalidate();
         }
         protected override void OnPaint(PaintEventArgs e) {
@@ -258,7 +262,7 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));return menu;
         }
         public void Feed(Pet p,bool dew) {Change(()=>{double before=p.Hunger;Say(p,Engine.Feed(p,dew));if(p.Hunger<before){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});}
-        public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();}
+        public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();Activity.Activate();}
         void RefreshTray() {
             if(trayMenu.Visible)return;
             foreach(ToolStripItem old in trayMenu.Items.Cast<ToolStripItem>().ToArray())old.Dispose();
