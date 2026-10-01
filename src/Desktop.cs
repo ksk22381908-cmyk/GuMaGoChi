@@ -38,13 +38,32 @@ namespace GuMaGoChi {
         }
         public static void Pet(Graphics g,Pet p,Rectangle box,double phase,string motion="stand",bool flip=false) {
             g.InterpolationMode=InterpolationMode.NearestNeighbor;g.PixelOffsetMode=PixelOffsetMode.Half;
-            if(p.GrowthReady) {if(!Sprites.Draw(g,box,"burrow",phase,false))Soil(g,box);return;}
+            if(p.GrowthReady) {if(p.SpeciesId>=0)Adult(g,ImageFor(p.SpeciesId),box,"burrow",phase,flip);else if(!Sprites.Draw(g,box,"burrow",phase,false))Soil(g,box);return;}
             Image img=ImageFor(p.SpeciesId);
-            if(img!=null)g.DrawImage(img,box);else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
+            if(img!=null)Adult(g,img,box,p.Sleeping?"sleep":motion,phase,flip);else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
             if(p.Sleeping) {using(var f=new Font("Segoe UI",14,FontStyle.Bold))g.DrawString("z Z",f,Brushes.SlateBlue,box.Right-35,box.Top+8);}
             if(p.Illness>30)g.FillRectangle(Brushes.LightSkyBlue,box.Right-20,box.Top+30,6,10);
             if(p.Dirt>65) {using(var brush=new SolidBrush(Color.FromArgb(130,100,62,36))) {g.FillRectangle(brush,box.Left+box.Width/3,box.Top+box.Height*2/3,10,8);g.FillRectangle(brush,box.Left+box.Width/2,box.Top+box.Height/2,8,6);}}
             if(p.Age>=90*3600)g.DrawString("✧",SystemFonts.DefaultFont,Brushes.Gray,box.Left+8,box.Top+20);
+        }
+        public static void Adult(Graphics g,Image image,Rectangle box,string motion,double time,bool flip) {
+            if(image==null){Soil(g,box);return;}
+            double t=Math.Max(0,time),progress=Math.Min(1,t/1.875);float sx=1,sy=1,angle=0,lift=0;
+            if(motion=="walk"){double step=Math.Sin(t*Math.PI*4);angle=(float)(step*7);sx=1+(float)Math.Abs(step)*.035f;sy=1-(float)Math.Abs(step)*.06f;lift=(float)Math.Abs(step)*box.Height*.07f;}
+            else if(motion=="eat"){double sip=Math.Sin(t*Math.PI*6);sx=1+(float)sip*.04f;sy=1-(float)sip*.04f;angle=(float)(Math.Sin(t*Math.PI*2)*5);}
+            else if(motion=="throw"){if(t<.625){angle=(float)(-20*t/.625);sx=1.06f;sy=.94f;}else {double recoil=Math.Max(0,1-(t-.625)/.6);angle=(float)(24*recoil);lift=(float)(box.Height*.08*recoil);}}
+            else if(motion=="sleep"){sx=1.06f+(float)Math.Sin(t*2)*.015f;sy=.88f-(float)Math.Sin(t*2)*.015f;}
+            else if(motion=="burrow"){sy=1-(float)progress*.2f;angle=(float)(Math.Sin(t*22)*8*(1-progress));}
+            var state=g.Save();
+            if(motion=="burrow")g.SetClip(new Rectangle(box.Left,box.Top,box.Width,Math.Max(1,box.Height-12)));
+            g.TranslateTransform(box.Left+box.Width/2f,box.Bottom-lift+(motion=="burrow"?(float)progress*box.Height:0));
+            g.ScaleTransform(flip?-sx:sx,sy);g.RotateTransform(angle);
+            g.DrawImage(image,new Rectangle(-box.Width/2,-box.Height,box.Width,box.Height),0,0,image.Width,image.Height,GraphicsUnit.Pixel);g.Restore(state);
+            if(motion=="eat"&&t<1.7){int x=flip?box.Left+box.Width/4:box.Left+box.Width*3/4,y=box.Top+box.Height*2/3;g.FillRectangle(Brushes.Sienna,x-8,y,18,17);g.FillRectangle(Brushes.LightSkyBlue,x-6,y,14,4);}
+            if(motion=="burrow"){
+                using(var earth=new SolidBrush(Color.FromArgb(126,87,54)))g.FillPolygon(earth,new[]{new Point(box.Left+4,box.Bottom-2),new Point(box.Left+box.Width/3,box.Bottom-25),new Point(box.Left+box.Width*2/3,box.Bottom-28),new Point(box.Right-4,box.Bottom-2)});
+                if(progress>=1){int x=box.Left+box.Width/2;g.FillRectangle(Brushes.DarkOliveGreen,x,box.Bottom-40,3,18);g.FillRectangle(Brushes.OliveDrab,x-12,box.Bottom-42,14,6);g.FillRectangle(Brushes.YellowGreen,x+2,box.Bottom-47,13,6);}
+            }
         }
         public static void Baby(Graphics g,Rectangle box) {
             // Temporary code-native pixel art; a commissioned baby sprite can replace this renderer.

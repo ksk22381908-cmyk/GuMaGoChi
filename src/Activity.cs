@@ -36,7 +36,7 @@ namespace GuMaGoChi {
             double angle=(app.Engine.Random.NextDouble()-.5)*error;float strength=Pet.Skill=="힘"?5.8f:5.3f;
             velocity=new PointF((float)((dx*Math.Cos(angle)-dy*Math.Sin(angle))*strength),(float)((dx*Math.Sin(angle)+dy*Math.Cos(angle))*strength));
             flying=true;feedback=training?Pet.Name+"가 공을 쐈어요!":"공을 쫓아가요!";feedbackTime=2;
-            windup=Pet.SpeciesId<0?.625:0;
+            windup=.625;
             PetWindow actor;if(app.Windows.TryGetValue(Pet.Id,out actor))actor.Animate("throw",velocity.X<0);
         }
         static double Distance(PointF a,PointF b) {return Math.Sqrt((a.X-b.X)*(a.X-b.X)+(a.Y-b.Y)*(a.Y-b.Y));}
