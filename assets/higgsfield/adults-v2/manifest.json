@@ -2,7 +2,7 @@
   "created": "2026-10-01",
   "model": "gpt_image_2_5",
   "reference_job": "a93b6ee7-64c3-4cbe-b256-17639c0ff83e",
-  "status": "design-draft-not-applied-to-exe",
+  "status": "applied-v0.1.8",
   "characters": [
     {
       "id": 0,

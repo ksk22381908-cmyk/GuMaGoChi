@@ -45,6 +45,7 @@ namespace GuMaGoChi {
         public static readonly Color Ink=Color.FromArgb(65,48,55), Cream=Color.FromArgb(255,246,221), Green=Color.FromArgb(91,126,74), Pink=Color.FromArgb(188,112,145);
         static Dictionary<int,Image> images=new Dictionary<int,Image>();
         public static Image ImageFor(int id) {
+            if(id>=0){Image updated=Sprites.AdultStand(id);if(updated!=null)return updated;}
             if(id<0)return null;if(!images.ContainsKey(id)) {
                 string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",id.ToString("00")+".png");
                 if(File.Exists(path)) {using(var source=Image.FromFile(path))images[id]=new Bitmap(source);}else images[id]=null;
@@ -52,9 +53,9 @@ namespace GuMaGoChi {
         }
         public static void Pet(Graphics g,Pet p,Rectangle box,double phase,string motion="stand",bool flip=false) {
             g.InterpolationMode=InterpolationMode.NearestNeighbor;g.PixelOffsetMode=PixelOffsetMode.Half;
-            if(p.GrowthReady) {if(p.SpeciesId>=0)Adult(g,ImageFor(p.SpeciesId),box,"burrow",phase,flip);else if(!Sprites.Draw(g,box,"burrow",phase,false))Soil(g,box);return;}
+            if(p.GrowthReady) {if(!Sprites.Draw(g,box,"burrow",phase,flip,p.SpeciesId))Soil(g,box);return;}
             Image img=ImageFor(p.SpeciesId);
-            if(img!=null)Adult(g,img,box,p.Sleeping?"sleep":motion,phase,flip);else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
+            if(img!=null){if(p.Sleeping)Adult(g,img,box,"sleep",phase,flip);else if(!Sprites.Draw(g,box,motion,phase,flip,p.SpeciesId))Adult(g,img,box,motion,phase,flip);}else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
             if(p.Sleeping) {using(var f=new Font("Segoe UI",14,FontStyle.Bold))g.DrawString("z Z",f,Brushes.SlateBlue,box.Right-35,box.Top+8);}
             if(p.Illness>30)g.FillRectangle(Brushes.LightSkyBlue,box.Right-20,box.Top+30,6,10);
             if(p.Dirt>65) {using(var brush=new SolidBrush(Color.FromArgb(130,100,62,36))) {g.FillRectangle(brush,box.Left+box.Width/3,box.Top+box.Height*2/3,10,8);g.FillRectangle(brush,box.Left+box.Width/2,box.Top+box.Height/2,8,6);}}

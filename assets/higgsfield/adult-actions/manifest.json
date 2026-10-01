@@ -1,7 +1,7 @@
 {
   "created": "2026-10-01",
   "model": "gpt_image_2_5",
-  "status": "draft-not-applied-to-exe",
+  "status": "applied-v0.1.8",
   "columns": 4,
   "rows": 4,
   "frameWidth": 256,

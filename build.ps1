@@ -10,4 +10,5 @@ $sourceFiles = Get-ChildItem (Join-Path $projectPath 'src') -Filter '*.cs' | For
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed.' }
 Copy-Item -LiteralPath (Join-Path $projectPath 'assets') -Destination $outputPath -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $projectPath 'GuMaGoChi.exe.config') -Destination $outputPath -Force
+Copy-Item -LiteralPath (Join-Path $outputPath 'GuMaGoChi.exe') -Destination (Join-Path $projectPath 'GuMaGoChi.exe') -Force
 Write-Output "Built: $outputPath/GuMaGoChi.exe"
