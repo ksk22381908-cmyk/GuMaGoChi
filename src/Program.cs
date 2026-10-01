@@ -68,7 +68,8 @@ namespace GuMaGoChi {
                 Check(!closingMenu.IsDisposed,"Menu survives Closed while item-click dispatch is pending");
                 Find(closingMenu,"쓰다듬기").PerformClick();Check(pet.Affection==1,"Item action still runs after menu closes");
                 var replacementMenu=app.MenuFor(pet);Check(closingMenu.IsDisposed&&!replacementMenu.IsDisposed,"Previous menu released on next opening");
-                using(var menu=app.MenuFor(pet)){var food=Find(menu,"먹이 주기");((ToolStripMenuItem)food.DropDownItems[0]).PerformClick();}Check(pet.Hunger==60&&pet.FoodCooldown==300,"Context-menu feeding");
+                double hungerBefore=pet.Hunger;
+                using(var menu=app.MenuFor(pet)){var food=Find(menu,"먹이 주기");((ToolStripMenuItem)food.DropDownItems[0]).PerformClick();}Check(Math.Abs(pet.Hunger-(hungerBefore-10))<.0001&&pet.FoodCooldown==300,"Context-menu feeding");
                 using(var menu=app.MenuFor(pet))Find(menu,"집에서 재우기").PerformClick();Check(pet.Home&&pet.Sleeping&&!w.Visible&&app.Home.Visible,"Sleep opens home and hides desktop pet");
                 using(var menu=app.MenuFor(pet))Find(menu,"깨우기").PerformClick();Check(!pet.Sleeping&&pet.Home,"Wake stays at home");
                 using(var menu=app.MenuFor(pet))Find(menu,"외출하기").PerformClick();Check(!pet.Home&&w.Visible,"Outing restores desktop pet");
@@ -78,7 +79,12 @@ namespace GuMaGoChi {
                 app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");app.Activity.SetPaused(true);app.Activity.SetPaused(false);app.Activity.CancelActivity();Check(app.Activity==null,"Activity closes cleanly");
                 pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
-                return "PASS: 15 UI checks\r\nTransparent/topmost windows, menu-close lifecycle, context menu, home/sleep/outing, selection activation, pause, training lifecycle and growth verified.\r\n";
+                Check(Sprites.Home!=null,"Underground home background packaged");
+                using(var bmp=new System.Drawing.Bitmap(120,120))using(var g=System.Drawing.Graphics.FromImage(bmp))foreach(string key in new[]{"stand","walk","eat","throw","burrow"}) {
+                    g.Clear(System.Drawing.Color.Transparent);Check(Sprites.Draw(g,new System.Drawing.Rectangle(0,0,120,120),key,.625,false),"Sprite loaded: "+key);
+                    bool visible=false;for(int y=0;y<120;y++)for(int x=0;x<120;x++){int alpha=bmp.GetPixel(x,y).A;if(alpha>0)visible=true;if(alpha!=0&&alpha!=255)throw new Exception("Sprite halo alpha was not removed");}Check(visible,"Sprite contains visible silhouette: "+key);
+                }
+                return "PASS: 26 UI checks\r\nWindows, menus, activities, home background, five baby clips and binary alpha rendering verified.\r\n";
             }finally {app.Exit();}
         }
     }
@@ -87,7 +93,7 @@ namespace GuMaGoChi {
             Application.EnableVisualStyles();var data=new SaveData {Seeds=180,Dew=3,Medicine=2};
             data.Pets.Add(new Pet {Name="밤밤이",SpeciesId=10,Home=true,Age=36000,Waste=1});data.Pets.Add(new Pet {Name="새싹",Home=true,Sleeping=true});data.Discovered.Add(10);
             using(var app=new DesktopApp(data,null,false)) {
-                var home=new HomeWindow(app);home.Show();Application.DoEvents();using(var bmp=new System.Drawing.Bitmap(home.Width,home.Height)){home.DrawToBitmap(bmp,home.ClientRectangle);bmp.Save(Path.Combine(Paths.BaseDirectory,"home-preview.png"));}
+                var home=new HomeWindow(app);home.Show();Application.DoEvents();using(var bmp=new System.Drawing.Bitmap(home.Width,home.Height)){home.DrawToBitmap(bmp,new System.Drawing.Rectangle(0,0,home.Width,home.Height));bmp.Save(Path.Combine(Paths.BaseDirectory,"home-preview.png"));}
                 using(var bmp=new System.Drawing.Bitmap(900,180))using(var g=System.Drawing.Graphics.FromImage(bmp)) {g.Clear(Art.Cream);Art.Pet(g,new Pet(),new System.Drawing.Rectangle(10,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=23},new System.Drawing.Rectangle(190,10,150,150),0);Art.Pet(g,new Pet {GrowthReady=true},new System.Drawing.Rectangle(370,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=10,Sleeping=true},new System.Drawing.Rectangle(550,10,150,150),0);Art.Waste(g,new System.Drawing.Rectangle(780,80,40,30));bmp.Save(Path.Combine(Paths.BaseDirectory,"sprites-preview.png"));}
                 home.Dispose();app.Exit(); // Render mode deliberately does not persist fixture data.
             }

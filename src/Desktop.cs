@@ -36,11 +36,11 @@ namespace GuMaGoChi {
                 if(File.Exists(path)) {using(var source=Image.FromFile(path))images[id]=new Bitmap(source);}else images[id]=null;
             }return images[id];
         }
-        public static void Pet(Graphics g,Pet p,Rectangle box,double phase) {
+        public static void Pet(Graphics g,Pet p,Rectangle box,double phase,string motion="stand",bool flip=false) {
             g.InterpolationMode=InterpolationMode.NearestNeighbor;g.PixelOffsetMode=PixelOffsetMode.Half;
-            if(p.GrowthReady) {Soil(g,box);return;}
+            if(p.GrowthReady) {if(!Sprites.Draw(g,box,"burrow",phase,false))Soil(g,box);return;}
             Image img=ImageFor(p.SpeciesId);
-            if(img!=null)g.DrawImage(img,box);else Baby(g,box);
+            if(img!=null)g.DrawImage(img,box);else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
             if(p.Sleeping) {using(var f=new Font("Segoe UI",14,FontStyle.Bold))g.DrawString("z Z",f,Brushes.SlateBlue,box.Right-35,box.Top+8);}
             if(p.Illness>30)g.FillRectangle(Brushes.LightSkyBlue,box.Right-20,box.Top+30,6,10);
             if(p.Dirt>65) {using(var brush=new SolidBrush(Color.FromArgb(130,100,62,36))) {g.FillRectangle(brush,box.Left+box.Width/3,box.Top+box.Height*2/3,10,8);g.FillRectangle(brush,box.Left+box.Width/2,box.Top+box.Height/2,8,6);}}
@@ -65,11 +65,13 @@ namespace GuMaGoChi {
             g.FillRectangle(Brushes.YellowGreen,box.Left+box.Width/2+4,box.Bottom-88,18,10);
         }
         public static void Waste(Graphics g,Rectangle r) {using(var b=new SolidBrush(Color.FromArgb(127,87,51))) {g.FillEllipse(b,r.X,r.Y+10,r.Width,r.Height-10);g.FillEllipse(b,r.X+5,r.Y+4,r.Width-10,r.Height-8);g.FillEllipse(b,r.X+10,r.Y,r.Width-20,12);} }
-        public static void DisposeImages() {foreach(var i in images.Values)if(i!=null)i.Dispose();images.Clear();}
+        public static void DisposeImages() {foreach(var i in images.Values)if(i!=null)i.Dispose();images.Clear();Sprites.Dispose();}
     }
     public class PetWindow:Form {
         public Pet Pet; public DesktopApp App; public string Bubble="";double bubbleLeft=0,phase=0;
         bool moving=false,drag=false; Point offset,start;double strokeTime=0;int moveSamples=0;int direction=1;
+        string motion="stand";double motionTime=0;bool walkingNow=false,growthSeen=false;
+        public void Animate(string key,bool faceLeft=false) {if(motion!=key)motionTime=0;motion=key;direction=faceLeft?-1:1;Invalidate();}
         Rectangle Body {get {return new Rectangle(26,74,120,120);}}
         public PetWindow(DesktopApp app,Pet pet) {
             App=app;Pet=pet;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;TopMost=true;BackColor=Color.Magenta;TransparencyKey=Color.Magenta;ClientSize=new Size(180,236);DoubleBuffered=true;Font=new Font("맑은 고딕",9);
@@ -98,11 +100,14 @@ namespace GuMaGoChi {
         void Up(object sender,MouseEventArgs e) {Capture=false;if(drag){drag=false;moving=false;App.Save();}else if(moveSamples==0 && !Pet.GrowthReady && Body.Contains(e.Location) && strokeTime==0)Say(Pet.Name+" · "+Pet.Kind+"\n배고픔 "+Math.Round(Pet.Hunger)+" / 병세 "+Math.Round(Pet.Illness));}
         public void Say(string text) {Bubble=text;bubbleLeft=8;Invalidate();}
         public void Step(double dt,bool walking) {
-            phase+=dt;bubbleLeft-=dt;if(bubbleLeft<=0)Bubble="";
+            phase+=dt;motionTime+=dt;bubbleLeft-=dt;if(bubbleLeft<=0)Bubble="";
+            if(Pet.GrowthReady&&!growthSeen){Animate("burrow");growthSeen=true;}if(!Pet.GrowthReady)growthSeen=false;
+            if((motion=="eat"||motion=="throw")&&motionTime>=2)motion="stand";
+            walkingNow=false;
             if(walking && !moving && !drag && !Pet.Sleeping && !Pet.GrowthReady && Bubble=="" && Math.Sin(phase/11)>.5) {
                 Rectangle area=Screen.FromControl(this).WorkingArea;int speed=Pet.Skill=="민첩"?2:1;
                 if(Left<=area.Left+8)direction=1;if(Right>=area.Right-8)direction=-1;
-                Left+=direction*speed;Pet.X=Left;Pet.Y=Top;
+                Left+=direction*speed;Pet.X=Left;Pet.Y=Top;walkingNow=true;
             }
             Invalidate();
         }
@@ -113,7 +118,7 @@ namespace GuMaGoChi {
                 TextRenderer.DrawText(g,Bubble,Font,new Rectangle(9,8,162,56),Art.Ink,TextFormatFlags.WordBreak|TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
             }
             Rectangle body=Body;if(!Pet.Sleeping && !Pet.GrowthReady)body.Y+=(int)(Math.Sin(phase*3)*2);
-            Art.Pet(g,Pet,body,phase);
+            Art.Pet(g,Pet,body,Pet.GrowthReady?motionTime:motion=="stand"?phase:motionTime,walkingNow?"walk":motion,direction<0);
             if(Pet.Waste>0) {Art.Waste(g,new Rectangle(10,203,30,26));TextRenderer.DrawText(g,Pet.Name+" · "+Pet.Waste+"개",Font,new Point(46,207),Art.Ink,Art.Cream);}
             else TextRenderer.DrawText(g,Pet.Name,Font,new Rectangle(20,200,140,23),Art.Ink,Art.Cream,TextFormatFlags.HorizontalCenter);
         }
@@ -130,7 +135,7 @@ namespace GuMaGoChi {
             persist=persistData;Engine=new Engine(data);icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
             tray.DoubleClick+=(s,e)=>OpenHome(null);tray.MouseClick+=(s,e)=>{if(e.Button==MouseButtons.Left)OpenHome(null);};
             RefreshTray();SystemEvents.PowerModeChanged+=Power;SystemEvents.SessionSwitch+=Session;
-            timer=new Timer {Interval=250};timer.Tick+=Tick;timer.Start();
+            timer=new Timer {Interval=125};timer.Tick+=Tick;timer.Start();
             if(data.Pets.Count==0) {OpenHome(null);Adopt(true);}else SyncWindows();
             if(warning!=null)MessageBox.Show(warning,"저장 복구");
         }
@@ -212,8 +217,8 @@ namespace GuMaGoChi {
             menu.Items.Add(new ToolStripLabel("배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+" · 피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)));
             menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Engine.CanCare(p);
             var food=new ToolStripMenuItem("먹이 주기"+(p.FoodCooldown>0?" · "+Engine.TimeText(p.FoodCooldown):""));
-            food.DropDownItems.Add(Item("수돗물 · 무료 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-10)),()=>Change(()=>Say(p,Engine.Feed(p,false))),care&&p.Hunger>0&&p.FoodCooldown<=0));
-            food.DropDownItems.Add(Item("아침 이슬 · "+Engine.Data.Dew+"개 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-30)),()=>Change(()=>Say(p,Engine.Feed(p,true))),care&&p.Hunger>0&&p.FoodCooldown<=0&&Engine.Data.Dew>0));menu.Items.Add(food);
+            food.DropDownItems.Add(Item("수돗물 · 무료 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-10)),()=>Feed(p,false),care&&p.Hunger>0&&p.FoodCooldown<=0));
+            food.DropDownItems.Add(Item("아침 이슬 · "+Engine.Data.Dew+"개 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-30)),()=>Feed(p,true),care&&p.Hunger>0&&p.FoodCooldown<=0&&Engine.Data.Dew>0));menu.Items.Add(food);
             var medicine=new ToolStripMenuItem("치료하기"+(p.MedicineCooldown>0?" · "+Engine.TimeText(p.MedicineCooldown):""));
             medicine.DropDownItems.Add(Item("기본 치료 · 무료 · 병세 −10",()=>Change(()=>Say(p,Engine.Treat(p,false))),care&&p.Illness>0&&p.MedicineCooldown<=0));
             medicine.DropDownItems.Add(Item("상위 치료 · "+Engine.Data.Medicine+"개 · 병세 −30",()=>Change(()=>Say(p,Engine.Treat(p,true))),care&&p.Illness>0&&p.MedicineCooldown<=0&&Engine.Data.Medicine>0));menu.Items.Add(medicine);
@@ -229,6 +234,7 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("이름 변경",()=>{using(var d=new NameDialog("이름 변경",p.Name))if(d.ShowDialog()==DialogResult.OK)Change(()=>p.Name=d.PetName);}));
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));return menu;
         }
+        public void Feed(Pet p,bool dew) {Change(()=>{double before=p.Hunger;Say(p,Engine.Feed(p,dew));if(p.Hunger<before){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});}
         public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();}
         void RefreshTray() {
             if(trayMenu.Visible)return;
