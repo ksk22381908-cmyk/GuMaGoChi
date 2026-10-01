@@ -85,7 +85,9 @@ namespace GuMaGoChi {
                 w.Top=Screen.FromControl(w).WorkingArea.Top+180;pet.Y=w.Top;app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");
                 var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+164))<1,"Ball starts at relocated pet height");
                 app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
-                pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
+                pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
+                Check((string)typeof(PetWindow).GetField("motion",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(w)=="stand","Growth reveal immediately resets burrow motion");
+                using(var sheet=new System.Drawing.Bitmap(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby","burrow-sheet.png")))using(var cell=sheet.Clone(new System.Drawing.Rectangle(768,768,256,256),System.Drawing.Imaging.PixelFormat.Format32bppArgb))using(var clean=Sprites.Cutout(cell,true))Check(clean.Height<128,"Final baby burrow frame excludes previous-row mound fragment");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
                 Check(Sprites.Home!=null,"Underground home background packaged");
                 using(var bmp=new System.Drawing.Bitmap(120,120))using(var g=System.Drawing.Graphics.FromImage(bmp))foreach(string key in new[]{"stand","walk","eat","throw","burrow"}) {
@@ -100,7 +102,7 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 217 UI checks\r\nOutside-click menu dismissal, Windows, pet list names, selected preview, direct drag, XY walking, pet-height ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
+                return "PASS: 219 UI checks\r\nGrowth reveal motion reset, burrow row cleanup, menus, direct drag, XY walking, ball, Escape, home, baby clips and all 30 adult action renders verified.\r\n";
             }finally {app.Exit();}
         }
     }

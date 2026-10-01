@@ -138,7 +138,7 @@ namespace GuMaGoChi {
         public void Say(string text) {Bubble=text;bubbleLeft=8;Invalidate();}
         public void Step(double dt,bool walking) {
             phase+=dt;motionTime+=dt;bubbleLeft-=dt;if(bubbleLeft<=0)Bubble="";
-            if(Pet.GrowthReady&&!growthSeen){Animate("burrow");growthSeen=true;}if(!Pet.GrowthReady)growthSeen=false;
+            if(Pet.GrowthReady&&!growthSeen){Animate("burrow");growthSeen=true;}if(!Pet.GrowthReady){growthSeen=false;if(motion=="burrow")Animate("stand");}
             if((motion=="eat"||motion=="throw")&&motionTime>=2)motion="stand";
             walkingNow=false;
             if(walking && !pressed && !Pet.Sleeping && !Pet.GrowthReady && motion=="stand") {
@@ -239,7 +239,7 @@ namespace GuMaGoChi {
         public void Say(Pet p,string text) {PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
         public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
-        public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p))Say(p,"짜잔! "+p.Kind+"로 자랐어요!\n이름은 여전히 "+p.Name+"예요.");});}
+        public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,"짜잔! "+p.Kind+"로 자랐어요!\n이름은 여전히 "+p.Name+"예요.");}});}
         public void OpenHome(Pet p) {if(Home==null||Home.IsDisposed)Home=new HomeWindow(this);Home.RefreshData();if(p!=null)Home.SelectPet(p.Id);Home.Show();Home.Activate();}
         public void Adopt(bool first=false) {
             if(!first && Engine.Data.Pets.Any(p=>!p.Dead) && Engine.Data.Seeds<Engine.AdoptPrice){MessageBox.Show("입양에는 씨앗 100개가 필요해요.");return;}

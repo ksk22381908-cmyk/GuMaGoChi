@@ -21,14 +21,14 @@ namespace GuMaGoChi {
                 int row=species>=0?(key=="eat"?1:key=="throw"?2:key=="burrow"?3:0):0;
                 var clip=new Clip {Frames=new Bitmap[count]};
                 for(int i=0;i<count;i++) {
-                    using(var cell=source.Clone(new Rectangle((i%columns)*w,(row+i/columns)*h,w,h),PixelFormat.Format32bppArgb))clip.Frames[i]=Cutout(cell);
+                    using(var cell=source.Clone(new Rectangle((i%columns)*w,(row+i/columns)*h,w,h),PixelFormat.Format32bppArgb))clip.Frames[i]=Cutout(cell,key=="burrow");
                     clip.MaxWidth=Math.Max(clip.MaxWidth,clip.Frames[i].Width);clip.MaxHeight=Math.Max(clip.MaxHeight,clip.Frames[i].Height);
                 }clips[cacheKey]=clip;return clip;
             }
         }
         // Binary alpha avoids blending generated halos onto the magenta color-key
         // window. Remove isolated pixels and align actual silhouettes at the feet.
-        static Bitmap Cutout(Bitmap cell) {
+        public static Bitmap Cutout(Bitmap cell,bool removeTopFragment=false) {
             int w=cell.Width,h=cell.Height;var mask=new bool[w*h];var pixels=new int[w*h];
             var data=cell.LockBits(new Rectangle(0,0,w,h),ImageLockMode.ReadOnly,PixelFormat.Format32bppArgb);
             for(int y=0;y<h;y++)Marshal.Copy(IntPtr.Add(data.Scan0,y*data.Stride),pixels,y*w,w);cell.UnlockBits(data);
@@ -40,7 +40,13 @@ namespace GuMaGoChi {
                 groups.Add(group);largest=Math.Max(largest,group.Count);
             }
             int left=w,top=h,right=0,bottom=0;var keep=new bool[w*h];
-            foreach(var group in groups)if(group.Count>=Math.Max(12,largest*.035))foreach(int i in group){keep[i]=true;left=Math.Min(left,i%w);top=Math.Min(top,i/w);right=Math.Max(right,i%w);bottom=Math.Max(bottom,i/w);}
+            foreach(var group in groups){
+                int groupTop=h,groupBottom=0;foreach(int i in group){groupTop=Math.Min(groupTop,i/w);groupBottom=Math.Max(groupBottom,i/w);}
+                // Generated burrow rows spill the previous mound into the top of
+                // the next cell. Keep the central sprite and its separate sprout.
+                if(removeTopFragment&&groupTop==0&&groupBottom<h/3&&group.Count<largest)continue;
+                if(group.Count>=Math.Max(12,largest*.035))foreach(int i in group){keep[i]=true;left=Math.Min(left,i%w);top=Math.Min(top,i/w);right=Math.Max(right,i%w);bottom=Math.Max(bottom,i/w);}
+            }
             if(left>right)return new Bitmap(1,1);
             var result=new Bitmap(right-left+1,bottom-top+1,PixelFormat.Format32bppArgb);
             for(int y=top;y<=bottom;y++)for(int x=left;x<=right;x++)if(keep[y*w+x])result.SetPixel(x-left,y-top,Color.FromArgb(255,Color.FromArgb(pixels[y*w+x])));
