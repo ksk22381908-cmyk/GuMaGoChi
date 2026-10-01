@@ -64,6 +64,10 @@ namespace GuMaGoChi {
             Application.EnableVisualStyles();var data=new SaveData {Seeds=150,Dew=1,Medicine=1};var pet=new Pet {Name="테스트",Hunger=70};data.Pets.Add(pet);
             using(var app=new DesktopApp(data,null,false))try {
                 Application.DoEvents();var w=app.Windows[pet.Id];Check(w.Visible&&w.TopMost&&w.TransparencyKey==System.Drawing.Color.Magenta,"Transparent topmost pet window");
+                var closingMenu=app.MenuFor(pet);closingMenu.Show(w,new System.Drawing.Point(30,90));Application.DoEvents();closingMenu.Close(ToolStripDropDownCloseReason.ItemClicked);
+                Check(!closingMenu.IsDisposed,"Menu survives Closed while item-click dispatch is pending");
+                Find(closingMenu,"쓰다듬기").PerformClick();Check(pet.Affection==1,"Item action still runs after menu closes");
+                var replacementMenu=app.MenuFor(pet);Check(closingMenu.IsDisposed&&!replacementMenu.IsDisposed,"Previous menu released on next opening");
                 using(var menu=app.MenuFor(pet)){var food=Find(menu,"먹이 주기");((ToolStripMenuItem)food.DropDownItems[0]).PerformClick();}Check(pet.Hunger==60&&pet.FoodCooldown==300,"Context-menu feeding");
                 using(var menu=app.MenuFor(pet))Find(menu,"집에서 재우기").PerformClick();Check(pet.Home&&pet.Sleeping&&!w.Visible&&app.Home.Visible,"Sleep opens home and hides desktop pet");
                 using(var menu=app.MenuFor(pet))Find(menu,"깨우기").PerformClick();Check(!pet.Sleeping&&pet.Home,"Wake stays at home");
@@ -74,7 +78,7 @@ namespace GuMaGoChi {
                 app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");app.Activity.SetPaused(true);app.Activity.SetPaused(false);app.Activity.CancelActivity();Check(app.Activity==null,"Activity closes cleanly");
                 pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
-                return "PASS: 12 UI checks\r\nTransparent/topmost windows, context menu, home/sleep/outing, selection activation, pause, training lifecycle and growth verified.\r\n";
+                return "PASS: 15 UI checks\r\nTransparent/topmost windows, menu-close lifecycle, context menu, home/sleep/outing, selection activation, pause, training lifecycle and growth verified.\r\n";
             }finally {app.Exit();}
         }
     }

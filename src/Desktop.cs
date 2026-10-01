@@ -125,6 +125,7 @@ namespace GuMaGoChi {
         public bool Paused {get{return ManualPause||AutoPause||suspended||locked;}}
         NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
         Dictionary<string,double> pairCooldown=new Dictionary<string,double>();HashSet<string> warnings=new HashSet<string>();
+        Dictionary<string,ContextMenuStrip> petMenus=new Dictionary<string,ContextMenuStrip>();
         public DesktopApp(SaveData data,string warning,bool persistData=true) {
             persist=persistData;Engine=new Engine(data);icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
             tray.DoubleClick+=(s,e)=>OpenHome(null);tray.MouseClick+=(s,e)=>{if(e.Button==MouseButtons.Left)OpenHome(null);};
@@ -199,7 +200,14 @@ namespace GuMaGoChi {
         }
         ToolStripMenuItem Item(string title,Action action,bool enabled=true) {var i=new ToolStripMenuItem(title);i.Enabled=enabled;i.Click+=(s,e)=>action();return i;}
         public ContextMenuStrip MenuFor(Pet p) {
-            var menu=new ContextMenuStrip {Font=new Font("맑은 고딕",9)};menu.Closed+=(s,e)=>menu.Dispose();
+            // WinForms continues dispatching item clicks after Closed. Keep the
+            // menu alive until the next opening instead of disposing inside Closed.
+            ContextMenuStrip previousMenu;
+            if(petMenus.TryGetValue(p.Id,out previousMenu)) {
+                if(previousMenu.Visible)return previousMenu;
+                if(!previousMenu.IsDisposed)previousMenu.Dispose();
+            }
+            var menu=new ContextMenuStrip {Font=new Font("맑은 고딕",9)};petMenus[p.Id]=menu;
             menu.Items.Add(Item(p.Name+" · "+p.Kind,()=>OpenHome(p)));
             menu.Items.Add(new ToolStripLabel("배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+" · 피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)));
             menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Engine.CanCare(p);
@@ -235,7 +243,7 @@ namespace GuMaGoChi {
             trayMenu.Items.Add(Item("종료 · 저장 후 닫기",Exit));tray.Icon=needs.Length>0?alertIcon:icon;tray.Text=needs.Length>0?"GuMaGoChi · "+needs.Length+"마리 돌봄 필요":"GuMaGoChi · 고구마와 함께";
         }
         void ToggleAutoStart() {try {using(var key=Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run")) {if(Engine.Data.AutoStart)key.DeleteValue("GuMaGoChi",false);else key.SetValue("GuMaGoChi","\""+Application.ExecutablePath+"\"");}Change(()=>Engine.Data.AutoStart=!Engine.Data.AutoStart);}catch(Exception ex){MessageBox.Show(ex.Message,"자동 실행 설정 실패");}}
-        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Activity!=null)Activity.CancelActivity();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
+        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Activity!=null)Activity.CancelActivity();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
     }
     public class NameDialog:Form {
         TextBox input;public string PetName {get{return input.Text.Trim();}}
