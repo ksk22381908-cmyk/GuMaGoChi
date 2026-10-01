@@ -64,6 +64,9 @@ namespace GuMaGoChi {
             Application.EnableVisualStyles();var data=new SaveData {Seeds=150,Dew=1,Medicine=1};var pet=new Pet {Name="테스트",Hunger=70};data.Pets.Add(pet);
             using(var app=new DesktopApp(data,null,false))try {
                 Application.DoEvents();var w=app.Windows[pet.Id];Check(w.Visible&&w.TopMost&&w.TransparencyKey==System.Drawing.Color.Magenta,"Transparent topmost pet window");
+                int initialX=w.Left;w.Say("이동 중에도 말해요");w.Step(.5,true);Check(w.Left!=initialX,"Autonomous walking starts immediately and continues during speech");
+                var down=typeof(PetWindow).GetMethod("Down",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);var up=typeof(PetWindow).GetMethod("Up",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+                down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(w.Capture,"Direct body press captures pointer without move menu");initialX=w.Left;w.Step(.5,true);Check(w.Left==initialX,"Holding body suspends autonomous walking");up.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,60,110,0)});Check(!w.Capture,"Releasing body releases pointer capture");
                 var closingMenu=app.MenuFor(pet);closingMenu.Show(w,new System.Drawing.Point(30,90));Application.DoEvents();closingMenu.Close(ToolStripDropDownCloseReason.ItemClicked);
                 Check(!closingMenu.IsDisposed,"Menu survives Closed while item-click dispatch is pending");
                 Find(closingMenu,"쓰다듬기").PerformClick();Check(pet.Affection==1,"Item action still runs after menu closes");
@@ -92,7 +95,7 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 206 UI checks\r\nWindows, menus, activities, home, baby clips and all 30 adult action renders verified.\r\n";
+                return "PASS: 210 UI checks\r\nWindows, direct drag capture, autonomous walking, menus, activities, home, baby clips and all 30 adult action renders verified.\r\n";
             }finally {app.Exit();}
         }
     }

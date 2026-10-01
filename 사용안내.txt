@@ -1,4 +1,4 @@
-GuMaGoChi 0.1.3 · 첫 플레이 가능 버전
+GuMaGoChi 0.1.4 · 첫 플레이 가능 버전
 
 1. ZIP 전체를 원하는 폴더에 압축 해제하세요.
 2. GuMaGoChi.exe를 실행하세요. assets 폴더를 함께 유지해야 합니다.
