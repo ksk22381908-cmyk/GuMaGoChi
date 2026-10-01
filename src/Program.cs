@@ -88,7 +88,27 @@ namespace GuMaGoChi {
             Check(migrated.Pets[2].PendingSpecies==23&&migrated.Pets[3].SpeciesId==30&&migrated.Pets[3].Age==40000,"Legacy growth result and adult retained");
             revised.Nutrients=2;var roundtrip=Storage.Decode(Storage.Encode(revised));Check(roundtrip.Nutrients==2&&roundtrip.Pets[0].GrowthExp==180,"New experience and inventory survive save roundtrip");
             bool invalidExp=false;young.GrowthExp=-1;try{Storage.Decode(Storage.Encode(revised));}catch{invalidExp=true;}Check(invalidExp,"Invalid experience rejected");
-            return "PASS: "+count+" checks\r\nGrowth, lifespan, inventory, cooldowns, pause, sleep, filtering, rewards, adoption, save and character dialogue verified.\r\n";
+            var challenge=new TrainingRun();var challengeData=new SaveData();var challengePet=new Pet {SpeciesId=2};challengeData.Pets.Add(challengePet);var challengeEngine=new Engine(challengeData);
+            for(int stage=0;stage<3;stage++){
+                int limit=challenge.Limit;Check(limit==(stage==0?3:stage==1?5:7)&&challenge.Reward==stage+1,"Stage limit and reward");
+                for(int shot=0;shot<limit;shot++){Check(challenge.BeginShot()&&!challenge.BeginShot(),"One shot in flight");challengeEngine.RecordShot(challengePet);Check(challenge.Score()&&!challenge.Score(),"Single goal per shot");challengeEngine.ScoreGoal(challengePet,challenge.Reward,challenge.TotalGoals);challenge.EndShot();challenge.EndShot();}
+                if(stage==0)challengeEngine.FinishActivity(challengePet,true);
+                Check(challenge.Complete&&!challenge.BeginShot(),"Stage cannot exceed attempt limit");Check(challenge.Advance()==(stage<2),"Perfect-only progression stops at final stage");
+            }
+            Check(challenge.TotalGoals==15&&challengeData.BestGoals==15&&challengeData.Seeds==42&&challengePet.Training==1&&challengePet.Shots==15,"Perfect run pays 34 goal seeds plus eight base seeds once");
+            Check(Storage.Decode(Storage.Encode(challengeData)).BestGoals==15,"Best score survives restart");challengeEngine.ScoreGoal(challengePet,1,1);Check(challengeData.BestGoals==15,"Lower score cannot replace record");
+            var missed=new TrainingRun();for(int shot=0;shot<3;shot++){missed.BeginShot();if(shot<2)missed.Score();missed.EndShot();}Check(!missed.Advance()&&missed.TotalGoals==2,"Miss prevents bonus entry");
+            var rim=new System.Drawing.Rectangle(200,200,75,85);
+            Check(BallPhysics.TouchesTop(new System.Drawing.PointF(185,180),new System.Drawing.PointF(185,220),rim),"Ball edge and overhanging rim count as goal");
+            Check(BallPhysics.TouchesTop(new System.Drawing.PointF(220,300),new System.Drawing.PointF(220,100),rim),"Rising shot touching top counts");
+            Check(!BallPhysics.TouchesTop(new System.Drawing.PointF(350,100),new System.Drawing.PointF(350,300),rim),"Far shot does not hit rim");
+            Check(BallPhysics.HitsBody(new System.Drawing.PointF(0,230),new System.Drawing.PointF(400,230),rim)&&!BallPhysics.HitsBody(new System.Drawing.PointF(0,100),new System.Drawing.PointF(400,100),rim),"Swept body collision catches fast ball without distant false hit");
+            double power=BallPhysics.Strength(1920,false)*BallPhysics.MaxDrag;Check(Math.Abs(power*power/BallPhysics.Gravity-1888)<1,"Full power reaches screen width");
+            var edgePull=BallPhysics.Pull(new System.Drawing.PointF(100,900),new System.Drawing.PointF(16,964),1920,980);Check(Math.Abs(Math.Sqrt(edgePull.X*edgePull.X+edgePull.Y*edgePull.Y)-280)<.01,"Screen edge drag can reach full power without leaving monitor");
+            foreach(var species in Catalog.All){Check(!String.IsNullOrEmpty(Dialogue.Hit(new Pet {SpeciesId=species.Id})),"Species hit reaction");}
+            Check(Dialogue.Hit(new Pet {SpeciesId=2})=="일부러 그런 거 아니지?"&&Dialogue.Hit(new Pet {SpeciesId=30})=="감… 고구마 살려주구마!","Requested hit reactions preserved");
+            var hitTarget=new Pet();Check(ActivityWindow.CanHit(challengePet,hitTarget)&&!ActivityWindow.CanHit(challengePet,challengePet),"Other pet collision excludes thrower");hitTarget.Sleeping=true;Check(!ActivityWindow.CanHit(challengePet,hitTarget),"Sleeping pet excluded");
+            return "PASS: "+count+" checks\r\nCare, growth, save migration, challenge progression, goal physics, rewards, best score and dialogue verified.\r\n";
         }
     }
     static class UiCheck {
@@ -122,6 +142,9 @@ namespace GuMaGoChi {
                 app.ManualPause=true;app.SyncWindows();Check(!w.Visible,"Global pause hides pet");app.ManualPause=false;app.SyncWindows();
                 w.Top=Screen.FromControl(w).WorkingArea.Top+180;pet.Y=w.Top;app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");
                 var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+164))<1,"Ball starts at relocated pet height");
+                Check(app.Activity.Owner==w,"Activity owned by actor stays above actor");
+                down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,80,160,0)});app.Activity.EnsureForeground();
+                IntPtr below=Native.GetWindow(app.Activity.Handle,2);bool actorBelow=false;for(int z=0;z<500&&below!=IntPtr.Zero;z++){if(below==w.Handle){actorBelow=true;break;}below=Native.GetWindow(below,2);}Check(actorBelow,"Character click leaves ball overlay above pet");
                 app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
                 pet.Age=Engine.AdultAge-1;pet.GrowthExp=Engine.AdultExp-1.0/60;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 Check((string)typeof(PetWindow).GetField("motion",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(w)=="stand","Growth reveal immediately resets burrow motion");
@@ -141,7 +164,21 @@ namespace GuMaGoChi {
                     }
                 }
                 var spy=new Pet {SpeciesId=30,Name="간첩"};var spySave=new SaveData();spySave.Pets.Add(spy);spySave.Discovered.Add(30);Check(Storage.Decode(Storage.Encode(spySave)).Pets[0].SpeciesId==30,"Spy species save roundtrip");
-                return "PASS: 229 UI checks\r\nGrowth, nutrient and cooldown menus, motion and all 31 adult renders including spy save verified.\r\n";
+                app.StartActivity(pet,false);var companion=new Pet {Name="간첩",SpeciesId=30,X=pet.X+220,Y=pet.Y};data.Pets.Add(companion);app.SyncWindows();var friendWindow=app.Windows[companion.Id];
+                var hitMethod=typeof(ActivityWindow).GetMethod("HitOthers",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
+                var hitFrom=new System.Drawing.PointF(friendWindow.Left-app.Activity.Left-50,friendWindow.Top-app.Activity.Top+120);var hitTo=new System.Drawing.PointF(hitFrom.X+250,hitFrom.Y);
+                hitMethod.Invoke(app.Activity,new object[]{hitFrom,hitTo});Check(friendWindow.Bubble=="감… 고구마 살려주구마!","Fetch collision displays spy reaction");friendWindow.Bubble="";
+                hitMethod.Invoke(app.Activity,new object[]{hitFrom,hitTo});Check(friendWindow.Bubble=="","Repeated hit in same throw does not repeat interaction");app.Activity.CancelActivity();
+                pet.TrainCooldown=0;app.StartActivity(pet,true);var challengeWindow=app.Activity;var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;var challenge=(TrainingRun)typeof(ActivityWindow).GetField("run",flags).GetValue(challengeWindow);int challengeSeeds=data.Seeds,trainingBefore=pet.Training;
+                var frame=typeof(ActivityWindow).GetMethod("Frame",flags);var reset=typeof(ActivityWindow).GetMethod("ResetBall",flags);
+                for(int shot=0;shot<15;shot++){
+                    typeof(ActivityWindow).GetField("celebration",flags).SetValue(challengeWindow,0.0);reset.Invoke(challengeWindow,null);challenge.BeginShot();challenge.Score();app.Engine.RecordShot(pet);app.Engine.ScoreGoal(pet,challenge.Reward,challenge.TotalGoals);
+                    typeof(ActivityWindow).GetField("returning",flags).SetValue(challengeWindow,true);typeof(ActivityWindow).GetField("ball",flags).SetValue(challengeWindow,new System.Drawing.PointF(w.Left-challengeWindow.Left+88,w.Top-challengeWindow.Top+164));frame.Invoke(challengeWindow,new object[]{null,EventArgs.Empty});
+                }
+                Check(challenge.TotalGoals==15&&data.Seeds==challengeSeeds+42&&pet.Training==trainingBefore+1&&data.BestGoals==15,"Actual activity advances 3-5-7 and grants base reward once");
+                Check(challengeWindow.Visible&&(bool)typeof(ActivityWindow).GetField("finished",flags).GetValue(challengeWindow),"Finished record screen stays visible for capture");
+                using(var capture=new System.Drawing.Bitmap(challengeWindow.Width,challengeWindow.Height)){challengeWindow.DrawToBitmap(capture,new System.Drawing.Rectangle(0,0,capture.Width,capture.Height));capture.Save(Path.Combine(Paths.BaseDirectory,"training-preview.png"));}challengeWindow.CancelActivity();
+                return "PASS: 235 UI checks\r\nChallenge progression, rewards, record capture, foreground ball overlay and pet collision verified.\r\n";
             }finally {app.Exit();}
         }
     }

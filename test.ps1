@@ -1,5 +1,6 @@
+param([switch]$SkipRootCopy)
 $ErrorActionPreference = 'Stop'
-& (Join-Path $PSScriptRoot 'build.ps1')
+& (Join-Path $PSScriptRoot 'build.ps1') -SkipRootCopy:$SkipRootCopy
 # Windows PowerShell hosts the same Framework assembly. This also works in
 # environments that delay or restrict launching freshly compiled executables.
 $assemblyPath = Join-Path $PSScriptRoot 'bin/GuMaGoChi.exe'

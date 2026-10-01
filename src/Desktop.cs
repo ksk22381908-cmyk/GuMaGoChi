@@ -18,6 +18,8 @@ namespace GuMaGoChi {
         [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
         [DllImport("user32.dll")] public static extern bool DestroyIcon(IntPtr h);
         [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int key);
+        [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h,IntPtr after,int x,int y,int width,int height,uint flags);
+        [DllImport("user32.dll")] public static extern IntPtr GetWindow(IntPtr h,uint command);
         public static bool FullScreen() {
             IntPtr h=GetForegroundWindow();uint pid;GetWindowThreadProcessId(h,out pid);
             if(h==IntPtr.Zero || pid==(uint)Process.GetCurrentProcess().Id)return false;
@@ -121,6 +123,7 @@ namespace GuMaGoChi {
         public void BeginMove() {Say("몸을 바로 드래그해서 옮길 수 있어요.");}
         public Point Clamp(Point point) {Rectangle area=Screen.FromPoint(new Point(point.X+Width/2,point.Y+Height/2)).WorkingArea;return new Point(Math.Max(area.Left,Math.Min(area.Right-Width,point.X)),Math.Max(area.Top,Math.Min(area.Bottom-Height,point.Y)));}
         void Down(object sender,MouseEventArgs e) {
+            if(App.Activity!=null&&e.Button==MouseButtons.Left){App.Activity.EnsureForeground();return;}
             if(e.Button==MouseButtons.Right) {App.MenuFor(Pet).Show(this,e.Location);return;}
             if(e.Button!=MouseButtons.Left)return;
             if(App.Paused)return;

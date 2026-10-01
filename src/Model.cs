@@ -46,7 +46,7 @@ namespace GuMaGoChi {
         public string Personality { get { return SpeciesId<0 ? "호기심 많은 아기" : Catalog.All[SpeciesId].Personality; } }
     }
     public class SaveData {
-        public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0;
+        public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0, BestGoals=0;
         public List<Pet> Pets=new List<Pet>();
         public List<int> Discovered=new List<int>();
         public bool AutoStart=false;
@@ -143,7 +143,7 @@ namespace GuMaGoChi {
             else if(p.PlayCooldown<=0) {p.Play++;p.Affection++;Data.Seeds+=8;p.PlayCooldown=ActivityCooldown;}
             p.Fatigue=Clamp(p.Fatigue+3);
         }
-        public bool ScoreGoal(Pet p) {if(!CanCare(p))return false;p.Goals++;Data.Seeds++;return true;}
+        public bool ScoreGoal(Pet p,int reward=1,int score=0) {if(!CanCare(p)||reward<1||reward>3||score<0||score>15)return false;p.Goals++;Data.Seeds+=reward;Data.BestGoals=Math.Max(Data.BestGoals,score);return true;}
         public void RecordShot(Pet p) {if(CanCare(p))p.Shots++;}
         public bool Buy(bool medicine) {int price=medicine?MedicinePrice:DewPrice;if(Data.Seeds<price)return false;Data.Seeds-=price;if(medicine)Data.Medicine++;else Data.Dew++;return true;}
         public void Kill(Pet p,string cause) {p.Dead=true;p.Active=false;p.Sleeping=false;p.GrowthReady=false;p.Cause=cause;p.DiedAt=DateTime.Now.ToString("yyyy-MM-dd HH:mm");}
@@ -157,7 +157,7 @@ namespace GuMaGoChi {
         public static string Encode(SaveData data) {return Serializer().Serialize(data);}
         public static SaveData Decode(string json) {
             SaveData d=Serializer().Deserialize<SaveData>(json);
-            if(d==null || (d.Version!=1&&d.Version!=2) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
+            if(d==null || (d.Version!=1&&d.Version!=2) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.BestGoals<0 || d.BestGoals>15 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
             var ids=new HashSet<string>();
             foreach(Pet p in d.Pets) {
                 if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>=Catalog.All.Length || p.PendingSpecies< -1 || p.PendingSpecies>=Catalog.All.Length || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");
