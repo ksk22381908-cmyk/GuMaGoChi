@@ -177,8 +177,8 @@ namespace GuMaGoChi {
                 }
                 Check(challenge.TotalGoals==15&&data.Seeds==challengeSeeds+42&&pet.Training==trainingBefore+1&&data.BestGoals==15,"Actual activity advances 3-5-7 and grants base reward once");
                 Check(challengeWindow.Visible&&(bool)typeof(ActivityWindow).GetField("finished",flags).GetValue(challengeWindow),"Finished record screen stays visible for capture");
-                using(var capture=new System.Drawing.Bitmap(challengeWindow.Width,challengeWindow.Height)){challengeWindow.DrawToBitmap(capture,new System.Drawing.Rectangle(0,0,capture.Width,capture.Height));capture.Save(Path.Combine(Paths.BaseDirectory,"training-preview.png"));}challengeWindow.CancelActivity();
-                return "PASS: 235 UI checks\r\nChallenge progression, rewards, record capture, foreground ball overlay and pet collision verified.\r\n";
+                using(var capture=new System.Drawing.Bitmap(challengeWindow.Width,challengeWindow.Height)){challengeWindow.DrawToBitmap(capture,new System.Drawing.Rectangle(0,0,capture.Width,capture.Height));bool objectsGone=true;for(int y=140;y<capture.Height&&objectsGone;y++)for(int x=0;x<capture.Width;x++){int color=capture.GetPixel(x,y).ToArgb();if(color==System.Drawing.Color.Orange.ToArgb()||color==System.Drawing.Color.FromArgb(108,139,102).ToArgb()){objectsGone=false;break;}}Check(objectsGone,"Completed training hides both ball and goal while preserving record panel");capture.Save(Path.Combine(Paths.BaseDirectory,"training-preview.png"));}challengeWindow.CancelActivity();
+                return "PASS: 236 UI checks\r\nChallenge progression, rewards, completed object cleanup, record capture and pet collision verified.\r\n";
             }finally {app.Exit();}
         }
     }

@@ -104,11 +104,13 @@ namespace GuMaGoChi {
             TextRenderer.DrawText(g,app.Paused||paused?"일시정지 중이에요.":"공을 뒤로 당겼다 놓으면 고구마가 직접 쏴요.  /  Esc: 끝내기",Font,new Point(32,58),Art.Ink);
             if(training)TextRenderer.DrawText(g,"현재 "+run.TotalGoals+" / 15점   최고 기록 "+app.Engine.Data.BestGoals+" / 15점   · "+(run.Stage==0?"가까운 거리":run.Stage==1?"먼 거리":"최대 거리"),Font,new Point(32,82),Art.Ink);
             if(feedback!="")TextRenderer.DrawText(g,feedback,Font,new Point(32,training?110:82),Art.Green);
+            // Keep only the score panel after completion; gameplay objects must disappear.
+            if(finished)return;
             if(training) {using(var b=new SolidBrush(Color.FromArgb(108,139,102)))g.FillRectangle(b,basket);using(var p=new Pen(Art.Ink,4)) {g.DrawRectangle(p,basket);g.DrawLine(p,basket.Left-5,basket.Top,basket.Right+5,basket.Top);}TextRenderer.DrawText(g,"GOAL",Font,new Point(basket.Left+10,basket.Top+28),Color.White);}
             if(dragging) {
                 using(var pen=new Pen(Art.Ink,3))g.DrawLine(pen,source,dragPoint);
                 PointF pull=BallPhysics.Pull(source,dragPoint,Width,Height);float vx=pull.X*BallPhysics.Strength(Width,Pet.Skill=="힘"),vy=pull.Y*BallPhysics.Strength(Width,Pet.Skill=="힘");
-                for(int i=1;i<=35;i++) {float t=i*.08f,x=source.X+vx*t,y=source.Y+vy*t+325*t*t;if(y>floor)break;g.FillEllipse(Brushes.DarkOliveGreen,x-3,y-3,6,6);}
+                for(int i=1;i<=6;i++) {float t=i*.08f,x=source.X+vx*t,y=source.Y+vy*t+325*t*t;if(y>floor)break;g.FillEllipse(Brushes.DarkOliveGreen,x-3,y-3,6,6);}
             }
             g.FillEllipse(Brushes.Orange,ball.X-14,ball.Y-14,28,28);using(var p=new Pen(Art.Ink,2))g.DrawEllipse(p,ball.X-14,ball.Y-14,28,28);
             g.DrawArc(Pens.White,ball.X-9,ball.Y-9,16,16,200,85);
