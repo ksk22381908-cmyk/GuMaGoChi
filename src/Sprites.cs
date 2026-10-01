@@ -15,9 +15,10 @@ namespace GuMaGoChi {
             string file=key=="stand"?"baby-reference.png":key+"-sheet.png";
             string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby",file);
             if(species>=0)path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield",key=="stand"?"adults-v2":"adult-actions",species.ToString("00")+(key=="stand"?".png":"-sheet.png"));
+            if(key=="sleep")path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","sleep",species<0?"baby-sheet.png":species.ToString("00")+"-sheet.png");
             if(!File.Exists(path))return null;
             using(var source=new Bitmap(path)) {
-                int columns=key=="stand"?1:4,count=species>=0&&key!="stand"?4:columns*columns,w=source.Width/columns,h=source.Height/columns;
+                int columns=key=="stand"?1:key=="sleep"?2:4,count=key=="sleep"?4:species>=0&&key!="stand"?4:columns*columns,w=source.Width/columns,h=source.Height/columns;
                 int row=species>=0?(key=="eat"?1:key=="throw"?2:key=="burrow"?3:0):0;
                 var clip=new Clip {Frames=new Bitmap[count]};
                 for(int i=0;i<count;i++) {
@@ -56,7 +57,7 @@ namespace GuMaGoChi {
         public static bool Draw(Graphics g,Rectangle box,string key,double time,bool flip,int species=-1) {
             Clip clip=Load(key,species);if(clip==null)return false;
             bool once=key=="eat"||key=="throw"||key=="burrow";
-            int frame=(int)(Math.Max(0,time)*(species>=0?4:8));frame=once?Math.Min(clip.Frames.Length-1,frame):frame%clip.Frames.Length;
+            int frame=(int)(Math.Max(0,time)*(key=="sleep"?2:species>=0?4:8));frame=once?Math.Min(clip.Frames.Length-1,frame):frame%clip.Frames.Length;
             Bitmap image=clip.Frames[frame];float scale=Math.Min(box.Width/(float)clip.MaxWidth,box.Height/(float)clip.MaxHeight);
             int width=Math.Max(1,(int)(image.Width*scale)),height=Math.Max(1,(int)(image.Height*scale));int x=box.Left+(box.Width-width)/2,y=box.Bottom-height;
             var state=g.Save();g.InterpolationMode=System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;g.PixelOffsetMode=System.Drawing.Drawing2D.PixelOffsetMode.Half;if(flip){g.TranslateTransform(x+width,y);g.ScaleTransform(-1,1);g.DrawImage(image,new Rectangle(0,0,width,height));}else g.DrawImage(image,new Rectangle(x,y,width,height));g.Restore(state);return true;

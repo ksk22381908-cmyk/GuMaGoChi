@@ -30,7 +30,7 @@ namespace GuMaGoChi {
             var collection=new TabPage("성체 도감") {BackColor=Art.Cream};tabs.TabPages.Add(collection);dex=Flow(collection);
             var memories=new TabPage("추억 앨범") {BackColor=Art.Cream};tabs.TabPages.Add(memories);album=Flow(memories);
             var settings=new TabPage("저장 · 사용 안내") {BackColor=Art.Cream};tabs.TabPages.Add(settings);
-            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 8시간이에요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n3단계 성장과 집 꾸미기는 추후 업데이트 예정이에요.\n아기 이동·식사·발사·성장 준비 모션을 제공해요. 대기·수면은 기본 표현이에요."});
+            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 8시간이에요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n3단계 성장과 집 꾸미기는 추후 업데이트 예정이에요.\n아기 이동·식사·발사·성장 준비 모션을 제공해요. 수면은 눈을 감은 전용 모션이에요."});
             AddButton(settings,"저장 데이터 내보내기",28,260,230,42,Export);
             AddButton(settings,"저장 데이터 가져오기",278,260,230,42,Import);
             AddButton(settings,"모두 잠시 쉬기 / 다시 시작",528,260,280,42,()=>{app.ManualPause=!app.ManualPause;app.SyncWindows();if(app.Activity!=null)app.Activity.SetPaused(app.Paused);RefreshData();});
