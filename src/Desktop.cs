@@ -259,7 +259,8 @@ namespace GuMaGoChi {
             var medicine=new ToolStripMenuItem("치료하기"+(p.MedicineCooldown>0?" · "+Engine.TimeText(p.MedicineCooldown):""));
             medicine.DropDownItems.Add(Item("기본 치료 · 무료 · 병세 −10",()=>Change(()=>Say(p,Engine.Treat(p,false))),care&&p.Illness>0&&p.MedicineCooldown<=0));
             medicine.DropDownItems.Add(Item("상위 치료 · "+Engine.Data.Medicine+"개 · 병세 −30",()=>Change(()=>Say(p,Engine.Treat(p,true))),care&&p.Illness>0&&p.MedicineCooldown<=0&&Engine.Data.Medicine>0));menu.Items.Add(medicine);
-            menu.Items.Add(Item("쓰다듬기",()=>Change(()=>Say(p,Engine.Stroke(p))),care));
+            menu.Items.Add(Item("쓰다듬기"+(p.PetCooldown>0?" · "+Engine.TimeText(p.PetCooldown):" · 피로 +1"),()=>Change(()=>Say(p,Engine.Stroke(p))),care&&p.PetCooldown<=0));
+            menu.Items.Add(Item("성장 영양제 먹이기 · "+Engine.Data.Nutrients+"개 · +30 EXP",()=>Nourish(p),care&&Engine.CanNourish(p)&&Engine.Data.Nutrients>0));
             menu.Items.Add(Item("공 가져오기"+(p.PlayCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.PlayCooldown):""),()=>StartActivity(p,false),care&&!p.Home&&Activity==null));
             menu.Items.Add(Item("골인 훈련"+(p.TrainCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.TrainCooldown):""),()=>StartActivity(p,true),care&&!p.Home&&Activity==null));
             menu.Items.Add(new ToolStripSeparator());
@@ -272,6 +273,11 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));return menu;
         }
         public void Feed(Pet p,bool dew) {Change(()=>{double before=p.Hunger;Say(p,Engine.Feed(p,dew));if(p.Hunger<before){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});}
+        public void Nourish(Pet p) {
+            if(Paused||!Engine.CanNourish(p)||Engine.Data.Nutrients<=0)return;
+            if(p.GrowthExp>150&&MessageBox.Show("남은 성장 경험치는 "+(Engine.AdultExp-p.GrowthExp).ToString("0.##")+" EXP입니다. 초과분은 적용되지 않습니다. 사용할까요?","성장 영양제",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)return;
+            Change(()=>{if(Engine.Nourish(p)){Say(p,Dialogue.Get(p,0));PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate(p.GrowthReady?"burrow":"eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});
+        }
         public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();Activity.Activate();}
         void RefreshTray() {
             if(trayMenu.Visible)return;

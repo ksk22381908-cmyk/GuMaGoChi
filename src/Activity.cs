@@ -38,6 +38,7 @@ namespace GuMaGoChi {
             double angle=(app.Engine.Random.NextDouble()-.5)*error;float strength=Pet.Skill=="힘"?5.8f:5.3f;
             velocity=new PointF((float)((dx*Math.Cos(angle)-dy*Math.Sin(angle))*strength),(float)((dx*Math.Sin(angle)+dy*Math.Cos(angle))*strength));
             flying=true;feedback=training?Pet.Name+"가 공을 쐈어요!":"공을 쫓아가요!";feedbackTime=2;
+            if(training)app.Change(()=>app.Engine.RecordShot(Pet));
             windup=.625;
             PetWindow actor;if(app.Windows.TryGetValue(Pet.Id,out actor))actor.Animate("throw",velocity.X<0);
         }
@@ -54,7 +55,7 @@ namespace GuMaGoChi {
                 if(ball.X<16){ball.X=16;velocity.X=Math.Abs(velocity.X)*.4f;}if(ball.X>Width-16){ball.X=Width-16;velocity.X=-Math.Abs(velocity.X)*.4f;}
                 bool goal=training && velocity.Y>0 && old.Y<=basket.Top+9 && ball.Y>=basket.Top+9 && ball.X>=basket.Left+5 && ball.X<=basket.Right-5;
                 if(goal || ball.Y>=floor-12) {
-                    if(goal){goals++;ball=new PointF(basket.Left+basket.Width/2,basket.Top+30);feedback="골인! "+Pet.Name+"가 뿌듯해해요.";}
+                    if(goal){goals++;app.Change(()=>app.Engine.ScoreGoal(Pet));ball=new PointF(basket.Left+basket.Width/2,basket.Top+30);feedback="골인! 씨앗 +1 · "+Pet.Name+"가 뿌듯해해요.";}
                     else {ball.Y=(float)floor-12;feedback=training?"아깝다! 다음 공도 해볼까?":"공을 주우러 가요.";}
                     feedbackTime=3;flying=false;returning=true;
                 }
@@ -65,7 +66,7 @@ namespace GuMaGoChi {
                     double dx=target.X-petWindow.Left,dy=target.Y-petWindow.Top,distance=Math.Sqrt(dx*dx+dy*dy);petWindow.Animate("walk",dx<0);
                     if(distance>0){double step=Math.Min(distance,Math.Max(1,speed*dt));petWindow.Location=new Point(petWindow.Left+(int)Math.Round(dx/distance*step),petWindow.Top+(int)Math.Round(dy/distance*step));}Pet.X=petWindow.Left;Pet.Y=petWindow.Top;
                     if(distance<8) {rounds++;returning=false;
-                        if(rounds>=3) {app.Change(()=>{app.Engine.FinishActivity(Pet,training,goals,rounds);app.Say(Pet,Dialogue.Activity(Pet,training));});CancelActivity();return;}
+                        if(rounds>=3) {app.Change(()=>{app.Engine.FinishActivity(Pet,training);app.Say(Pet,Dialogue.Activity(Pet,training));});CancelActivity();return;}
                         ResetBall();
                     }
                 }else {CancelActivity();return;}

@@ -18,7 +18,7 @@ namespace GuMaGoChi {
             pets=new ListBox {Left=12,Top=16,Width=235,Height=210,Font=new Font("맑은 고딕",10)};pets.SelectedIndexChanged+=(s,e)=>RefreshDetail();home.Controls.Add(pets);
             actions=new Button {Text="선택한 고구마의 행동 메뉴 ▾",Left=12,Top=235,Width=235,Height=36};actions.Click+=(s,e)=>{Pet p=Selected();if(p!=null)app.MenuFor(p).Show(actions,new Point(0,actions.Height));};home.Controls.Add(actions);
             adopt=new Button {Text="새 아기 입양",Left=12,Top=280,Width=235,Height=36};adopt.Click+=(s,e)=>app.Adopt();home.Controls.Add(adopt);
-            detail=new Label {Left=12,Top=331,Width=235,Height=180,ForeColor=Art.Ink};home.Controls.Add(detail);
+            detail=new Label {Left=12,Top=325,Width=235,Height=210,ForeColor=Art.Ink};home.Controls.Add(detail);
             habitat=new Habitat(app) {Left=260,Top=16,Width=672,Height=340,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};home.Controls.Add(habitat);home.Resize+=(s,e)=>{habitat.Width=Math.Max(200,home.ClientSize.Width-habitat.Left-20);};
             var help=new Label {Left=274,Top=373,Width=640,Height=70,ForeColor=Art.Ink,Text="고구마 우클릭: 먹이·치료·수면·외출\n배설물 클릭: 직접 청소 / 흙더미 클릭: 성장 공개\n목록에서 비활성 개체도 선택할 수 있어요. 수치는 낮을수록 양호해요."};home.Controls.Add(help);
             var shop=new TabPage("씨앗 상점 · 공용 가방") {BackColor=Art.Cream};tabs.TabPages.Add(shop);
@@ -26,11 +26,12 @@ namespace GuMaGoChi {
             AddButton(shop,"아침 이슬 구매 · 씨앗 8개\n배고픔 −30 / 1개",30,140,260,80,()=>app.Change(()=>ShowMessage(app.Engine.Buy(false)?"아침 이슬 1개를 가방에 넣었어요.":"씨앗이 부족해요.")));
             AddButton(shop,"상위 치료 구매 · 씨앗 12개\n병세 −30 / 1개",320,140,260,80,()=>app.Change(()=>ShowMessage(app.Engine.Buy(true)?"상위 치료 1개를 가방에 넣었어요.":"씨앗이 부족해요.")));
             AddButton(shop,"새 아기 입양 · 씨앗 100개",610,140,290,80,()=>app.Adopt());
-            shop.Controls.Add(new Label {Left=30,Top=255,Width=860,Height=115,Text="무료 수돗물과 기본 치료는 개체 행동 메뉴에서 사용해요.\n먹이는 개체별 5분, 치료는 10분의 공통 쿨타임이 있어요.\n가방 아이템은 모든 고구마가 공유하지만, 효과는 사용한 한 마리에게만 적용돼요.\n반복 놀이·훈련은 가능하며, 성장 기록과 씨앗 보상은 20분 간격으로 쌓여요."});
+            AddButton(shop,"성장 영양제 구매 · 씨앗 30개\n성장 경험치 +30 EXP / 1개",30,235,260,70,()=>app.Change(()=>ShowMessage(app.Engine.BuyNutrient()?"성장 영양제 1개를 가방에 넣었어요.":"씨앗이 부족해요.")));
+            shop.Controls.Add(new Label {Left=30,Top=330,Width=860,Height=160,Text="무료 수돗물과 기본 치료는 개체 행동 메뉴에서 사용해요.\n먹이는 개체별 5분, 치료는 10분의 공통 쿨타임이 있어요.\n가방 아이템은 모든 고구마가 공유하지만, 효과는 사용한 한 마리에게만 적용돼요.\n반복 놀이·훈련은 가능하며, 완료 보상은 3분 간격, 골인마다 즉시 씨앗 +1을 받아요.\n성장 영양제는 아기 행동 메뉴에서 먹이며, 나이와 수명에는 영향을 주지 않아요."});
             var collection=new TabPage("성체 도감") {BackColor=Art.Cream};tabs.TabPages.Add(collection);dex=Flow(collection);
             var memories=new TabPage("추억 앨범") {BackColor=Art.Cream};tabs.TabPages.Add(memories);album=Flow(memories);
             var settings=new TabPage("저장 · 사용 안내") {BackColor=Art.Cream};tabs.TabPages.Add(settings);
-            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 8시간이에요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n3단계 성장과 집 꾸미기는 추후 업데이트 예정이에요.\n아기 이동·식사·발사·성장 준비 모션을 제공해요. 수면은 눈을 감은 전용 모션이에요."});
+            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 180 EXP(자동 누적 3시간)예요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n3단계 성장과 집 꾸미기는 추후 업데이트 예정이에요.\n아기 이동·식사·발사·성장 준비 모션을 제공해요. 수면은 눈을 감은 전용 모션이에요."});
             AddButton(settings,"저장 데이터 내보내기",28,260,230,42,Export);
             AddButton(settings,"저장 데이터 가져오기",278,260,230,42,Import);
             AddButton(settings,"모두 잠시 쉬기 / 다시 시작",528,260,280,42,()=>{app.ManualPause=!app.ManualPause;app.SyncWindows();if(app.Activity!=null)app.Activity.SetPaused(app.Paused);RefreshData();});
@@ -48,7 +49,7 @@ namespace GuMaGoChi {
         public void AnimateMeal(Pet p) {habitat.AnimateMeal(p);}
         void RefreshDetail() {
             Pet p=Selected();if(habitat!=null){habitat.Preview=p;habitat.Invalidate();}actions.Enabled=p!=null;if(p==null){detail.Text="함께할 고구마를 입양해 보세요.";return;}
-            detail.Text=p.Name+" · "+p.Kind+"\n"+p.Personality+" / "+p.Skill+"\n나이 "+(p.Age/3600).ToString("0.00")+" / 100시간\n배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+"\n피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)+"\n"+(p.SpeciesId<0?Engine.Hint(p):"추가 성장: 추후 업데이트")+"\n교감 "+p.Affection+" / 놀이 "+p.Play+" / 훈련 "+p.Training;
+            detail.Text=p.Name+" · "+p.Kind+"\n"+p.Personality+" / "+p.Skill+"\n나이 "+(p.Age/3600).ToString("0.00")+" / 100시간\n성장 경험치 "+p.GrowthExp.ToString("0.0")+" / 180 EXP\n배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+"\n피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)+"\n"+(p.SpeciesId<0?Engine.Hint(p):"추가 성장: 추후 업데이트")+"\n교감 "+p.Affection+" / 놀이 "+p.Play+" / 훈련 "+p.Training;
         }
         int dexCount=-1,deadCount=-1;
         public void RefreshData() {
@@ -58,7 +59,7 @@ namespace GuMaGoChi {
             if(selected!=null){for(int i=0;i<pets.Items.Count;i++)if(((PetEntry)pets.Items[i]).Pet.Id==selected){pets.SelectedIndex=i;break;}}
             if(pets.SelectedIndex<0&&pets.Items.Count>0)pets.SelectedIndex=0;RefreshDetail();habitat.Invalidate();
             bool rescue=living.Length==0&&app.Engine.Data.Seeds<Engine.AdoptPrice;adopt.Text=rescue?"무료 아기 입양 · 다시 시작":"새 아기 입양 · 씨앗 100개";
-            bag.Text="씨앗 "+app.Engine.Data.Seeds+"개\n공용 가방: 아침 이슬 "+app.Engine.Data.Dew+"개 / 상위 치료 "+app.Engine.Data.Medicine+"개";
+            bag.Text="씨앗 "+app.Engine.Data.Seeds+"개\n공용 가방: 아침 이슬 "+app.Engine.Data.Dew+"개 / 상위 치료 "+app.Engine.Data.Medicine+"개\n성장 영양제 "+app.Engine.Data.Nutrients+"개";
             if(dexCount!=app.Engine.Data.Discovered.Count) {
                 foreach(Control c in dex.Controls.Cast<Control>().ToArray())c.Dispose();dex.Controls.Clear();
                 foreach(Species s in Catalog.All) {bool found=app.Engine.Data.Discovered.Contains(s.Id);dex.Controls.Add(new CollectionCard(found?s.Id:-2,found?s.Name:"???",found?s.Personality+"\n특기: "+s.Skill+"\n추가 성장: 추후 업데이트":"아직 만나지 못했어요.") {Width=205,Height=235,Margin=new Padding(7)});}dexCount=app.Engine.Data.Discovered.Count;

@@ -35,7 +35,7 @@ namespace GuMaGoChi {
         public string Id=Guid.NewGuid().ToString(), Name="고구마", LastWords="", DiedAt="", Cause="";
         public int SpeciesId=-1, PendingSpecies=-1, Waste=0, X=0, Y=0;
         public bool Active=true, Home=false, Sleeping=false, GrowthReady=false, Dead=false;
-        public double Age=0, Hunger=15, Dirt=5, Fatigue=5, Illness=0;
+        public double Age=0, GrowthExp=0, Hunger=15, Dirt=5, Fatigue=5, Illness=0;
         public double FoodCooldown=0, MedicineCooldown=0, PetCooldown=0, PlayCooldown=0, TrainCooldown=0;
         public double WasteClock=0, SleepClock=0, TalkClock=0;
         public int Affection=0, Play=0, Training=0, Shots=0, Goals=0, Care=0;
@@ -46,16 +46,16 @@ namespace GuMaGoChi {
         public string Personality { get { return SpeciesId<0 ? "호기심 많은 아기" : Catalog.All[SpeciesId].Personality; } }
     }
     public class SaveData {
-        public int Version=1, Seeds=0, Dew=0, Medicine=0;
+        public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0;
         public List<Pet> Pets=new List<Pet>();
         public List<int> Discovered=new List<int>();
         public bool AutoStart=false;
     }
     public class Engine {
-        public const double AdultAge=8*3600, Life=100*3600;
-        public const int AdoptPrice=100, DewPrice=8, MedicinePrice=12;
+        public const double AdultAge=3*3600, AdultExp=180, Life=100*3600, ActivityCooldown=180;
+        public const int AdoptPrice=100, DewPrice=8, MedicinePrice=12, NutrientPrice=30;
         public SaveData Data; public Random Random;
-        public Engine(SaveData data, int? seed=null) { Data=data; Random=seed.HasValue ? new Random(seed.Value) : new Random(); }
+        public Engine(SaveData data, int? seed=null) { Data=data; Random=seed.HasValue ? new Random(seed.Value) : new Random();foreach(Pet p in Data.Pets)PrepareGrowth(p); }
         public static double Clamp(double value) { return Math.Max(0,Math.Min(100,value)); }
         public Pet Adopt(string name, bool first=false) {
             bool rescue=!Data.Pets.Any(p=>!p.Dead) && Data.Seeds<AdoptPrice;
@@ -67,9 +67,10 @@ namespace GuMaGoChi {
             foreach(Pet p in Data.Pets) {
                 if(!p.Active || p.Dead || p.GrowthReady) continue;
                 // Stop exactly at the first age boundary; ready pets never accumulate hidden time.
-                double boundary=p.SpeciesId<0 ? AdultAge : Life;
-                double dt=Math.Min(seconds,Math.Max(0,boundary-p.Age));
+                double remaining=p.SpeciesId<0?Math.Max(0,(AdultExp-p.GrowthExp)*60):Double.MaxValue;
+                double dt=Math.Min(seconds,Math.Min(remaining,Math.Max(0,Life-p.Age)));
                 p.Age+=dt;
+                if(p.SpeciesId<0)p.GrowthExp=Math.Min(AdultExp,p.GrowthExp+dt/60);
                 p.FoodCooldown=Math.Max(0,p.FoodCooldown-dt); p.MedicineCooldown=Math.Max(0,p.MedicineCooldown-dt);
                 p.PetCooldown=Math.Max(0,p.PetCooldown-dt);p.PlayCooldown=Math.Max(0,p.PlayCooldown-dt);p.TrainCooldown=Math.Max(0,p.TrainCooldown-dt);
                 p.TalkClock-=dt;
@@ -84,9 +85,13 @@ namespace GuMaGoChi {
                 if(p.Sleeping) {p.SleepClock+=dt;if(p.Fatigue<=5 && p.SleepClock>=600) {p.Sleeping=false;p.SleepClock=0;}}
                 if(p.Illness>=100) { Kill(p,"질병"); continue; }
                 if(p.Age>=Life) { Kill(p,"자연사");continue; }
-                if(p.SpeciesId<0 && p.Age>=AdultAge) { p.PendingSpecies=ChooseSpecies(p);p.GrowthReady=true;p.Sleeping=false; }
+                PrepareGrowth(p);
             }
         }
+        void PrepareGrowth(Pet p) {if(!p.Dead&&p.SpeciesId<0&&!p.GrowthReady&&p.GrowthExp>=AdultExp-1e-9){p.GrowthExp=AdultExp;p.PendingSpecies=ChooseSpecies(p);p.GrowthReady=true;p.Sleeping=false;}}
+        public bool CanNourish(Pet p) {return CanCare(p)&&p.SpeciesId<0&&p.GrowthExp<AdultExp;}
+        public bool BuyNutrient() {if(Data.Seeds<NutrientPrice)return false;Data.Seeds-=NutrientPrice;Data.Nutrients++;return true;}
+        public bool Nourish(Pet p) {if(!CanNourish(p)||Data.Nutrients<=0)return false;Data.Nutrients--;p.GrowthExp=Math.Min(AdultExp,p.GrowthExp+30);PrepareGrowth(p);return true;}
         public List<Species> Candidates(Pet p) { return Catalog.All.Where(s=>!(p.Training>=12 && s.Id==6)).ToList(); }
         public int ChooseSpecies(Pet p) {
             var candidates=Candidates(p); var weights=candidates.Select(s=> {
@@ -125,19 +130,21 @@ namespace GuMaGoChi {
         }
         public string Stroke(Pet p) {
             if(!CanCare(p))return "지금은 쉬고 있어요.";
-            if(p.PetCooldown<=0) {p.Affection++;p.PetCooldown=900;Data.Seeds+=2;return Dialogue.Get(p,2);}
-            return Dialogue.Get(p,2);
+            if(p.PetCooldown>0)return "쓰다듬기까지 "+TimeText(p.PetCooldown)+" 남았어요.";
+            p.Affection++;p.PetCooldown=180;p.Fatigue=Clamp(p.Fatigue+1);Data.Seeds+=2;return Dialogue.Get(p,2);
         }
         public bool Clean(Pet p) {
             if(!p.Active || p.Dead || p.GrowthReady || p.Waste<=0)return false;
             p.Waste--;p.Dirt=Clamp(p.Dirt-20);p.Care++;Data.Seeds+=8;return true;
         }
-        public void FinishActivity(Pet p, bool train, int goals, int shots) {
+        public void FinishActivity(Pet p, bool train) {
             if(!CanCare(p))return;
-            if(train) {p.Shots+=shots;p.Goals+=goals;if(p.TrainCooldown<=0) {p.Training++;p.Affection++;Data.Seeds+=8+Math.Min(3,goals);p.TrainCooldown=1200;}}
-            else if(p.PlayCooldown<=0) {p.Play++;p.Affection++;Data.Seeds+=8;p.PlayCooldown=1200;}
+            if(train) {if(p.TrainCooldown<=0) {p.Training++;p.Affection++;Data.Seeds+=8;p.TrainCooldown=ActivityCooldown;}}
+            else if(p.PlayCooldown<=0) {p.Play++;p.Affection++;Data.Seeds+=8;p.PlayCooldown=ActivityCooldown;}
             p.Fatigue=Clamp(p.Fatigue+3);
         }
+        public bool ScoreGoal(Pet p) {if(!CanCare(p))return false;p.Goals++;Data.Seeds++;return true;}
+        public void RecordShot(Pet p) {if(CanCare(p))p.Shots++;}
         public bool Buy(bool medicine) {int price=medicine?MedicinePrice:DewPrice;if(Data.Seeds<price)return false;Data.Seeds-=price;if(medicine)Data.Medicine++;else Data.Dew++;return true;}
         public void Kill(Pet p,string cause) {p.Dead=true;p.Active=false;p.Sleeping=false;p.GrowthReady=false;p.Cause=cause;p.DiedAt=DateTime.Now.ToString("yyyy-MM-dd HH:mm");}
         public static string TimeText(double seconds) {return TimeSpan.FromSeconds(Math.Max(0,seconds)).ToString(@"hh\:mm\:ss");}
@@ -150,14 +157,16 @@ namespace GuMaGoChi {
         public static string Encode(SaveData data) {return Serializer().Serialize(data);}
         public static SaveData Decode(string json) {
             SaveData d=Serializer().Deserialize<SaveData>(json);
-            if(d==null || d.Version!=1 || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
+            if(d==null || (d.Version!=1&&d.Version!=2) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
             var ids=new HashSet<string>();
             foreach(Pet p in d.Pets) {
                 if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>=Catalog.All.Length || p.PendingSpecies< -1 || p.PendingSpecies>=Catalog.All.Length || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");
                 if(new[]{p.Hunger,p.Dirt,p.Fatigue,p.Illness}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)||v<0||v>100) || new[]{p.FoodCooldown,p.MedicineCooldown,p.PetCooldown,p.PlayCooldown,p.TrainCooldown,p.WasteClock,p.SleepClock,p.TalkClock}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)) || p.Waste<0 || p.Waste>6 || (p.GrowthReady && p.PendingSpecies<0))throw new InvalidDataException("상태 정보가 올바르지 않습니다.");
                 if(p.Friends==null)p.Friends=new Dictionary<string,int>();if(p.GrowthHistory==null)p.GrowthHistory=new List<int>();
+                if(d.Version==1) {p.GrowthExp=p.SpeciesId>=0||p.GrowthReady?Engine.AdultExp:Math.Min(Engine.AdultExp,p.Age/60);p.PetCooldown=Math.Min(180,Math.Max(0,p.PetCooldown));p.PlayCooldown=Math.Min(180,Math.Max(0,p.PlayCooldown));p.TrainCooldown=Math.Min(180,Math.Max(0,p.TrainCooldown));}
+                if(Double.IsNaN(p.GrowthExp)||Double.IsInfinity(p.GrowthExp)||p.GrowthExp<0||p.GrowthExp>Engine.AdultExp)throw new InvalidDataException("성장 경험치가 올바르지 않습니다.");
             }
-            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");return d;
+            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");d.Version=2;return d;
         }
         public static SaveData Load(out string warning) {
             warning=null;if(!File.Exists(PathName))return new SaveData();

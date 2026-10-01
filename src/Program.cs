@@ -32,14 +32,14 @@ namespace GuMaGoChi {
             p.Illness=50;engine.Treat(p,false);Check(p.Illness==50,"Medicine cooldown enforced");
             p.Active=false;double before=p.Age;engine.Tick(60);Check(p.Age==before&&p.MedicineCooldown==600,"Inactive freezes time and cooldowns");
             p.Active=true;p.Illness=0;p.Sleeping=true;p.Fatigue=80;engine.Tick(60);Check(p.Age==60&&p.Fatigue<80,"Sleep contributes age and recovers fatigue");
-            p.Sleeping=false;p.Age=Engine.AdultAge-1;engine.Tick(5);Check(p.Age==Engine.AdultAge&&p.GrowthReady&&p.PendingSpecies>=0,"Growth exact boundary and fixed pending result");
+            p.Sleeping=false;p.Age=Engine.AdultAge-1;p.GrowthExp=Engine.AdultExp-1.0/60;engine.Tick(5);Check(p.Age==Engine.AdultAge&&p.GrowthReady&&p.PendingSpecies>=0,"Growth exact boundary and fixed pending result");
             int pending=p.PendingSpecies;double hunger=p.Hunger;engine.Tick(1000);Check(p.Age==Engine.AdultAge&&p.Hunger==hunger&&p.PendingSpecies==pending,"Growth waiting freezes states and result");
             var decoded=Storage.Decode(Storage.Encode(data));Check(decoded.Pets[0].PendingSpecies==pending&&decoded.Pets[0].GrowthReady,"Pending growth survives serialization");
             engine.Reveal(p);Check(p.SpeciesId==pending&&!p.GrowthReady&&data.Discovered.Contains(pending),"Reveal registers discovery");
             p.Training=12;Check(!engine.Candidates(p).Any(s=>s.Id==6),"High training excludes lazy adult");
             Check(engine.Candidates(p).Count>0,"Candidates remain available");
-            p.Training=0;p.TrainCooldown=0;int seeds=data.Seeds;engine.FinishActivity(p,true,2,3);Check(p.Training==1&&data.Seeds==seeds+10,"Completed training rewards once");
-            engine.FinishActivity(p,true,3,3);Check(p.Training==1&&data.Seeds==seeds+10,"Repeated training cannot farm growth rewards");
+            p.Training=0;p.TrainCooldown=0;int seeds=data.Seeds;engine.FinishActivity(p,true);Check(p.Training==1&&data.Seeds==seeds+8,"Completed training rewards once");
+            engine.FinishActivity(p,true);Check(p.Training==1&&data.Seeds==seeds+8,"Repeated training cannot farm growth rewards");
             p.Waste=2;p.Dirt=70;engine.Clean(p);Check(p.Waste==1&&p.Dirt==50,"Cleaning is per waste");
             p.Age=Engine.Life-1;p.Illness=0;p.Hunger=0;p.Dirt=0;p.Fatigue=0;engine.Tick(5);Check(p.Dead&&p.Age==Engine.Life&&p.Cause=="자연사","Natural death fixed at 100 hours");
             data.Seeds=0;var rescue=engine.Adopt("새싹");Check(rescue!=null,"Rescue when all dead and no funds");
@@ -49,10 +49,10 @@ namespace GuMaGoChi {
             // Basic meals every two hours plus direct cleaning fund an adoption by first growth.
             var economy=new SaveData();var basic=new Engine(economy,5);var baby=basic.Adopt("기본돌봄",true);
             for(int hour=0;hour<8;hour++){for(int minute=0;minute<60;minute++){basic.Tick(60);while(baby.Waste>0&&!baby.GrowthReady)basic.Clean(baby);}if(hour%2==1&&!baby.GrowthReady)basic.Feed(baby,false);}
-            basic.Reveal(baby);Check(economy.Seeds>=Engine.AdoptPrice,"Basic care funds another baby around eight hours");
+            basic.Reveal(baby);Check(baby.SpeciesId>=0&&baby.Age==Engine.AdultAge,"Basic care reaches growth after three hours");
             var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==Catalog.All.Length,"Low interaction retains basic candidates");
             untouchedPet.Training=100;for(int i=0;i<1000;i++)if(untouchedEngine.ChooseSpecies(untouchedPet)==6)throw new Exception("Excluded species selected");Check(true,"Excluded species never selected in repeated draws");
-            bool rejected=false;try{Storage.Decode("{\"Version\":2}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
+            bool rejected=false;try{Storage.Decode("{\"Version\":3}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
             var disease=new SaveData();var sickEngine=new Engine(disease);var sick=sickEngine.Adopt("아픈고구마",true);sick.Illness=99.99;sick.Hunger=100;sickEngine.Tick(60);Check(sick.Dead&&sick.Cause=="질병","Disease can kill before lifespan");
             var speech=new System.Collections.Generic.HashSet<string>();
             foreach(var species in Catalog.All) {
@@ -63,6 +63,31 @@ namespace GuMaGoChi {
                 speaker.Illness=30;Check(Dialogue.Need(speaker).Contains("치료"),"Illness remains visible in dialogue: "+species.Name);
             }
             Check(Dialogue.Get(new Pet {SpeciesId=30},0)=="배가 든든하구마~","Spy uses authored speech without numerical suffix");
+            var revised=new SaveData {Seeds=90};var revisedEngine=new Engine(revised,5);var young=revisedEngine.Adopt("경험치",true);
+            revisedEngine.Tick(30);Check(young.Age==30&&young.GrowthExp==.5,"Fractional experience accumulates independently");
+            young.Active=false;revisedEngine.Tick(120);Check(young.Age==30&&young.GrowthExp==.5,"Inactive freezes experience and age");young.Active=true;
+            Check(revisedEngine.BuyNutrient()&&revised.Seeds==60&&revised.Nutrients==1&&young.GrowthExp==.5,"Nutrient purchase does not apply experience");
+            Check(revisedEngine.Nourish(young)&&young.Age==30&&young.GrowthExp==30.5&&revised.Nutrients==0&&young.Affection==0,"Nutrient adds only experience and consumes inventory");
+            revised.Nutrients=1;young.GrowthExp=175;Check(revisedEngine.Nourish(young)&&young.GrowthExp==180&&young.GrowthReady&&young.Age==30,"Nutrient overflow caps experience without aging");
+            revised.Nutrients=1;Check(!revisedEngine.Nourish(young)&&revised.Nutrients==1,"Ready baby cannot consume nutrients");
+            revisedEngine.Tick(60);Check(young.Age==30,"Growth waiting freezes age after accelerated growth");revisedEngine.Reveal(young);
+            Check(!revisedEngine.Nourish(young)&&revised.Nutrients==1,"Adult cannot consume nutrients");revisedEngine.Tick(60);Check(young.Age==90&&young.GrowthExp==180,"Adult ages while experience stops");
+            young.PetCooldown=0;young.Fatigue=99.5;double affection=young.Affection;int oldSeeds=revised.Seeds;revisedEngine.Stroke(young);
+            Check(young.Fatigue==100&&young.Affection==affection+1&&young.PetCooldown==180&&revised.Seeds==oldSeeds+2,"Stroke increases fatigue and starts three minute cooldown");
+            revisedEngine.Stroke(young);Check(young.Affection==affection+1&&revised.Seeds==oldSeeds+2,"Stroke during cooldown has no effects");
+            young.Fatigue=0;revisedEngine.Tick(180);revisedEngine.Stroke(young);Check(young.Affection==affection+2,"Stroke becomes available after three minutes");
+            young.TrainCooldown=180;oldSeeds=revised.Seeds;int oldGoals=young.Goals;Check(revisedEngine.ScoreGoal(young)&&revised.Seeds==oldSeeds+1&&young.Goals==oldGoals+1,"Goal pays immediately during cooldown");
+            revisedEngine.FinishActivity(young,true);Check(revised.Seeds==oldSeeds+1&&young.Training==0,"Completion cannot pay a goal twice");
+            young.TrainCooldown=0;revisedEngine.FinishActivity(young,true);Check(revised.Seeds==oldSeeds+9&&young.Training==1&&young.TrainCooldown==180,"Training completion pays eight seeds with three minute cooldown");
+            young.PlayCooldown=0;revisedEngine.FinishActivity(young,false);Check(young.PlayCooldown==180,"Play cooldown is three minutes");
+            young.Sleeping=true;oldSeeds=revised.Seeds;Check(!revisedEngine.ScoreGoal(young)&&revised.Seeds==oldSeeds,"Unavailable pet cannot score");young.Sleeping=false;
+            var legacy=new SaveData {Version=1};legacy.Pets.Add(new Pet {Age=5400,PetCooldown=800,TrainCooldown=1200});legacy.Pets.Add(new Pet {Age=20000});legacy.Pets.Add(new Pet {Age=28800,GrowthReady=true,PendingSpecies=23});legacy.Pets.Add(new Pet {Age=40000,SpeciesId=30});
+            var migrated=Storage.Decode(Storage.Encode(legacy));var migratedEngine=new Engine(migrated,4);
+            Check(migrated.Version==2&&migrated.Pets[0].Age==5400&&migrated.Pets[0].GrowthExp==90&&migrated.Pets[0].PetCooldown==180,"Legacy baby progress migrates preserving age");
+            Check(migrated.Pets[1].GrowthReady&&migrated.Pets[1].Age==20000&&migrated.Pets[1].PendingSpecies>=0,"Older legacy baby becomes ready without age reset");
+            Check(migrated.Pets[2].PendingSpecies==23&&migrated.Pets[3].SpeciesId==30&&migrated.Pets[3].Age==40000,"Legacy growth result and adult retained");
+            revised.Nutrients=2;var roundtrip=Storage.Decode(Storage.Encode(revised));Check(roundtrip.Nutrients==2&&roundtrip.Pets[0].GrowthExp==180,"New experience and inventory survive save roundtrip");
+            bool invalidExp=false;young.GrowthExp=-1;try{Storage.Decode(Storage.Encode(revised));}catch{invalidExp=true;}Check(invalidExp,"Invalid experience rejected");
             return "PASS: "+count+" checks\r\nGrowth, lifespan, inventory, cooldowns, pause, sleep, filtering, rewards, adoption, save and character dialogue verified.\r\n";
         }
     }
@@ -81,6 +106,10 @@ namespace GuMaGoChi {
                 Check(!closingMenu.IsDisposed,"Menu survives Closed while item-click dispatch is pending");
                 Find(closingMenu,"쓰다듬기").PerformClick();Check(pet.Affection==1,"Item action still runs after menu closes");
                 var replacementMenu=app.MenuFor(pet);Check(closingMenu.IsDisposed&&!replacementMenu.IsDisposed,"Previous menu released on next opening");
+                Check(!Find(replacementMenu,"쓰다듬기").Enabled&&Find(replacementMenu,"쓰다듬기").Text.Contains("00:03:00"),"Stroke menu disabled with remaining cooldown");
+                data.Nutrients=1;double nutrientAge=pet.Age;using(var nutrientMenu=app.MenuFor(pet))Find(nutrientMenu,"성장 영양제").PerformClick();
+                Check(pet.GrowthExp>=30&&pet.Age==nutrientAge&&data.Nutrients==0,"Nutrient menu consumes item without aging");
+                using(var emptyMenu=app.MenuFor(pet))Check(!Find(emptyMenu,"성장 영양제").Enabled,"Nutrient menu disabled without inventory");
                 double hungerBefore=pet.Hunger;
                 using(var menu=app.MenuFor(pet)){var food=Find(menu,"먹이 주기");((ToolStripMenuItem)food.DropDownItems[0]).PerformClick();}Check(Math.Abs(pet.Hunger-(hungerBefore-10))<.0001&&pet.FoodCooldown==300,"Context-menu feeding");
                 using(var menu=app.MenuFor(pet))Find(menu,"집에서 재우기").PerformClick();Check(pet.Home&&pet.Sleeping&&!w.Visible&&app.Home.Visible,"Sleep opens home and hides desktop pet");
@@ -94,7 +123,7 @@ namespace GuMaGoChi {
                 w.Top=Screen.FromControl(w).WorkingArea.Top+180;pet.Y=w.Top;app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");
                 var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+164))<1,"Ball starts at relocated pet height");
                 app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
-                pet.Age=Engine.AdultAge-1;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
+                pet.Age=Engine.AdultAge-1;pet.GrowthExp=Engine.AdultExp-1.0/60;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 Check((string)typeof(PetWindow).GetField("motion",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(w)=="stand","Growth reveal immediately resets burrow motion");
                 using(var sheet=new System.Drawing.Bitmap(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby","burrow-sheet.png")))using(var cell=sheet.Clone(new System.Drawing.Rectangle(768,768,256,256),System.Drawing.Imaging.PixelFormat.Format32bppArgb))using(var clean=Sprites.Cutout(cell,true))Check(clean.Height<128,"Final baby burrow frame excludes previous-row mound fragment");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
@@ -112,7 +141,7 @@ namespace GuMaGoChi {
                     }
                 }
                 var spy=new Pet {SpeciesId=30,Name="간첩"};var spySave=new SaveData();spySave.Pets.Add(spy);spySave.Discovered.Add(30);Check(Storage.Decode(Storage.Encode(spySave)).Pets[0].SpeciesId==30,"Spy species save roundtrip");
-                return "PASS: 226 UI checks\r\nGrowth, menus, motion and all 31 adult renders including spy save verified.\r\n";
+                return "PASS: 229 UI checks\r\nGrowth, nutrient and cooldown menus, motion and all 31 adult renders including spy save verified.\r\n";
             }finally {app.Exit();}
         }
     }
