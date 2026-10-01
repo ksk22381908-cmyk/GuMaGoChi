@@ -76,6 +76,8 @@ namespace GuMaGoChi {
                 using(var menu=app.MenuFor(pet))Find(menu,"집에서 재우기").PerformClick();Check(pet.Home&&pet.Sleeping&&!w.Visible&&app.Home.Visible,"Sleep opens home and hides desktop pet");
                 using(var menu=app.MenuFor(pet))Find(menu,"깨우기").PerformClick();Check(!pet.Sleeping&&pet.Home,"Wake stays at home");
                 using(var menu=app.MenuFor(pet))Find(menu,"외출하기").PerformClick();Check(!pet.Home&&w.Visible,"Outing restores desktop pet");
+                app.Home.RefreshData();var petList=app.Home.Controls.OfType<TabControl>().Single().TabPages[0].Controls.OfType<ListBox>().Single();Check(petList.GetItemText(petList.Items[0]).Contains(pet.Name),"Pet list displays name without private-type binding");
+                var habitat=app.Home.Controls.OfType<TabControl>().Single().TabPages[0].Controls.OfType<Habitat>().Single();Check(habitat.Preview==pet&&!pet.Home,"Outside selected pet has home preview without moving residence");
                 using(var menu=app.MenuFor(pet))Find(menu,"비활성화").PerformClick();Check(!pet.Active&&!w.Visible,"Deactivation hides pet");
                 using(var menu=app.MenuFor(pet))Find(menu,"활성화하기").PerformClick();Check(pet.Active&&w.Visible,"Activation restores pet");
                 app.ManualPause=true;app.SyncWindows();Check(!w.Visible,"Global pause hides pet");app.ManualPause=false;app.SyncWindows();
@@ -95,7 +97,7 @@ namespace GuMaGoChi {
                         bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
                     }
                 }
-                return "PASS: 210 UI checks\r\nWindows, direct drag capture, autonomous walking, menus, activities, home, baby clips and all 30 adult action renders verified.\r\n";
+                return "PASS: 212 UI checks\r\nWindows, pet list names, selected preview, direct drag capture, autonomous walking, menus, activities, home, baby clips and all 30 adult action renders verified.\r\n";
             }finally {app.Exit();}
         }
     }

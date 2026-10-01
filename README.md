@@ -1,6 +1,6 @@
 # GuMaGoChi
 
-윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.4: 첫 플레이 가능 버전**입니다.
+윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.5: 첫 플레이 가능 버전**입니다.
 
 ## 실행
 
@@ -34,8 +34,8 @@
 
 ```powershell
 ./build.ps1     # bin/GuMaGoChi.exe
-./test.ps1      # 모델 28개 + UI 210개 검증과 화면 렌더링
-./package.ps1   # release/GuMaGoChi-0.1.4-windows.zip
+./test.ps1      # 모델 28개 + UI 212개 검증과 화면 렌더링
+./package.ps1   # release/GuMaGoChi-0.1.5-windows.zip
 ```
 
 테스트와 렌더링은 고정 테스트 개체를 사용하며 실제 육성 저장 파일을 변경하지 않습니다. `bin/home-preview.png`와 `bin/sprites-preview.png`로 렌더링 결과를 확인할 수 있습니다.
