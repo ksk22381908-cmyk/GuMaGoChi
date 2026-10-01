@@ -1,0 +1,40 @@
+{
+  "model": "gpt_image_2_5",
+  "reference_job": "a93b6ee7-64c3-4cbe-b256-17639c0ff83e",
+  "columns": 4,
+  "rows": 4,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "frameCount": 16,
+  "status": "draft-needs-frame-alignment-and-halo-cleanup",
+  "animations": [
+    {
+      "name": "walk",
+      "file": "walk-sheet.png",
+      "jobId": "84317b78-eb4d-4e33-a9a1-d313e933bf93",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_034240_84317b78-eb4d-4e33-a9a1-d313e933bf93.png"
+    },
+    {
+      "name": "eat",
+      "file": "eat-sheet.png",
+      "jobId": "e9c12dc1-cd7c-46e5-acba-d2aec772edbc",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_034240_e9c12dc1-cd7c-46e5-acba-d2aec772edbc.png"
+    },
+    {
+      "name": "throw",
+      "file": "throw-sheet.png",
+      "jobId": "4fcee5f1-5d29-458e-beee-d37ecfe2ebe0",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_034240_4fcee5f1-5d29-458e-beee-d37ecfe2ebe0.png"
+    },
+    {
+      "name": "burrow",
+      "file": "burrow-sheet.png",
+      "jobId": "1fd96acb-d3ef-40f2-9a94-4bf06f24b852",
+      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_034240_1fd96acb-d3ef-40f2-9a94-4bf06f24b852.png"
+    }
+  ],
+  "pending": [
+    "idle",
+    "sleep"
+  ]
+}

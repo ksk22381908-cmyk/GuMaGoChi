@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>아기 고구마 모션 미리보기</title>
+<style>
+body{margin:0;padding:32px;background:#fff6dd;color:#413037;font:16px 'Malgun Gothic',sans-serif}h1{font-size:26px}p{line-height:1.7;max-width:950px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;max-width:1200px}.card{background:#fffaf0;border:1px solid #d5bea1;border-radius:16px;padding:20px}canvas{width:100%;max-width:256px;image-rendering:pixelated;background:repeating-conic-gradient(#eee 0% 25%,#fff 0% 50%) 0/24px 24px;border-radius:8px}button,select,input{font:inherit;padding:8px;margin:5px}label{display:inline-block}small{display:block;margin-top:8px;color:#78645b}.note{background:#f0e4ca;padding:14px;border-radius:10px}
+</style>
+<h1>흙 묻은 아기 고구마 · 모션 초안</h1>
+<p>4가지 동작을 16프레임으로 확인하세요. 아직 게임에 적용되지 않았으며, 반투명 잔광과 프레임별 기준선은 정리가 필요합니다.</p>
+<div><button id="pause">일시정지</button><label>속도 <select id="fps"><option>4</option><option selected>6</option><option>8</option><option>12</option></select> FPS</label><label>배경 <select id="bg"><option value="check">체커</option><option value="#fff6dd">밝은색</option><option value="#24362b">어두운색</option></select></label></div>
+<label>프레임 <input id="frame" type="range" min="0" max="15" value="0"><span id="number">1 / 16</span></label>
+<main id="cards"></main>
+<p class="note">대기·수면: 크레딧 부족으로 미생성. 공 던지기 시트에는 공이 없으며 게임에서 따로 표시합니다.</p>
+<script>
+const specs=[['walk','이동'],['eat','물 마시기'],['throw','공 던지기'],['burrow','땅속 들어가기']];let playing=true,frame=0,last=0;
+const sheets=specs.map(([key,title])=>{const card=document.createElement('section');card.className='card';const h=document.createElement('h2');h.textContent=title;const c=document.createElement('canvas');c.width=c.height=256;const info=document.createElement('small');info.textContent='4 × 4 / 256px 셀 / 16프레임';const link=document.createElement('a');link.textContent='원본 시트 보기';link.href=key+'-sheet.png';link.target='_blank';card.append(h,c,info,link);document.querySelector('#cards').append(card);const img=new Image();img.onload=draw;img.src=key+'-sheet.png';return{img,c,ctx:c.getContext('2d')};});
+function draw(){for(const s of sheets){s.ctx.clearRect(0,0,256,256);s.ctx.imageSmoothingEnabled=false;if(s.img.complete&&s.img.naturalWidth)s.ctx.drawImage(s.img,(frame%4)*256,Math.floor(frame/4)*256,256,256,0,0,256,256);}document.querySelector('#frame').value=frame;document.querySelector('#number').textContent=(frame+1)+' / 16';}
+document.querySelector('#pause').onclick=()=>{playing=!playing;document.querySelector('#pause').textContent=playing?'일시정지':'재생';};document.querySelector('#frame').oninput=e=>{playing=false;document.querySelector('#pause').textContent='재생';frame=Number(e.target.value);draw();};document.querySelector('#bg').onchange=e=>{for(const s of sheets)s.c.style.background=e.target.value==='check'?'':e.target.value;};
+function loop(t){if(playing&&t-last>=1000/Number(document.querySelector('#fps').value)){frame=(frame+1)%16;draw();last=t;}requestAnimationFrame(loop);}requestAnimationFrame(loop);
+</script></html>
