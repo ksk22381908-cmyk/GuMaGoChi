@@ -1,0 +1,399 @@
+{
+  "generator": "Higgsfield MCP / nano_banana_2",
+  "characters": [
+    {
+      "id": 0,
+      "name": "밤톨이",
+      "file": "characters/00.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 1,
+      "name": "꿀떡이",
+      "file": "characters/01.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 2,
+      "name": "자몽이",
+      "file": "characters/02.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 3,
+      "name": "군밤이",
+      "file": "characters/03.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 4,
+      "name": "새싹이",
+      "file": "characters/04.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 5,
+      "name": "딸기마",
+      "file": "characters/05.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 6,
+      "name": "구름이",
+      "file": "characters/06.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 7,
+      "name": "달콩이",
+      "file": "characters/07.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 8,
+      "name": "햇살이",
+      "file": "characters/08.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 9,
+      "name": "눈송이",
+      "file": "characters/09.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 10,
+      "name": "왕고마",
+      "file": "characters/10.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 11,
+      "name": "마법마",
+      "file": "characters/11.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 12,
+      "name": "해적마",
+      "file": "characters/12.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 13,
+      "name": "요리마",
+      "file": "characters/13.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 14,
+      "name": "화가마",
+      "file": "characters/14.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 15,
+      "name": "음표마",
+      "file": "characters/15.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 16,
+      "name": "책벌레마",
+      "file": "characters/16.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 17,
+      "name": "탐험마",
+      "file": "characters/17.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 18,
+      "name": "우주마",
+      "file": "characters/18.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 19,
+      "name": "별똥이",
+      "file": "characters/19.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 20,
+      "name": "꽃송이",
+      "file": "characters/20.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 21,
+      "name": "버섯마",
+      "file": "characters/21.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 22,
+      "name": "개굴마",
+      "file": "characters/22.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 23,
+      "name": "냥고마",
+      "file": "characters/23.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 24,
+      "name": "멍고마",
+      "file": "characters/24.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 25,
+      "name": "토끼마",
+      "file": "characters/25.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 26,
+      "name": "당근마",
+      "file": "characters/26.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 27,
+      "name": "민트마",
+      "file": "characters/27.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 28,
+      "name": "초코마",
+      "file": "characters/28.png",
+      "width": 384,
+      "height": 384
+    },
+    {
+      "id": 29,
+      "name": "무지개마",
+      "file": "characters/29.png",
+      "width": 384,
+      "height": 384
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": 0,
+      "name": "초록 사잇길",
+      "file": "backgrounds/00.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 1,
+      "name": "쌍둥이 연못",
+      "file": "backgrounds/01.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 2,
+      "name": "돌담 미로",
+      "file": "backgrounds/02.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 3,
+      "name": "억새 평원",
+      "file": "backgrounds/03.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 4,
+      "name": "메마른 밭",
+      "file": "backgrounds/04.png",
+      "width": 600,
+      "height": 598
+    },
+    {
+      "id": 5,
+      "name": "비밀 정원",
+      "file": "backgrounds/05.png",
+      "width": 600,
+      "height": 598
+    },
+    {
+      "id": 6,
+      "name": "물길 교차로",
+      "file": "backgrounds/06.png",
+      "width": 600,
+      "height": 598
+    },
+    {
+      "id": 7,
+      "name": "바위 협곡",
+      "file": "backgrounds/07.png",
+      "width": 600,
+      "height": 598
+    },
+    {
+      "id": 8,
+      "name": "나선 농원",
+      "file": "backgrounds/08.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 9,
+      "name": "네잎 분지",
+      "file": "backgrounds/09.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 10,
+      "name": "달빛 습지",
+      "file": "backgrounds/10.png",
+      "width": 600,
+      "height": 597
+    },
+    {
+      "id": 11,
+      "name": "왕의 요새",
+      "file": "backgrounds/11.png",
+      "width": 600,
+      "height": 597
+    }
+  ],
+  "effects": [
+    {
+      "id": "seed",
+      "file": "effects/seed-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "honey",
+      "file": "effects/honey-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "ribbon",
+      "file": "effects/ribbon-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "fire",
+      "file": "effects/fire-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "vine",
+      "file": "effects/vine-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "frost",
+      "file": "effects/frost-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "lightning",
+      "file": "effects/lightning-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "star",
+      "file": "effects/star-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "petals",
+      "file": "effects/petals-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "spores",
+      "file": "effects/spores-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "mint",
+      "file": "effects/mint-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    },
+    {
+      "id": "rainbow",
+      "file": "effects/rainbow-strip.png",
+      "frames": 4,
+      "frameWidth": 384,
+      "frameHeight": 384,
+      "previewFps": 8
+    }
+  ]
+}
