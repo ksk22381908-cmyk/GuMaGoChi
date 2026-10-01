@@ -113,7 +113,7 @@ namespace GuMaGoChi {
             double before=p.Hunger;p.Hunger=Clamp(p.Hunger-(dew?30:10));p.FoodCooldown=300;if(dew)Data.Dew--;
             // A tiny restored deficit cannot be farmed for full care rewards.
             if(before-p.Hunger>=5) {Data.Seeds+=10;p.Care++;}
-            return "잘 먹었어요! 배고픔 "+Math.Round(before)+" → "+Math.Round(p.Hunger);
+            return Dialogue.Get(p,0);
         }
         public string Treat(Pet p, bool strong) {
             if(!CanCare(p))return "지금은 치료할 수 없어요.";
@@ -121,12 +121,12 @@ namespace GuMaGoChi {
             if(p.Illness<=0)return "건강해요!";
             if(strong && Data.Medicine<=0)return "상위 치료가 없어요.";
             p.Illness=Clamp(p.Illness-(strong?30:10));p.MedicineCooldown=600;if(strong)Data.Medicine--;
-            return p.Illness==0?"다 나았어요!":"병세가 나아졌어요. 계속 지켜봐 주세요.";
+            return Dialogue.Get(p,1);
         }
         public string Stroke(Pet p) {
             if(!CanCare(p))return "지금은 쉬고 있어요.";
-            if(p.PetCooldown<=0) {p.Affection++;p.PetCooldown=900;Data.Seeds+=2;return p.SpeciesId==23?"좋다고는 안 했어… 싫다고도 안 했고.":"곁에 있어 줘서 좋아요.";}
-            return "고마워요. 다음 성장 교감까지 "+TimeText(p.PetCooldown);
+            if(p.PetCooldown<=0) {p.Affection++;p.PetCooldown=900;Data.Seeds+=2;return Dialogue.Get(p,2);}
+            return Dialogue.Get(p,2);
         }
         public bool Clean(Pet p) {
             if(!p.Active || p.Dead || p.GrowthReady || p.Waste<=0)return false;

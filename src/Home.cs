@@ -90,7 +90,7 @@ namespace GuMaGoChi {
         Pet[] Residents {get{return app.Engine.Data.Pets.Where(p=>p.Home&&p.Active&&!p.Dead).ToArray();}}
         Rectangle Slot(int i) {int columns=Math.Max(1,(int)(Width*.65)/120);return new Rectangle((int)(Width*.18)+(i%columns)*120,(int)(Height*.78)-110+(i/columns)*160,110,110);}
         void ClickPet(object s,MouseEventArgs e) {
-            var list=Residents;for(int i=0;i<list.Length;i++) {var r=Slot(i);if(r.Contains(e.Location)) {Pet p=list[i];if(e.Button==MouseButtons.Right)app.MenuFor(p).Show(this,e.Location);else if(p.GrowthReady)app.Reveal(p);else app.Say(p,p.Name+"가 집에서 쉬고 있어요.");return;}if(new Rectangle(r.X,r.Bottom+16,100,25).Contains(e.Location)&&e.Button==MouseButtons.Left&&!app.Paused) {Pet p=list[i];app.Change(()=>{if(app.Engine.Clean(p))app.Say(p,"잠자리도 깨끗해졌어요!");});return;}}
+            var list=Residents;for(int i=0;i<list.Length;i++) {var r=Slot(i);if(r.Contains(e.Location)) {Pet p=list[i];if(e.Button==MouseButtons.Right)app.MenuFor(p).Show(this,e.Location);else if(p.GrowthReady)app.Reveal(p);else app.Say(p,p.Name+"가 집에서 쉬고 있어요.");return;}if(new Rectangle(r.X,r.Bottom+16,100,25).Contains(e.Location)&&e.Button==MouseButtons.Left&&!app.Paused) {Pet p=list[i];app.Change(()=>{if(app.Engine.Clean(p))app.Say(p,Dialogue.Clean(p));});return;}}
         }
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);Graphics g=e.Graphics;g.Clear(Color.FromArgb(109,75,49));

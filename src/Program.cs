@@ -54,7 +54,16 @@ namespace GuMaGoChi {
             untouchedPet.Training=100;for(int i=0;i<1000;i++)if(untouchedEngine.ChooseSpecies(untouchedPet)==6)throw new Exception("Excluded species selected");Check(true,"Excluded species never selected in repeated draws");
             bool rejected=false;try{Storage.Decode("{\"Version\":2}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
             var disease=new SaveData();var sickEngine=new Engine(disease);var sick=sickEngine.Adopt("아픈고구마",true);sick.Illness=99.99;sick.Hunger=100;sickEngine.Tick(60);Check(sick.Dead&&sick.Cause=="질병","Disease can kill before lifespan");
-            return "PASS: "+count+" checks\r\nGrowth, lifespan, inventory, cooldowns, pause, sleep, filtering, rewards, adoption and save validation verified.\r\n";
+            var speech=new System.Collections.Generic.HashSet<string>();
+            foreach(var species in Catalog.All) {
+                var speaker=new Pet {SpeciesId=species.Id,Hunger=6};var speechData=new SaveData();speechData.Pets.Add(speaker);var speechEngine=new Engine(speechData);
+                string meal=speechEngine.Feed(speaker,false);
+                Check(speaker.Hunger==0&&!meal.Contains("→")&&!meal.Contains("배고픔")&&speech.Add(meal),"Unique natural feeding dialogue: "+species.Name);
+                Check(!String.IsNullOrEmpty(Dialogue.Activity(speaker,true))&&!String.IsNullOrEmpty(Dialogue.Activity(speaker,false))&&!String.IsNullOrEmpty(Dialogue.Clean(speaker))&&!String.IsNullOrEmpty(Dialogue.Greet(speaker)),"Activity dialogue: "+species.Name);
+                speaker.Illness=30;Check(Dialogue.Need(speaker).Contains("치료"),"Illness remains visible in dialogue: "+species.Name);
+            }
+            Check(Dialogue.Get(new Pet {SpeciesId=30},0)=="배가 든든하구마~","Spy uses authored speech without numerical suffix");
+            return "PASS: "+count+" checks\r\nGrowth, lifespan, inventory, cooldowns, pause, sleep, filtering, rewards, adoption, save and character dialogue verified.\r\n";
         }
     }
     static class UiCheck {

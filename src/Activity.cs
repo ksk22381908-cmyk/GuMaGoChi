@@ -65,7 +65,7 @@ namespace GuMaGoChi {
                     double dx=target.X-petWindow.Left,dy=target.Y-petWindow.Top,distance=Math.Sqrt(dx*dx+dy*dy);petWindow.Animate("walk",dx<0);
                     if(distance>0){double step=Math.Min(distance,Math.Max(1,speed*dt));petWindow.Location=new Point(petWindow.Left+(int)Math.Round(dx/distance*step),petWindow.Top+(int)Math.Round(dy/distance*step));}Pet.X=petWindow.Left;Pet.Y=petWindow.Top;
                     if(distance<8) {rounds++;returning=false;
-                        if(rounds>=3) {app.Change(()=>{app.Engine.FinishActivity(Pet,training,goals,rounds);app.Say(Pet,training?"훈련 끝! "+goals+" / 3 골인\n함께 연습해서 좋았어요.":"공을 가져왔어요! 칭찬해 줘요.");});CancelActivity();return;}
+                        if(rounds>=3) {app.Change(()=>{app.Engine.FinishActivity(Pet,training,goals,rounds);app.Say(Pet,Dialogue.Activity(Pet,training));});CancelActivity();return;}
                         ResetBall();
                     }
                 }else {CancelActivity();return;}

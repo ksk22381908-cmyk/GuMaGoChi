@@ -1,6 +1,8 @@
-# GuMaGoChi
+﻿# GuMaGoChi
 
-윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.12: 첫 플레이 가능 버전**입니다.
+윈도우 바탕화면에서 키우는 고구마 다마고치. **0.1.13: 캐릭터별 대사 개선 버전**입니다.
+
+31종의 먹기·치료·쓰다듬기·혼잣말·놀이·훈련 반응을 성격에 맞게 구분했습니다. 배고픔 등 수치 변화는 메뉴에서 확인하며 간첩마의 말투는 직접 작성한 대사에만 적용합니다.
 
 ## 실행
 
@@ -35,7 +37,7 @@
 ```powershell
 ./build.ps1     # bin/GuMaGoChi.exe
 ./test.ps1      # 모델 28개 + UI 226개 검증과 화면 렌더링
-./package.ps1   # release/GuMaGoChi-0.1.12-windows.zip
+./package.ps1   # release/GuMaGoChi-0.1.13-windows.zip
 ```
 
 테스트와 렌더링은 고정 테스트 개체를 사용하며 실제 육성 저장 파일을 변경하지 않습니다. `bin/home-preview.png`와 `bin/sprites-preview.png`로 렌더링 결과를 확인할 수 있습니다.

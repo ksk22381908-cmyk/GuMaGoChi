@@ -124,7 +124,7 @@ namespace GuMaGoChi {
             if(e.Button==MouseButtons.Right) {App.MenuFor(Pet).Show(this,e.Location);return;}
             if(e.Button!=MouseButtons.Left)return;
             if(App.Paused)return;
-            if(e.Y>=198 && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say("깨끗해졌어요!");App.Save();}return;}
+            if(e.Y>=198 && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say(Dialogue.Clean(Pet));App.Save();}return;}
             if(Pet.GrowthReady && Body.Contains(e.Location)) {App.Reveal(Pet);return;}
             if(Body.Contains(e.Location)&&App.Activity==null) {pressed=true;drag=false;Capture=true;offset=e.Location;start=Cursor.Position;}
         }
@@ -208,15 +208,7 @@ namespace GuMaGoChi {
                 if(refreshClock>=1){SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();refreshClock=0;}
             }
         }
-        string Talk(Pet p) {
-            if(p.SpeciesId==30){if(p.Hunger>60)return "배가 고프구마~";if(p.Illness>20)return "몸이 으슬으슬하구마.";if(p.Fatigue>75)return "잠깐 눈 붙이겠구마.";string[] spyLines={"아 날씨 좋구마!","나도 분명 고구마구마.","감자? 여기엔 그런 거 없구마!","싹은 건드리지 말아주구마."};return spyLines[Engine.Random.Next(spyLines.Length)];}
-            if(p.Hunger>60)return "배가 슬슬 고파요…";if(p.Illness>20)return "몸이 조금 무거워요.";if(p.Fatigue>75)return "땅속 잠자리가 생각나요.";
-            if(p.Age>=90*3600)return "너와 함께한 시간이 참 따뜻했어.";
-            if(p.SpeciesId<0)return Engine.Hint(p);
-            string[] lines={"오늘은 어떤 일이 생길까?","같이 있으니까 심심하지 않네.","흙 냄새가 참 좋아."};
-            switch(p.SpeciesId) {case 10:return "방금 소리… 들었느냐? 무서운 건 아니다.";case 12:return p.Waste>0?"갑판 청결 상태가 엉망이군.":"깨끗한 공으로 준비하게.";case 23:return "쓰다듬어도 된다고는 안 했는데…";case 27:return "내가 봤을 때는 잠깐 쉬어도 되겠어.";case 24:return "누가 공을 움직였어?! …그냥 물어본 거야.";case 28:return "한 판만 더. 이번엔 연습 아니야.";case 3:return "오늘도 수고했어. 천천히 해도 괜찮아.";case 9:return "다음 공은 꼭 넣고 말겠어!";}
-            return p.Affection>=10 && Engine.Random.Next(3)==0?"네가 오는 발소리는 이제 알아.":lines[Engine.Random.Next(lines.Length)];
-        }
+        string Talk(Pet p) { return Dialogue.Need(p)??(p.SpeciesId<0?Engine.Hint(p):Dialogue.Get(p,3)); }
         void Interact() {
             if(Activity!=null || Windows.Values.Any(w=>w.Bubble!=""))return;
             var list=Windows.Values.Where(w=>w.Visible && Engine.CanCare(w.Pet)).ToArray();
@@ -226,9 +218,9 @@ namespace GuMaGoChi {
                 if(Math.Abs(a.Left-b.Left)>160 || Math.Abs(a.Top-b.Top)>90)continue;
                 pairCooldown[key]=watch.Elapsed.TotalSeconds+600;
                 int bond;a.Pet.Friends.TryGetValue(b.Pet.Id,out bond);a.Pet.Friends[b.Pet.Id]=bond+1;b.Pet.Friends[a.Pet.Id]=bond+1;
-                a.Say(a.Pet.SpeciesId==10?"내 뒤에 있으면 안전하다!":bond>=3?b.Pet.Name+", 옆에 앉아도 돼?":b.Pet.Name+", 안녕!");
+                a.Say(Dialogue.Greet(a.Pet));
                 // Queue the second speech instead of overlapping ordinary bubbles.
-                var response=new Timer {Interval=8500};response.Tick+=(s,e)=> {response.Stop();response.Dispose();if(!Paused && !b.IsDisposed && b.Visible && Engine.CanCare(b.Pet) && !Windows.Values.Any(w=>w.Bubble!=""))b.Say(b.Pet.SpeciesId==27?"네가 제일 먼저 숨었잖아.":bond>=3?"응, 여기 같이 쉬자.":"반가워. 같이 걸을래?");};response.Start();Save();return;
+                var response=new Timer {Interval=8500};response.Tick+=(s,e)=> {response.Stop();response.Dispose();if(!Paused && !b.IsDisposed && b.Visible && Engine.CanCare(b.Pet) && !Windows.Values.Any(w=>w.Bubble!=""))b.Say(Dialogue.Greet(b.Pet));};response.Start();Save();return;
             }
         }
         public void SyncWindows() {
@@ -239,10 +231,10 @@ namespace GuMaGoChi {
             }
             foreach(var pair in Windows.ToArray())if(!Engine.Data.Pets.Contains(pair.Value.Pet)){pair.Value.Close();Windows.Remove(pair.Key);}
         }
-        public void Say(Pet p,string text) {if(p.SpeciesId==30)text=String.Join("\n",text.Split('\n').Select(line=>line.Contains("구마")?line:line.TrimEnd('!','.','~')+"구마."));PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
+        public void Say(Pet p,string text) {PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
         public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
-        public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,"짜잔! "+p.Kind+"로 자랐어요!\n이름은 여전히 "+p.Name+"예요.");}});}
+        public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,p.Kind+" · "+p.Name+"\n"+Dialogue.Get(p,3));}});}
         public void OpenHome(Pet p) {if(Home==null||Home.IsDisposed)Home=new HomeWindow(this);Home.RefreshData();if(p!=null)Home.SelectPet(p.Id);Home.Show();Home.Activate();}
         public void Adopt(bool first=false) {
             if(!first && Engine.Data.Pets.Any(p=>!p.Dead) && Engine.Data.Seeds<Engine.AdoptPrice){MessageBox.Show("입양에는 씨앗 100개가 필요해요.");return;}
