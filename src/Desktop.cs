@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -110,9 +110,12 @@ namespace GuMaGoChi {
         bool pressed=false,drag=false; Point offset,start;int direction=1;double wanderClock=6,walkX,walkY,headingX=.8,headingY=-.6;bool wandering=true;
         string motion="stand";double motionTime=0;bool walkingNow=false,growthSeen=false;
         public void Animate(string key,bool faceLeft=false) {if(motion!=key)motionTime=0;motion=key;direction=faceLeft?-1:1;Invalidate();}
-        Rectangle Body {get {return new Rectangle(26,74,120,120);}}
+        public static readonly Rectangle SpriteBounds=new Rectangle(18,52,84,84);
+        public static readonly Point BallAnchor=new Point(62,115);
+        public const int FloorOffset=136;
+        Rectangle Body {get {return SpriteBounds;}}
         public PetWindow(DesktopApp app,Pet pet) {
-            App=app;Pet=pet;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;TopMost=true;BackColor=Color.Magenta;TransparencyKey=Color.Magenta;ClientSize=new Size(180,236);DoubleBuffered=true;Font=new Font("맑은 고딕",9);
+            App=app;Pet=pet;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;TopMost=true;BackColor=Color.Magenta;TransparencyKey=Color.Magenta;ClientSize=new Size(126,166);DoubleBuffered=true;Font=new Font("맑은 고딕",8);
             StartPosition=FormStartPosition.Manual;
             if(pet.X==0 && pet.Y==0) {Rectangle area=Screen.PrimaryScreen.WorkingArea;pet.X=area.Left+70+(app.Windows.Count%7)*155;pet.Y=area.Bottom-Height;}
             Location=Clamp(new Point(pet.X,pet.Y));Pet.X=Left;Pet.Y=Top;
@@ -127,7 +130,7 @@ namespace GuMaGoChi {
             if(e.Button==MouseButtons.Right) {App.MenuFor(Pet).Show(this,e.Location);return;}
             if(e.Button!=MouseButtons.Left)return;
             if(App.Paused)return;
-            if(e.Y>=198 && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say(Dialogue.Clean(Pet));App.Save();}return;}
+            if(e.Y>=138 && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say(Dialogue.Clean(Pet));App.Save();}return;}
             if(Pet.GrowthReady && Body.Contains(e.Location)) {App.Reveal(Pet);return;}
             if(Body.Contains(e.Location)&&App.Activity==null) {pressed=true;drag=false;Capture=true;offset=e.Location;start=Cursor.Position;}
         }
@@ -161,13 +164,13 @@ namespace GuMaGoChi {
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);Graphics g=e.Graphics;
             if(Bubble!="") {
-                Rectangle r=new Rectangle(3,3,174,67);using(var b=new SolidBrush(Art.Cream))g.FillRectangle(b,r);using(var pen=new Pen(Art.Ink,2))g.DrawRectangle(pen,r);
-                TextRenderer.DrawText(g,Bubble,Font,new Rectangle(9,8,162,56),Art.Ink,TextFormatFlags.WordBreak|TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
+                Rectangle r=new Rectangle(2,2,122,47);using(var b=new SolidBrush(Art.Cream))g.FillRectangle(b,r);using(var pen=new Pen(Art.Ink,1))g.DrawRectangle(pen,r);
+                using(var bubbleFont=new Font("맑은 고딕",7))TextRenderer.DrawText(g,Bubble,bubbleFont,new Rectangle(6,5,114,40),Art.Ink,TextFormatFlags.WordBreak|TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
             }
             Rectangle body=Body;if(!Pet.Sleeping && !Pet.GrowthReady)body.Y+=(int)(Math.Sin(phase*3)*2);
             Art.Pet(g,Pet,body,Pet.GrowthReady?motionTime:motion=="stand"?phase:motionTime,walkingNow?"walk":motion,direction<0);
-            if(Pet.Waste>0) {Art.Waste(g,new Rectangle(10,203,30,26));TextRenderer.DrawText(g,Pet.Name+" · "+Pet.Waste+"개",Font,new Point(46,207),Art.Ink,Art.Cream);}
-            else TextRenderer.DrawText(g,Pet.Name,Font,new Rectangle(20,200,140,23),Art.Ink,Art.Cream,TextFormatFlags.HorizontalCenter);
+            if(Pet.Waste>0) {Art.Waste(g,new Rectangle(7,142,21,18));TextRenderer.DrawText(g,Pet.Name+" · "+Pet.Waste+"개",Font,new Point(32,145),Art.Ink,Art.Cream);}
+            else TextRenderer.DrawText(g,Pet.Name,Font,new Rectangle(14,140,98,20),Art.Ink,Art.Cream,TextFormatFlags.HorizontalCenter);
         }
     }
     public class DesktopApp:ApplicationContext {
@@ -179,7 +182,7 @@ namespace GuMaGoChi {
         Dictionary<string,double> pairCooldown=new Dictionary<string,double>();HashSet<string> warnings=new HashSet<string>();
         Dictionary<string,ContextMenuStrip> petMenus=new Dictionary<string,ContextMenuStrip>();
         public DesktopApp(SaveData data,string warning,bool persistData=true) {
-            persist=persistData;Engine=new Engine(data);icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
+            persist=persistData;bool starterGift=!data.StarterNutrientsClaimed;Engine=new Engine(data);if(starterGift)Save();icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
             tray.DoubleClick+=(s,e)=>OpenHome(null);tray.MouseClick+=(s,e)=>{if(e.Button==MouseButtons.Left)OpenHome(null);};
             RefreshTray();SystemEvents.PowerModeChanged+=Power;SystemEvents.SessionSwitch+=Session;
             timer=new Timer {Interval=125};timer.Tick+=Tick;timer.Start();

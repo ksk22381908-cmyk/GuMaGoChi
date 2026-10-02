@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,6 +23,7 @@ namespace GuMaGoChi {
         static int count=0;
         static void Check(bool condition,string message) {if(!condition)throw new Exception("FAIL: "+message);count++;}
         public static string Run() {
+            var gift=new SaveData();new Engine(gift);Check(gift.Nutrients==6&&gift.StarterNutrientsClaimed,"New player receives six starter nutrients");new Engine(gift);Check(gift.Nutrients==6,"Repeated engine start does not repeat starter gift");var returning=Storage.Decode("{\"Version\":2,\"Nutrients\":4,\"Pets\":[],\"Discovered\":[]}");new Engine(returning);Check(returning.Nutrients==10&&returning.StarterNutrientsClaimed,"Existing player keeps inventory and receives six nutrients");var giftReload=Storage.Decode(Storage.Encode(returning));new Engine(giftReload);Check(giftReload.Nutrients==10,"Saved gift claim prevents repeat after restart");giftReload.Nutrients=0;new Engine(giftReload);Check(giftReload.Nutrients==0,"Consumed gift cannot be claimed again");
             var data=new SaveData();var engine=new Engine(data,42);Pet p=engine.Adopt("첫고구마",true);
             Check(p!=null&&data.Seeds==0,"Free first adoption");p.Hunger=70;engine.Feed(p,false);Check(p.Hunger==60&&p.FoodCooldown==300,"Food subtracts 10 and starts cooldown");
             data.Dew=1;engine.Feed(p,true);Check(data.Dew==1&&p.Hunger==60,"Shared food cooldown preserves inventory");
@@ -63,7 +64,7 @@ namespace GuMaGoChi {
                 speaker.Illness=30;Check(Dialogue.Need(speaker).Contains("치료"),"Illness remains visible in dialogue: "+species.Name);
             }
             Check(Dialogue.Get(new Pet {SpeciesId=30},0)=="배가 든든하구마~","Spy uses authored speech without numerical suffix");
-            var revised=new SaveData {Seeds=90};var revisedEngine=new Engine(revised,5);var young=revisedEngine.Adopt("경험치",true);
+            var revised=new SaveData {Seeds=90,StarterNutrientsClaimed=true};var revisedEngine=new Engine(revised,5);var young=revisedEngine.Adopt("경험치",true);
             revisedEngine.Tick(30);Check(young.Age==30&&young.GrowthExp==.5,"Fractional experience accumulates independently");
             young.Active=false;revisedEngine.Tick(120);Check(young.Age==30&&young.GrowthExp==.5,"Inactive freezes experience and age");young.Active=true;
             Check(revisedEngine.BuyNutrient()&&revised.Seeds==60&&revised.Nutrients==1&&young.GrowthExp==.5,"Nutrient purchase does not apply experience");
@@ -141,7 +142,7 @@ namespace GuMaGoChi {
                 using(var menu=app.MenuFor(pet))Find(menu,"활성화하기").PerformClick();Check(pet.Active&&w.Visible,"Activation restores pet");
                 app.ManualPause=true;app.SyncWindows();Check(!w.Visible,"Global pause hides pet");app.ManualPause=false;app.SyncWindows();
                 w.Top=Screen.FromControl(w).WorkingArea.Top+180;pet.Y=w.Top;app.StartActivity(pet,true);Check(app.Activity!=null&&app.Activity.Visible,"Training overlay opens");
-                var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+164))<1,"Ball starts at relocated pet height");
+                var source=(System.Drawing.PointF)typeof(ActivityWindow).GetField("source",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);Check(Math.Abs(source.Y-(pet.Y-app.Activity.Top+PetWindow.BallAnchor.Y))<1,"Ball starts at relocated pet height");
                 Check(app.Activity.Owner==w,"Activity owned by actor stays above actor");
                 down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,80,160,0)});app.Activity.EnsureForeground();
                 IntPtr below=Native.GetWindow(app.Activity.Handle,2);bool actorBelow=false;for(int z=0;z<500&&below!=IntPtr.Zero;z++){if(below==w.Handle){actorBelow=true;break;}below=Native.GetWindow(below,2);}Check(actorBelow,"Character click leaves ball overlay above pet");
@@ -173,7 +174,7 @@ namespace GuMaGoChi {
                 var frame=typeof(ActivityWindow).GetMethod("Frame",flags);var reset=typeof(ActivityWindow).GetMethod("ResetBall",flags);
                 for(int shot=0;shot<15;shot++){
                     typeof(ActivityWindow).GetField("celebration",flags).SetValue(challengeWindow,0.0);reset.Invoke(challengeWindow,null);challenge.BeginShot();challenge.Score();app.Engine.RecordShot(pet);app.Engine.ScoreGoal(pet,challenge.Reward,challenge.TotalGoals);
-                    typeof(ActivityWindow).GetField("returning",flags).SetValue(challengeWindow,true);typeof(ActivityWindow).GetField("ball",flags).SetValue(challengeWindow,new System.Drawing.PointF(w.Left-challengeWindow.Left+88,w.Top-challengeWindow.Top+164));frame.Invoke(challengeWindow,new object[]{null,EventArgs.Empty});
+                    typeof(ActivityWindow).GetField("returning",flags).SetValue(challengeWindow,true);typeof(ActivityWindow).GetField("ball",flags).SetValue(challengeWindow,new System.Drawing.PointF(w.Left-challengeWindow.Left+PetWindow.BallAnchor.X,w.Top-challengeWindow.Top+PetWindow.BallAnchor.Y));frame.Invoke(challengeWindow,new object[]{null,EventArgs.Empty});
                 }
                 Check(challenge.TotalGoals==15&&data.Seeds==challengeSeeds+42&&pet.Training==trainingBefore+1&&data.BestGoals==15,"Actual activity advances 3-5-7 and grants base reward once");
                 Check(challengeWindow.Visible&&(bool)typeof(ActivityWindow).GetField("finished",flags).GetValue(challengeWindow),"Finished record screen stays visible for capture");

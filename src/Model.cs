@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,13 +49,13 @@ namespace GuMaGoChi {
         public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0, BestGoals=0;
         public List<Pet> Pets=new List<Pet>();
         public List<int> Discovered=new List<int>();
-        public bool AutoStart=false;
+        public bool AutoStart=false, StarterNutrientsClaimed=false;
     }
     public class Engine {
         public const double AdultAge=3*3600, AdultExp=180, Life=100*3600, ActivityCooldown=180;
         public const int AdoptPrice=100, DewPrice=8, MedicinePrice=12, NutrientPrice=30;
         public SaveData Data; public Random Random;
-        public Engine(SaveData data, int? seed=null) { Data=data; Random=seed.HasValue ? new Random(seed.Value) : new Random();foreach(Pet p in Data.Pets)PrepareGrowth(p); }
+        public Engine(SaveData data, int? seed=null) { Data=data; Random=seed.HasValue ? new Random(seed.Value) : new Random();if(!Data.StarterNutrientsClaimed){Data.Nutrients+=6;Data.StarterNutrientsClaimed=true;}foreach(Pet p in Data.Pets)PrepareGrowth(p); }
         public static double Clamp(double value) { return Math.Max(0,Math.Min(100,value)); }
         public Pet Adopt(string name, bool first=false) {
             bool rescue=!Data.Pets.Any(p=>!p.Dead) && Data.Seeds<AdoptPrice;

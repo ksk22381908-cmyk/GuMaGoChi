@@ -23,11 +23,11 @@ namespace GuMaGoChi {
         }
         void ResetBall() {
             PetWindow actor;if(app.Windows.TryGetValue(Pet.Id,out actor))actor.Animate("stand");
-            floor=Math.Max(115,Math.Min(Height-12,Pet.Y-Top+194));
-            source=new PointF(Math.Max(70,Math.Min(Width-80,Pet.X-Left+88)),(float)floor-30);ball=source;
+            floor=Math.Max(80,Math.Min(Height-12,Pet.Y-Top+PetWindow.FloorOffset));
+            source=new PointF(Math.Max(42,Math.Min(Width-56,Pet.X-Left+PetWindow.BallAnchor.X)),(float)floor-(PetWindow.FloorOffset-PetWindow.BallAnchor.Y));ball=source;
             int distance=training?(int)(Width*(run.Stage==0?.22:run.Stage==1?.48:.88)):(Pet.SpeciesId<0?210:320);
             bool right=source.X<Width/2;
-            if(training&&run.Stage==2){PetWindow w;if(app.Windows.TryGetValue(Pet.Id,out w)){w.Location=w.Clamp(new Point(Left+(right?24:Width-204),w.Top));Pet.X=w.Left;Pet.Y=w.Top;source.X=w.Left-Left+88;ball=source;}}
+            if(training&&run.Stage==2){PetWindow w;if(app.Windows.TryGetValue(Pet.Id,out w)){w.Location=w.Clamp(new Point(Left+(right?24:Width-w.Width-24),w.Top));Pet.X=w.Left;Pet.Y=w.Top;source.X=w.Left-Left+PetWindow.BallAnchor.X;ball=source;}}
             int x=training&&run.Stage==2?(right?Width-100:24):(int)(source.X+(right?distance:-distance));x=Math.Max(24,Math.Min(Width-100,x));
             int y=training?Math.Max(165,Math.Min(Height-105,(int)source.Y+app.Engine.Random.Next(-160,61))):(int)floor-85;
             basket=new Rectangle(x,y,75,85);if(training)floor=Height-12;flying=false;returning=false;dragging=false;Invalidate();
@@ -55,7 +55,7 @@ namespace GuMaGoChi {
         void HitOthers(PointF old,PointF current) {
             foreach(PetWindow w in app.Windows.Values){
                 Pet target=w.Pet;if(!w.Visible||!CanHit(Pet,target)||hitPets.Contains(target.Id))continue;
-                Rectangle body=new Rectangle(w.Left-Left+26,w.Top-Top+74,120,120);
+                Rectangle body=new Rectangle(w.Left-Left+PetWindow.SpriteBounds.X,w.Top-Top+PetWindow.SpriteBounds.Y,PetWindow.SpriteBounds.Width,PetWindow.SpriteBounds.Height);
                 if(!BallPhysics.HitsBody(old,current,body))continue;
                 hitPets.Add(target.Id);w.Say(Dialogue.Hit(target));w.Animate("throw",velocity.X<0);
                 ball.X=velocity.X>0?body.Left-BallPhysics.Radius-1:body.Right+BallPhysics.Radius+1;
@@ -85,7 +85,7 @@ namespace GuMaGoChi {
             }
             if(returning) {
                 PetWindow petWindow;if(app.Windows.TryGetValue(Pet.Id,out petWindow)) {
-                    Point target=petWindow.Clamp(new Point((int)(ball.X+Left-88),(int)(ball.Y+Top-164)));double speed=Pet.SpeciesId<0?150:Pet.Skill=="민첩"?310:220;
+                    Point target=petWindow.Clamp(new Point((int)(ball.X+Left-PetWindow.BallAnchor.X),(int)(ball.Y+Top-PetWindow.BallAnchor.Y)));double speed=Pet.SpeciesId<0?150:Pet.Skill=="민첩"?310:220;
                     double dx=target.X-petWindow.Left,dy=target.Y-petWindow.Top,distance=Math.Sqrt(dx*dx+dy*dy);petWindow.Animate("walk",dx<0);
                     if(distance>0){double step=Math.Min(distance,Math.Max(1,speed*dt));petWindow.Location=new Point(petWindow.Left+(int)Math.Round(dx/distance*step),petWindow.Top+(int)Math.Round(dy/distance*step));}Pet.X=petWindow.Left;Pet.Y=petWindow.Top;
                     if(distance<8) {rounds++;returning=false;
