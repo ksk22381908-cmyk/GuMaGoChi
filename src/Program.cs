@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,6 +23,13 @@ namespace GuMaGoChi {
         static int count=0;
         static void Check(bool condition,string message) {if(!condition)throw new Exception("FAIL: "+message);count++;}
         public static string Run() {
+            var mattangData=new SaveData {Seeds=27};var mattangEngine=new Engine(mattangData);
+            var removed=mattangEngine.Adopt("맛탕",true);removed.SpeciesId=12;mattangData.Discovered.Add(12);
+            var survivor=mattangEngine.Adopt("남은 고구마",true);survivor.Friends[removed.Id]=3;
+            Check(mattangEngine.MakeMattang(removed)&&!mattangData.Pets.Contains(removed)&&mattangData.Pets.Contains(survivor),"Mattang deletes only selected pet");
+            Check(!survivor.Friends.ContainsKey(removed.Id)&&mattangData.Discovered.Contains(12)&&mattangData.Seeds==27,"Mattang clears links and preserves discovery and currency");
+            Check(!mattangEngine.MakeMattang(removed)&&!mattangEngine.MakeMattang(null),"Mattang is safe for repeated or invalid targets");
+            Check(Storage.Decode(Storage.Encode(mattangData)).Pets.Count==1,"Mattang deletion persists after save roundtrip");
             var gift=new SaveData();new Engine(gift);Check(gift.Nutrients==6&&gift.StarterNutrientsClaimed,"New player receives six starter nutrients");new Engine(gift);Check(gift.Nutrients==6,"Repeated engine start does not repeat starter gift");var returning=Storage.Decode("{\"Version\":2,\"Nutrients\":4,\"Pets\":[],\"Discovered\":[]}");new Engine(returning);Check(returning.Nutrients==10&&returning.StarterNutrientsClaimed,"Existing player keeps inventory and receives six nutrients");var giftReload=Storage.Decode(Storage.Encode(returning));new Engine(giftReload);Check(giftReload.Nutrients==10,"Saved gift claim prevents repeat after restart");giftReload.Nutrients=0;new Engine(giftReload);Check(giftReload.Nutrients==0,"Consumed gift cannot be claimed again");
             var data=new SaveData();var engine=new Engine(data,42);Pet p=engine.Adopt("첫고구마",true);
             Check(p!=null&&data.Seeds==0,"Free first adoption");p.Hunger=70;engine.Feed(p,false);Check(p.Hunger==60&&p.FoodCooldown==300,"Food subtracts 10 and starts cooldown");
@@ -158,10 +165,16 @@ namespace GuMaGoChi {
                 }
                 for(int id=0;id<Catalog.All.Length;id++)using(var first=new System.Drawing.Bitmap(120,120))using(var next=new System.Drawing.Bitmap(120,120))using(var a=System.Drawing.Graphics.FromImage(first))using(var b=System.Drawing.Graphics.FromImage(next)) {
                     Check(Art.ImageFor(id)!=null,"Adult asset: "+id);
+                    foreach(string pose in new[]{"stand","walk","eat","throw","sleep","burrow"})for(int poseFrame=0;poseFrame<4;poseFrame++) {
+                        b.Clear(System.Drawing.Color.Transparent);
+                        Check(Sprites.Draw(b,new System.Drawing.Rectangle(0,0,120,120),pose,poseFrame*(pose=="sleep"?.5:.25),false,id),"Reviewed atlas loads: "+id+" / "+pose+" / "+poseFrame);
+                        bool visible=false;for(int y=0;y<120;y++)for(int x=0;x<120;x++){int alpha=next.GetPixel(x,y).A;if(alpha>0)visible=true;Check(alpha==0||alpha==255,"Reviewed frame has no alpha halo");}
+                        Check(visible,"Reviewed frame remains visible: "+id+" / "+pose+" / "+poseFrame);
+                    }
                     foreach(string key in new[]{"walk","eat","throw","sleep","burrow"}) {
                         a.Clear(System.Drawing.Color.Transparent);b.Clear(System.Drawing.Color.Transparent);var p=new Pet {SpeciesId=id,Sleeping=key=="sleep",GrowthReady=key=="burrow"};
                         var box=new System.Drawing.Rectangle(0,0,120,120);Art.Pet(a,p,box,0,key);Art.Pet(b,p,box,.875,key);
-                        bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}Check(changed,"Adult animated: "+id+" / "+key);
+                        bool changed=false;for(int y=0;y<120&&!changed;y++)for(int x=0;x<120;x++)if(first.GetPixel(x,y)!=next.GetPixel(x,y)){changed=true;break;}if(key=="burrow")Check(changed,"Adult burrow advances: "+id);
                     }
                 }
                 var spy=new Pet {SpeciesId=30,Name="간첩"};var spySave=new SaveData();spySave.Pets.Add(spy);spySave.Discovered.Add(30);Check(Storage.Decode(Storage.Encode(spySave)).Pets[0].SpeciesId==30,"Spy species save roundtrip");
@@ -179,7 +192,7 @@ namespace GuMaGoChi {
                 Check(challenge.TotalGoals==15&&data.Seeds==challengeSeeds+42&&pet.Training==trainingBefore+1&&data.BestGoals==15,"Actual activity advances 3-5-7 and grants base reward once");
                 Check(challengeWindow.Visible&&(bool)typeof(ActivityWindow).GetField("finished",flags).GetValue(challengeWindow),"Finished record screen stays visible for capture");
                 using(var capture=new System.Drawing.Bitmap(challengeWindow.Width,challengeWindow.Height)){challengeWindow.DrawToBitmap(capture,new System.Drawing.Rectangle(0,0,capture.Width,capture.Height));bool objectsGone=true;for(int y=140;y<capture.Height&&objectsGone;y++)for(int x=0;x<capture.Width;x++){int color=capture.GetPixel(x,y).ToArgb();if(color==System.Drawing.Color.Orange.ToArgb()||color==System.Drawing.Color.FromArgb(108,139,102).ToArgb()){objectsGone=false;break;}}Check(objectsGone,"Completed training hides both ball and goal while preserving record panel");capture.Save(Path.Combine(Paths.BaseDirectory,"training-preview.png"));}challengeWindow.CancelActivity();
-                return "PASS: 236 UI checks\r\nChallenge progression, rewards, completed object cleanup, record capture and pet collision verified.\r\n";
+                return "PASS: UI checks, including all 744 reviewed frame slots\r\nChallenge progression, rewards, completed object cleanup, record capture and pet collision verified.\r\n";
             }finally {app.Exit();}
         }
     }

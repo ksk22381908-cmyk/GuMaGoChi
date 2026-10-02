@@ -419,5 +419,15 @@
       "model": "gpt_image_2_5",
       "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044434_b571e0b0-37dc-4a3d-bd76-37e7eb7f10c8.png"
     }
-  ]
+  ],
+  "compatibilityUpdate": {
+    "release": "v0.1.18",
+    "source": "reviewed frame repair candidates",
+    "cellSize": [
+      320,
+      320
+    ],
+    "babyChanged": false,
+    "notes": "Corrected adult frames installed in legacy paths. Some intact poses are reused; remaining silhouette differences are documented."
+  }
 }

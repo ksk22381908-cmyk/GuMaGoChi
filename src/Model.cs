@@ -146,6 +146,11 @@ namespace GuMaGoChi {
         public bool ScoreGoal(Pet p,int reward=1,int score=0) {if(!CanCare(p)||reward<1||reward>3||score<0||score>15)return false;p.Goals++;Data.Seeds+=reward;Data.BestGoals=Math.Max(Data.BestGoals,score);return true;}
         public void RecordShot(Pet p) {if(CanCare(p))p.Shots++;}
         public bool Buy(bool medicine) {int price=medicine?MedicinePrice:DewPrice;if(Data.Seeds<price)return false;Data.Seeds-=price;if(medicine)Data.Medicine++;else Data.Dew++;return true;}
+        public bool MakeMattang(Pet p) {
+            if(p==null||!Data.Pets.Remove(p))return false;
+            foreach(Pet other in Data.Pets)other.Friends.Remove(p.Id);
+            return true;
+        }
         public void Kill(Pet p,string cause) {p.Dead=true;p.Active=false;p.Sleeping=false;p.GrowthReady=false;p.Cause=cause;p.DiedAt=DateTime.Now.ToString("yyyy-MM-dd HH:mm");}
         public static string TimeText(double seconds) {return TimeSpan.FromSeconds(Math.Max(0,seconds)).ToString(@"hh\:mm\:ss");}
         public static string Hint(Pet p) {if(p.Training>=12)return "훈련할 시간이 되면 먼저 준비하네요. 느긋하게만 지내지는 않을 것 같아요.";if(p.Training>p.Play && p.Training>p.Affection)return "작은 목표에도 눈을 떼지 않네요.";if(p.Play>p.Training)return "굴러가는 공을 보면 잎이 들썩여요.";if(p.Affection>0)return "당신이 다가오기를 기다리는 것 같아요.";return "아직 세상의 모든 것이 궁금한 아기예요.";}

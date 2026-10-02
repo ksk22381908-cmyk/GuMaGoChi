@@ -276,7 +276,17 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("위치 옮기기 · 몸을 잡아 드래그",()=>{PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.BeginMove();},!p.Home&&p.Active&&!Paused&&Activity==null));
             menu.Items.Add(Item(p.Active?"비활성화 · 시간 멈추기":"활성화하기",()=>Change(()=>p.Active=!p.Active),!p.Dead&&Activity==null));
             menu.Items.Add(Item("이름 변경",()=>{using(var d=new NameDialog("이름 변경",p.Name))if(d.ShowDialog()==DialogResult.OK)Change(()=>p.Name=d.PetName);}));
-            menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));return menu;
+            menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add(Item("맛탕 만들기",()=>MakeMattang(p),Engine.Data.Pets.Contains(p)&&!p.Dead));return menu;
+        }
+        public void MakeMattang(Pet p) {
+            if(!Engine.Data.Pets.Contains(p))return;
+            string text="‘"+p.Name+"’로 맛탕을 만들까요?\n이 고구마와 돌봄 기록을 삭제하며, 추억 앨범에는 남지 않습니다.";
+            if(MessageBox.Show(text,"맛탕 만들기",MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+            if(Activity!=null&&Activity.Pet==p)Activity.CancelActivity();
+            Change(()=>{if(Engine.MakeMattang(p))warnings.Remove(p.Id);});
+            if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(p.Name+"로 맛탕을 만들었어요.");
         }
         public void Feed(Pet p,bool dew) {Change(()=>{double before=p.Hunger;Say(p,Engine.Feed(p,dew));if(p.Hunger<before){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});}
         public void Nourish(Pet p) {
