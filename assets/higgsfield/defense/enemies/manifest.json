@@ -1,0 +1,27 @@
+{
+  "names": [
+    "기본 애벌레",
+    "날쌘 버러지",
+    "껍질 버러지",
+    "분열형 버러지",
+    "꼬마 버러지",
+    "거대 버러지"
+  ],
+  "frames": 8,
+  "frame_size": [
+    256,
+    256
+  ],
+  "ground_anchor": 240,
+  "jump_offsets": [
+    0,
+    0,
+    15,
+    60,
+    90,
+    50,
+    0,
+    0
+  ],
+  "note": "Jump height is applied by gameplay in sync with grasshopper frame. No adjacent sprites are included."
+}

@@ -1,0 +1,1599 @@
+{
+  "scope": "31 species unique SKILL effects",
+  "status": "integrated-v0.2.0",
+  "entries": [
+    {
+      "id": 0,
+      "name": "밤톨이",
+      "skill": "성실한 한 방",
+      "type": "self_buff",
+      "cooldown_seconds": 25,
+      "duration_seconds": 8,
+      "species_id": 0,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "00/00.png",
+        "00/01.png",
+        "00/02.png",
+        "00/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          174,
+          311,
+          499,
+          549
+        ],
+        [
+          658,
+          213,
+          1063,
+          622
+        ],
+        [
+          1182,
+          197,
+          1674,
+          671
+        ],
+        [
+          1821,
+          286,
+          2192,
+          598
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "00/02.png"
+    },
+    {
+      "id": 1,
+      "name": "꿀떡이",
+      "skill": "끈적한 꿀밭",
+      "type": "ground_zone",
+      "cooldown_seconds": 25,
+      "duration_seconds": 5,
+      "species_id": 1,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "01/00.png",
+        "01/01.png",
+        "01/02.png",
+        "01/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          181,
+          866,
+          421,
+          1069
+        ],
+        [
+          637,
+          841,
+          1053,
+          1143
+        ],
+        [
+          1161,
+          812,
+          1663,
+          1176
+        ],
+        [
+          1785,
+          912,
+          2198,
+          1149
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "01/02.png"
+    },
+    {
+      "id": 2,
+      "name": "자몽이",
+      "skill": "딱히 도와주는 건 아냐",
+      "type": "piercing_projectile",
+      "cooldown_seconds": 25,
+      "duration_seconds": 0,
+      "species_id": 2,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "02/00.png",
+        "02/01.png",
+        "02/02.png",
+        "02/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          108,
+          1372,
+          553,
+          1625
+        ],
+        [
+          668,
+          1316,
+          1048,
+          1684
+        ],
+        [
+          1183,
+          1255,
+          1653,
+          1715
+        ],
+        [
+          1832,
+          1357,
+          2185,
+          1653
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "02/00.png",
+      "impact_frames": [
+        "02/01.png",
+        "02/02.png",
+        "02/03.png"
+      ],
+      "projectile_count": 1,
+      "launch_interval_ms": 0,
+      "trajectory": "straight"
+    },
+    {
+      "id": 3,
+      "name": "군밤이",
+      "skill": "뜨끈한 군밤",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 4,
+      "species_id": 3,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "03/00.png",
+        "03/01.png",
+        "03/02.png",
+        "03/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          139,
+          1928,
+          432,
+          2119
+        ],
+        [
+          649,
+          1857,
+          1040,
+          2214
+        ],
+        [
+          1174,
+          1861,
+          1686,
+          2223
+        ],
+        [
+          1805,
+          1889,
+          2186,
+          2202
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "03/02.png"
+    },
+    {
+      "id": 4,
+      "name": "새싹이",
+      "skill": "쑥쑥 연사",
+      "type": "self_buff",
+      "cooldown_seconds": 25,
+      "duration_seconds": 5,
+      "species_id": 4,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "04/00.png",
+        "04/01.png",
+        "04/02.png",
+        "04/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          166,
+          2482,
+          433,
+          2681
+        ],
+        [
+          631,
+          2419,
+          1032,
+          2777
+        ],
+        [
+          1175,
+          2373,
+          1655,
+          2801
+        ],
+        [
+          1813,
+          2440,
+          2183,
+          2769
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "04/02.png"
+    },
+    {
+      "id": 5,
+      "name": "딸기마",
+      "skill": "나 좀 봐!",
+      "type": "team_buff",
+      "cooldown_seconds": 30,
+      "duration_seconds": 6,
+      "species_id": 5,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "05/00.png",
+        "05/01.png",
+        "05/02.png",
+        "05/03.png"
+      ],
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          170,
+          3003,
+          456,
+          3231
+        ],
+        [
+          672,
+          2964,
+          1015,
+          3304
+        ],
+        [
+          1192,
+          2930,
+          1622,
+          3324
+        ],
+        [
+          1842,
+          2987,
+          2168,
+          3260
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "05/02.png"
+    },
+    {
+      "id": 6,
+      "name": "구름이",
+      "skill": "낮잠 구름",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 4,
+      "species_id": 6,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "06/00.png",
+        "06/01.png",
+        "06/02.png",
+        "06/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          187,
+          325,
+          452,
+          501
+        ],
+        [
+          680,
+          253,
+          1043,
+          594
+        ],
+        [
+          1175,
+          170,
+          1682,
+          633
+        ],
+        [
+          1821,
+          266,
+          2172,
+          594
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "06/02.png"
+    },
+    {
+      "id": 7,
+      "name": "달콩이",
+      "skill": "포근한 보호막",
+      "type": "house_shield",
+      "cooldown_seconds": 35,
+      "duration_seconds": 8,
+      "species_id": 7,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "07/00.png",
+        "07/01.png",
+        "07/02.png",
+        "07/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          217,
+          865,
+          458,
+          1054
+        ],
+        [
+          674,
+          781,
+          1044,
+          1156
+        ],
+        [
+          1181,
+          765,
+          1642,
+          1146
+        ],
+        [
+          1811,
+          802,
+          2168,
+          1132
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "07/02.png"
+    },
+    {
+      "id": 8,
+      "name": "햇살이",
+      "skill": "햇살 응원",
+      "type": "team_buff",
+      "cooldown_seconds": 30,
+      "duration_seconds": 6,
+      "species_id": 8,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "08/00.png",
+        "08/01.png",
+        "08/02.png",
+        "08/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          190,
+          1371,
+          478,
+          1556
+        ],
+        [
+          648,
+          1331,
+          1054,
+          1637
+        ],
+        [
+          1133,
+          1254,
+          1701,
+          1691
+        ],
+        [
+          1820,
+          1343,
+          2179,
+          1640
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "08/02.png"
+    },
+    {
+      "id": 9,
+      "name": "눈송이",
+      "skill": "발끈 눈보라",
+      "type": "ground_zone",
+      "cooldown_seconds": 25,
+      "duration_seconds": 3,
+      "species_id": 9,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "09/00.png",
+        "09/01.png",
+        "09/02.png",
+        "09/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          214,
+          1914,
+          463,
+          2092
+        ],
+        [
+          657,
+          1812,
+          1032,
+          2199
+        ],
+        [
+          1133,
+          1781,
+          1691,
+          2236
+        ],
+        [
+          1812,
+          1828,
+          2185,
+          2185
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "09/02.png"
+    },
+    {
+      "id": 10,
+      "name": "왕고마",
+      "skill": "왕의 호통",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 1,
+      "species_id": 10,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "10/00.png",
+        "10/01.png",
+        "10/02.png",
+        "10/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          219,
+          2457,
+          499,
+          2622
+        ],
+        [
+          640,
+          2390,
+          1033,
+          2743
+        ],
+        [
+          1117,
+          2308,
+          1691,
+          2826
+        ],
+        [
+          1809,
+          2401,
+          2171,
+          2734
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "10/02.png"
+    },
+    {
+      "id": 11,
+      "name": "마법마",
+      "skill": "고구마 대폭발",
+      "type": "target_burst",
+      "cooldown_seconds": 30,
+      "duration_seconds": 0,
+      "species_id": 11,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "11/00.png",
+        "11/01.png",
+        "11/02.png",
+        "11/03.png"
+      ],
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          183,
+          2988,
+          461,
+          3256
+        ],
+        [
+          658,
+          2953,
+          1022,
+          3300
+        ],
+        [
+          1153,
+          2889,
+          1668,
+          3362
+        ],
+        [
+          1839,
+          2958,
+          2166,
+          3274
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "11/02.png"
+    },
+    {
+      "id": 12,
+      "name": "해적마",
+      "skill": "고구마 함포 사격",
+      "type": "parabolic_projectile",
+      "cooldown_seconds": 30,
+      "duration_seconds": 0,
+      "species_id": 12,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "12/00.png",
+        "12/01.png",
+        "12/02.png",
+        "12/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          98,
+          293,
+          468,
+          541
+        ],
+        [
+          651,
+          224,
+          1063,
+          618
+        ],
+        [
+          1192,
+          181,
+          1679,
+          660
+        ],
+        [
+          1823,
+          239,
+          2212,
+          627
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "12/00.png",
+      "impact_frames": [
+        "12/01.png",
+        "12/02.png",
+        "12/03.png"
+      ],
+      "projectile_count": 3,
+      "launch_interval_ms": 220,
+      "trajectory": "parabolic"
+    },
+    {
+      "id": 13,
+      "name": "요리마",
+      "skill": "껍질 손질",
+      "type": "target_burst",
+      "cooldown_seconds": 30,
+      "duration_seconds": 6,
+      "species_id": 13,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "13/00.png",
+        "13/01.png",
+        "13/02.png",
+        "13/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          149,
+          842,
+          489,
+          1069
+        ],
+        [
+          671,
+          796,
+          1047,
+          1161
+        ],
+        [
+          1167,
+          747,
+          1689,
+          1213
+        ],
+        [
+          1839,
+          809,
+          2203,
+          1153
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "13/02.png"
+    },
+    {
+      "id": 14,
+      "name": "화가마",
+      "skill": "색칠 완료",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 5,
+      "species_id": 14,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "14/00.png",
+        "14/01.png",
+        "14/02.png",
+        "14/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          164,
+          1412,
+          465,
+          1590
+        ],
+        [
+          662,
+          1360,
+          1031,
+          1691
+        ],
+        [
+          1177,
+          1328,
+          1667,
+          1731
+        ],
+        [
+          1848,
+          1410,
+          2189,
+          1660
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "14/02.png"
+    },
+    {
+      "id": 15,
+      "name": "음표마",
+      "skill": "앙코르!",
+      "type": "team_buff",
+      "cooldown_seconds": 35,
+      "duration_seconds": 4,
+      "species_id": 15,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "15/00.png",
+        "15/01.png",
+        "15/02.png",
+        "15/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          207,
+          1986,
+          415,
+          2179
+        ],
+        [
+          664,
+          1903,
+          1037,
+          2282
+        ],
+        [
+          1183,
+          1878,
+          1672,
+          2301
+        ],
+        [
+          1823,
+          1927,
+          2200,
+          2278
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "15/02.png"
+    },
+    {
+      "id": 16,
+      "name": "책벌레마",
+      "skill": "약점은 여기야",
+      "type": "target_burst",
+      "cooldown_seconds": 30,
+      "duration_seconds": 0,
+      "species_id": 16,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "16/00.png",
+        "16/01.png",
+        "16/02.png",
+        "16/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          168,
+          2490,
+          441,
+          2779
+        ],
+        [
+          673,
+          2462,
+          1045,
+          2823
+        ],
+        [
+          1177,
+          2401,
+          1667,
+          2865
+        ],
+        [
+          1837,
+          2484,
+          2199,
+          2812
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "16/02.png"
+    },
+    {
+      "id": 17,
+      "name": "탐험마",
+      "skill": "길을 뚫자!",
+      "type": "piercing_projectile",
+      "cooldown_seconds": 25,
+      "duration_seconds": 0,
+      "species_id": 17,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "17/00.png",
+        "17/01.png",
+        "17/02.png",
+        "17/03.png"
+      ],
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          149,
+          3066,
+          516,
+          3204
+        ],
+        [
+          673,
+          3006,
+          1033,
+          3317
+        ],
+        [
+          1185,
+          2959,
+          1656,
+          3375
+        ],
+        [
+          1848,
+          3026,
+          2163,
+          3299
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "17/00.png",
+      "impact_frames": [
+        "17/01.png",
+        "17/02.png",
+        "17/03.png"
+      ],
+      "projectile_count": 5,
+      "launch_interval_ms": 120,
+      "trajectory": "straight"
+    },
+    {
+      "id": 18,
+      "name": "우주마",
+      "skill": "작은 블랙홀",
+      "type": "ground_zone",
+      "cooldown_seconds": 35,
+      "duration_seconds": 3,
+      "species_id": 18,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "18/00.png",
+        "18/01.png",
+        "18/02.png",
+        "18/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          190,
+          299,
+          434,
+          529
+        ],
+        [
+          669,
+          219,
+          1067,
+          596
+        ],
+        [
+          1161,
+          170,
+          1672,
+          648
+        ],
+        [
+          1817,
+          245,
+          2206,
+          614
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "18/02.png"
+    },
+    {
+      "id": 19,
+      "name": "별똥이",
+      "skill": "진짜 별똥별!",
+      "type": "target_burst",
+      "cooldown_seconds": 35,
+      "duration_seconds": 0,
+      "species_id": 19,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "19/00.png",
+        "19/01.png",
+        "19/02.png",
+        "19/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          210,
+          867,
+          408,
+          1066
+        ],
+        [
+          675,
+          751,
+          991,
+          1143
+        ],
+        [
+          1125,
+          728,
+          1644,
+          1222
+        ],
+        [
+          1822,
+          795,
+          2212,
+          1150
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "19/02.png"
+    },
+    {
+      "id": 20,
+      "name": "꽃송이",
+      "skill": "다정한 꽃밭",
+      "type": "house_heal",
+      "cooldown_seconds": 35,
+      "duration_seconds": 0,
+      "species_id": 20,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "20/00.png",
+        "20/01.png",
+        "20/02.png",
+        "20/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          211,
+          1412,
+          393,
+          1588
+        ],
+        [
+          669,
+          1317,
+          1009,
+          1706
+        ],
+        [
+          1151,
+          1279,
+          1666,
+          1742
+        ],
+        [
+          1817,
+          1363,
+          2206,
+          1679
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "20/02.png"
+    },
+    {
+      "id": 21,
+      "name": "버섯마",
+      "skill": "포자 구름",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 5,
+      "species_id": 21,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "21/00.png",
+        "21/01.png",
+        "21/02.png",
+        "21/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          193,
+          1947,
+          411,
+          2180
+        ],
+        [
+          645,
+          1885,
+          1042,
+          2259
+        ],
+        [
+          1128,
+          1855,
+          1668,
+          2310
+        ],
+        [
+          1831,
+          1926,
+          2212,
+          2209
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "21/02.png"
+    },
+    {
+      "id": 22,
+      "name": "개굴마",
+      "skill": "끈적한 개굴 점액",
+      "type": "ground_zone",
+      "cooldown_seconds": 25,
+      "duration_seconds": 4,
+      "species_id": 22,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "22/00.png",
+        "22/01.png",
+        "22/02.png",
+        "22/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          190,
+          2540,
+          395,
+          2692
+        ],
+        [
+          678,
+          2473,
+          1023,
+          2795
+        ],
+        [
+          1152,
+          2434,
+          1650,
+          2824
+        ],
+        [
+          1829,
+          2512,
+          2184,
+          2769
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "22/02.png"
+    },
+    {
+      "id": 23,
+      "name": "냥고마",
+      "skill": "거기, 빈틈",
+      "type": "straight_projectile",
+      "cooldown_seconds": 25,
+      "duration_seconds": 0,
+      "species_id": 23,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "23/00.png",
+        "23/01.png",
+        "23/02.png",
+        "23/03.png"
+      ],
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          149,
+          3016,
+          459,
+          3246
+        ],
+        [
+          694,
+          3004,
+          984,
+          3268
+        ],
+        [
+          1198,
+          2966,
+          1631,
+          3311
+        ],
+        [
+          1822,
+          2994,
+          2198,
+          3262
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "23/00.png",
+      "impact_frames": [
+        "23/01.png",
+        "23/02.png",
+        "23/03.png"
+      ],
+      "projectile_count": 1,
+      "launch_interval_ms": 0,
+      "trajectory": "straight"
+    },
+    {
+      "id": 24,
+      "name": "멍고마",
+      "skill": "누가 들어오래!",
+      "type": "ground_zone",
+      "cooldown_seconds": 30,
+      "duration_seconds": 1.5,
+      "species_id": 24,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "24/00.png",
+        "24/01.png",
+        "24/02.png",
+        "24/03.png"
+      ],
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          212,
+          340,
+          453,
+          511
+        ],
+        [
+          719,
+          208,
+          1140,
+          643
+        ],
+        [
+          1284,
+          151,
+          1817,
+          700
+        ],
+        [
+          1973,
+          239,
+          2376,
+          628
+        ]
+      ],
+      "anchor": "bottom-center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "24/02.png"
+    },
+    {
+      "id": 25,
+      "name": "토끼마",
+      "skill": "깜짝 토끼 연사",
+      "type": "straight_projectile",
+      "cooldown_seconds": 25,
+      "duration_seconds": 0,
+      "species_id": 25,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "25/00.png",
+        "25/01.png",
+        "25/02.png",
+        "25/03.png"
+      ],
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          182,
+          902,
+          511,
+          1043
+        ],
+        [
+          761,
+          825,
+          1099,
+          1146
+        ],
+        [
+          1287,
+          773,
+          1797,
+          1226
+        ],
+        [
+          1989,
+          850,
+          2366,
+          1130
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "25/00.png",
+      "impact_frames": [
+        "25/01.png",
+        "25/02.png",
+        "25/03.png"
+      ],
+      "projectile_count": 10,
+      "launch_interval_ms": 70,
+      "trajectory": "straight"
+    },
+    {
+      "id": 26,
+      "name": "당근마",
+      "skill": "끝까지 던진다",
+      "type": "straight_projectile",
+      "cooldown_seconds": 30,
+      "duration_seconds": 0,
+      "species_id": 26,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "26/00.png",
+        "26/01.png",
+        "26/02.png",
+        "26/03.png"
+      ],
+      "source": "../skill-pilot (approved art reused)",
+      "source_boxes": null,
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "26/00.png",
+      "impact_frames": [
+        "26/01.png",
+        "26/02.png",
+        "26/03.png"
+      ],
+      "projectile_count": 5,
+      "launch_interval_ms": 160,
+      "trajectory": "straight"
+    },
+    {
+      "id": 27,
+      "name": "민트마",
+      "skill": "정신 차려",
+      "type": "target_burst",
+      "cooldown_seconds": 30,
+      "duration_seconds": 2,
+      "species_id": 27,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "27/00.png",
+        "27/01.png",
+        "27/02.png",
+        "27/03.png"
+      ],
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          176,
+          1453,
+          465,
+          1629
+        ],
+        [
+          731,
+          1348,
+          1136,
+          1746
+        ],
+        [
+          1255,
+          1302,
+          1797,
+          1808
+        ],
+        [
+          1958,
+          1365,
+          2410,
+          1757
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "27/02.png"
+    },
+    {
+      "id": 28,
+      "name": "초코마",
+      "skill": "승부는 지금부터",
+      "type": "self_buff",
+      "cooldown_seconds": 25,
+      "duration_seconds": 8,
+      "species_id": 28,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "28/00.png",
+        "28/01.png",
+        "28/02.png",
+        "28/03.png"
+      ],
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          232,
+          2078,
+          420,
+          2258
+        ],
+        [
+          721,
+          1924,
+          1123,
+          2418
+        ],
+        [
+          1268,
+          1884,
+          1812,
+          2450
+        ],
+        [
+          1972,
+          1976,
+          2359,
+          2379
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "28/02.png"
+    },
+    {
+      "id": 29,
+      "name": "무지개마",
+      "skill": "무지개 소나기",
+      "type": "target_burst",
+      "cooldown_seconds": 30,
+      "duration_seconds": 0,
+      "species_id": 29,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "29/00.png",
+        "29/01.png",
+        "29/02.png",
+        "29/03.png"
+      ],
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          209,
+          2637,
+          419,
+          2842
+        ],
+        [
+          757,
+          2548,
+          1079,
+          2980
+        ],
+        [
+          1306,
+          2545,
+          1766,
+          3022
+        ],
+        [
+          1972,
+          2568,
+          2374,
+          2944
+        ]
+      ],
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "peak_loop_frame": "29/02.png"
+    },
+    {
+      "id": 30,
+      "name": "간첩마",
+      "skill": "고구마 폭탄이구마!",
+      "type": "parabolic_projectile",
+      "cooldown_seconds": 30,
+      "duration_seconds": 3,
+      "species_id": 30,
+      "frame_size": [
+        384,
+        384
+      ],
+      "frames": [
+        "30/00.png",
+        "30/01.png",
+        "30/02.png",
+        "30/03.png"
+      ],
+      "source": "../skill-pilot (approved art reused)",
+      "source_boxes": null,
+      "anchor": "center",
+      "attack_motion": "reuse-existing-throw",
+      "speech": "program-rendered",
+      "frames_timing": "pilot; actual durations set in code",
+      "projectile_frame": "30/00.png",
+      "impact_frames": [
+        "30/01.png",
+        "30/02.png",
+        "30/03.png"
+      ],
+      "projectile_count": 1,
+      "launch_interval_ms": 0,
+      "trajectory": "parabolic"
+    }
+  ],
+  "notes": [
+    "Cooldown/duration are planning recommendations, not implemented game balance.",
+    "Auras do not include character bodies; speech is drawn by program.",
+    "Projectiles are launched sequentially with code, never as one five-projectile sprite.",
+    "Only visual frames are supplied; damage, statuses and persistence require code."
+  ]
+}

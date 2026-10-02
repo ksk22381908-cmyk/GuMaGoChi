@@ -47,6 +47,7 @@ namespace GuMaGoChi {
     }
     public class SaveData {
         public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0, BestGoals=0;
+        public int DefenseBestWave=0,DefenseBestKills=0;
         public List<Pet> Pets=new List<Pet>();
         public List<int> Discovered=new List<int>();
         public bool AutoStart=false, StarterNutrientsClaimed=false;
@@ -163,6 +164,7 @@ namespace GuMaGoChi {
         public static SaveData Decode(string json) {
             SaveData d=Serializer().Deserialize<SaveData>(json);
             if(d==null || (d.Version!=1&&d.Version!=2) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.BestGoals<0 || d.BestGoals>15 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
+            if(d.DefenseBestWave<0||d.DefenseBestKills<0)throw new InvalidDataException("디펜스 기록이 올바르지 않습니다.");
             var ids=new HashSet<string>();
             foreach(Pet p in d.Pets) {
                 if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>=Catalog.All.Length || p.PendingSpecies< -1 || p.PendingSpecies>=Catalog.All.Length || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");

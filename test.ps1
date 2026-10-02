@@ -14,6 +14,7 @@ foreach ($typeName in @('GuMaGoChi.Tests', 'GuMaGoChi.UiCheck')) {
     Write-Output $result
 }
 $assembly.GetType('GuMaGoChi.RenderCheck').GetMethod('Run', [Reflection.BindingFlags]'Public,Static').Invoke($null, @())
+$assembly.GetType('GuMaGoChi.DefenseTests').GetMethod('Render', [Reflection.BindingFlags]'Public,Static').Invoke($null, @())
 '@
 $runnerPath = Join-Path $PSScriptRoot 'bin/framework-test.ps1'
 Set-Content -LiteralPath $runnerPath -Value $frameworkTestScript -Encoding utf8

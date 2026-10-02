@@ -1,0 +1,1387 @@
+{
+  "scope": "31 species BASIC attacks; unique skills are separate",
+  "status": "integrated-v0.2.0",
+  "entries": [
+    {
+      "species_id": 0,
+      "name": "밤톨이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "00/00.png",
+      "impact_frames": [
+        "00/01.png",
+        "00/02.png",
+        "00/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          188,
+          328,
+          427,
+          528
+        ],
+        [
+          695,
+          244,
+          1050,
+          602
+        ],
+        [
+          1247,
+          232,
+          1668,
+          630
+        ],
+        [
+          1848,
+          292,
+          2190,
+          595
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 1,
+      "name": "꿀떡이",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "01/00.png",
+      "impact_frames": [
+        "01/01.png",
+        "01/02.png",
+        "01/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          183,
+          859,
+          426,
+          1038
+        ],
+        [
+          694,
+          803,
+          1021,
+          1089
+        ],
+        [
+          1254,
+          799,
+          1616,
+          1129
+        ],
+        [
+          1847,
+          835,
+          2184,
+          1085
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 2,
+      "name": "자몽이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "02/00.png",
+      "impact_frames": [
+        "02/01.png",
+        "02/02.png",
+        "02/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          181,
+          1353,
+          422,
+          1582
+        ],
+        [
+          715,
+          1323,
+          996,
+          1621
+        ],
+        [
+          1248,
+          1308,
+          1607,
+          1634
+        ],
+        [
+          1847,
+          1341,
+          2166,
+          1607
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 3,
+      "name": "군밤이",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "03/00.png",
+      "impact_frames": [
+        "03/01.png",
+        "03/02.png",
+        "03/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          182,
+          1893,
+          424,
+          2101
+        ],
+        [
+          696,
+          1846,
+          1047,
+          2178
+        ],
+        [
+          1243,
+          1829,
+          1650,
+          2181
+        ],
+        [
+          1850,
+          1872,
+          2185,
+          2140
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 4,
+      "name": "새싹이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "04/00.png",
+      "impact_frames": [
+        "04/01.png",
+        "04/02.png",
+        "04/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          188,
+          2465,
+          449,
+          2657
+        ],
+        [
+          695,
+          2408,
+          1010,
+          2753
+        ],
+        [
+          1254,
+          2374,
+          1626,
+          2777
+        ],
+        [
+          1853,
+          2432,
+          2168,
+          2714
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 5,
+      "name": "딸기마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "05/00.png",
+      "impact_frames": [
+        "05/01.png",
+        "05/02.png",
+        "05/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-0.png",
+      "source_boxes": [
+        [
+          188,
+          3037,
+          414,
+          3209
+        ],
+        [
+          693,
+          2983,
+          1011,
+          3261
+        ],
+        [
+          1234,
+          2967,
+          1597,
+          3288
+        ],
+        [
+          1867,
+          3000,
+          2169,
+          3252
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 6,
+      "name": "구름이",
+      "trajectory": "point",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "06/00.png",
+      "impact_frames": [
+        "06/01.png",
+        "06/02.png",
+        "06/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          201,
+          304,
+          492,
+          513
+        ],
+        [
+          724,
+          266,
+          1025,
+          564
+        ],
+        [
+          1246,
+          212,
+          1624,
+          592
+        ],
+        [
+          1829,
+          266,
+          2157,
+          571
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 7,
+      "name": "달콩이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "07/00.png",
+      "impact_frames": [
+        "07/01.png",
+        "07/02.png",
+        "07/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          227,
+          838,
+          459,
+          1028
+        ],
+        [
+          716,
+          770,
+          1044,
+          1090
+        ],
+        [
+          1239,
+          746,
+          1622,
+          1119
+        ],
+        [
+          1857,
+          801,
+          2166,
+          1077
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 8,
+      "name": "햇살이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "08/00.png",
+      "impact_frames": [
+        "08/01.png",
+        "08/02.png",
+        "08/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          201,
+          1383,
+          475,
+          1549
+        ],
+        [
+          735,
+          1321,
+          1033,
+          1607
+        ],
+        [
+          1243,
+          1262,
+          1624,
+          1657
+        ],
+        [
+          1845,
+          1336,
+          2150,
+          1601
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 9,
+      "name": "눈송이",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "09/00.png",
+      "impact_frames": [
+        "09/01.png",
+        "09/02.png",
+        "09/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          210,
+          1909,
+          474,
+          2095
+        ],
+        [
+          724,
+          1826,
+          1031,
+          2178
+        ],
+        [
+          1230,
+          1817,
+          1609,
+          2198
+        ],
+        [
+          1829,
+          1856,
+          2155,
+          2151
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 10,
+      "name": "왕고마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "10/00.png",
+      "impact_frames": [
+        "10/01.png",
+        "10/02.png",
+        "10/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          212,
+          2464,
+          491,
+          2620
+        ],
+        [
+          706,
+          2392,
+          1031,
+          2723
+        ],
+        [
+          1228,
+          2350,
+          1632,
+          2755
+        ],
+        [
+          1828,
+          2411,
+          2179,
+          2709
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 11,
+      "name": "마법마",
+      "trajectory": "point",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "11/00.png",
+      "impact_frames": [
+        "11/01.png",
+        "11/02.png",
+        "11/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-1.png",
+      "source_boxes": [
+        [
+          182,
+          2985,
+          457,
+          3246
+        ],
+        [
+          726,
+          2974,
+          1018,
+          3253
+        ],
+        [
+          1228,
+          2921,
+          1637,
+          3318
+        ],
+        [
+          1837,
+          2962,
+          2147,
+          3256
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 12,
+      "name": "해적마",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "12/00.png",
+      "impact_frames": [
+        "12/01.png",
+        "12/02.png",
+        "12/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          189,
+          296,
+          443,
+          534
+        ],
+        [
+          686,
+          251,
+          1047,
+          573
+        ],
+        [
+          1248,
+          225,
+          1647,
+          608
+        ],
+        [
+          1843,
+          245,
+          2194,
+          572
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 13,
+      "name": "요리마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "13/00.png",
+      "impact_frames": [
+        "13/01.png",
+        "13/02.png",
+        "13/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          172,
+          837,
+          481,
+          1039
+        ],
+        [
+          685,
+          804,
+          1040,
+          1137
+        ],
+        [
+          1236,
+          774,
+          1647,
+          1157
+        ],
+        [
+          1843,
+          817,
+          2178,
+          1121
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 14,
+      "name": "화가마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "14/00.png",
+      "impact_frames": [
+        "14/01.png",
+        "14/02.png",
+        "14/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          183,
+          1407,
+          463,
+          1578
+        ],
+        [
+          690,
+          1359,
+          1023,
+          1653
+        ],
+        [
+          1233,
+          1306,
+          1649,
+          1700
+        ],
+        [
+          1843,
+          1372,
+          2179,
+          1626
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 15,
+      "name": "음표마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "15/00.png",
+      "impact_frames": [
+        "15/01.png",
+        "15/02.png",
+        "15/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          213,
+          1968,
+          399,
+          2153
+        ],
+        [
+          712,
+          1918,
+          1007,
+          2219
+        ],
+        [
+          1249,
+          1872,
+          1645,
+          2263
+        ],
+        [
+          1870,
+          1919,
+          2167,
+          2222
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 16,
+      "name": "책벌레마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "16/00.png",
+      "impact_frames": [
+        "16/01.png",
+        "16/02.png",
+        "16/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          183,
+          2493,
+          439,
+          2773
+        ],
+        [
+          696,
+          2453,
+          1044,
+          2795
+        ],
+        [
+          1228,
+          2408,
+          1649,
+          2833
+        ],
+        [
+          1844,
+          2457,
+          2189,
+          2795
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 17,
+      "name": "탐험마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "17/00.png",
+      "impact_frames": [
+        "17/01.png",
+        "17/02.png",
+        "17/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-2.png",
+      "source_boxes": [
+        [
+          184,
+          3082,
+          465,
+          3205
+        ],
+        [
+          689,
+          3023,
+          1010,
+          3294
+        ],
+        [
+          1260,
+          2982,
+          1625,
+          3332
+        ],
+        [
+          1867,
+          3037,
+          2136,
+          3281
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 18,
+      "name": "우주마",
+      "trajectory": "point",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "18/00.png",
+      "impact_frames": [
+        "18/01.png",
+        "18/02.png",
+        "18/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          197,
+          286,
+          440,
+          525
+        ],
+        [
+          723,
+          255,
+          1012,
+          550
+        ],
+        [
+          1238,
+          223,
+          1634,
+          565
+        ],
+        [
+          1831,
+          280,
+          2196,
+          537
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 19,
+      "name": "별똥이",
+      "trajectory": "point",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "19/00.png",
+      "impact_frames": [
+        "19/01.png",
+        "19/02.png",
+        "19/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          216,
+          836,
+          409,
+          1030
+        ],
+        [
+          732,
+          805,
+          1015,
+          1068
+        ],
+        [
+          1233,
+          768,
+          1647,
+          1126
+        ],
+        [
+          1835,
+          805,
+          2196,
+          1067
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 20,
+      "name": "꽃송이",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "20/00.png",
+      "impact_frames": [
+        "20/01.png",
+        "20/02.png",
+        "20/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          198,
+          1394,
+          392,
+          1525
+        ],
+        [
+          732,
+          1327,
+          997,
+          1620
+        ],
+        [
+          1244,
+          1305,
+          1623,
+          1647
+        ],
+        [
+          1836,
+          1345,
+          2210,
+          1592
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 21,
+      "name": "버섯마",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "21/00.png",
+      "impact_frames": [
+        "21/01.png",
+        "21/02.png",
+        "21/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          210,
+          1946,
+          394,
+          2124
+        ],
+        [
+          702,
+          1872,
+          1017,
+          2202
+        ],
+        [
+          1226,
+          1854,
+          1641,
+          2231
+        ],
+        [
+          1834,
+          1904,
+          2195,
+          2173
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 22,
+      "name": "개굴마",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "22/00.png",
+      "impact_frames": [
+        "22/01.png",
+        "22/02.png",
+        "22/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          198,
+          2528,
+          394,
+          2677
+        ],
+        [
+          712,
+          2464,
+          1017,
+          2753
+        ],
+        [
+          1232,
+          2436,
+          1613,
+          2765
+        ],
+        [
+          1839,
+          2477,
+          2186,
+          2741
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 23,
+      "name": "냥고마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "23/00.png",
+      "impact_frames": [
+        "23/01.png",
+        "23/02.png",
+        "23/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-3.png",
+      "source_boxes": [
+        [
+          194,
+          3035,
+          390,
+          3253
+        ],
+        [
+          727,
+          3034,
+          959,
+          3249
+        ],
+        [
+          1253,
+          2987,
+          1604,
+          3298
+        ],
+        [
+          1837,
+          3047,
+          2166,
+          3259
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 24,
+      "name": "멍고마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "24/00.png",
+      "impact_frames": [
+        "24/01.png",
+        "24/02.png",
+        "24/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          222,
+          326,
+          464,
+          505
+        ],
+        [
+          786,
+          275,
+          1096,
+          572
+        ],
+        [
+          1354,
+          219,
+          1757,
+          609
+        ],
+        [
+          1988,
+          282,
+          2373,
+          570
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 25,
+      "name": "토끼마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "25/00.png",
+      "impact_frames": [
+        "25/01.png",
+        "25/02.png",
+        "25/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          196,
+          905,
+          493,
+          1035
+        ],
+        [
+          811,
+          850,
+          1083,
+          1109
+        ],
+        [
+          1354,
+          804,
+          1713,
+          1158
+        ],
+        [
+          2014,
+          859,
+          2365,
+          1100
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 26,
+      "name": "당근마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "26/00.png",
+      "impact_frames": [
+        "26/01.png",
+        "26/02.png",
+        "26/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "../skill-pilot (reused approved art)",
+      "source_boxes": null,
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 27,
+      "name": "민트마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "27/00.png",
+      "impact_frames": [
+        "27/01.png",
+        "27/02.png",
+        "27/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          196,
+          1471,
+          425,
+          1624
+        ],
+        [
+          774,
+          1374,
+          1099,
+          1720
+        ],
+        [
+          1337,
+          1349,
+          1742,
+          1764
+        ],
+        [
+          1983,
+          1412,
+          2372,
+          1734
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 28,
+      "name": "초코마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "28/00.png",
+      "impact_frames": [
+        "28/01.png",
+        "28/02.png",
+        "28/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          235,
+          2082,
+          412,
+          2250
+        ],
+        [
+          777,
+          2005,
+          1099,
+          2340
+        ],
+        [
+          1322,
+          1968,
+          1756,
+          2365
+        ],
+        [
+          1967,
+          2012,
+          2368,
+          2346
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 29,
+      "name": "무지개마",
+      "trajectory": "straight",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "29/00.png",
+      "impact_frames": [
+        "29/01.png",
+        "29/02.png",
+        "29/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "source-4.png",
+      "source_boxes": [
+        [
+          226,
+          2658,
+          412,
+          2837
+        ],
+        [
+          786,
+          2616,
+          1082,
+          2913
+        ],
+        [
+          1326,
+          2569,
+          1737,
+          2968
+        ],
+        [
+          1967,
+          2596,
+          2369,
+          2939
+        ]
+      ],
+      "direction": "left",
+      "anchor": "center"
+    },
+    {
+      "species_id": 30,
+      "name": "간첩마",
+      "trajectory": "parabolic",
+      "frame_size": [
+        256,
+        256
+      ],
+      "attack_motion": "reuse-existing-throw",
+      "launch_or_telegraph": "30/00.png",
+      "impact_frames": [
+        "30/01.png",
+        "30/02.png",
+        "30/03.png"
+      ],
+      "impact_frame_ms": 100,
+      "source": "../skill-pilot (reused approved art)",
+      "source_boxes": null,
+      "direction": "left",
+      "anchor": "center"
+    }
+  ],
+  "notes": [
+    "Flight coordinates and collision are controlled by code, not baked into frames.",
+    "Point attacks use 00 as a telegraph at the target, not a projectile.",
+    "Carrot skill remains five sequential shots at 160ms intervals in the pilot manifest."
+  ]
+}

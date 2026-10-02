@@ -30,6 +30,9 @@ namespace GuMaGoChi {
             shop.Controls.Add(new Label {Left=30,Top=330,Width=860,Height=160,Text="무료 수돗물과 기본 치료는 개체 행동 메뉴에서 사용해요.\n먹이는 개체별 5분, 치료는 10분의 공통 쿨타임이 있어요.\n가방 아이템은 모든 고구마가 공유하지만, 효과는 사용한 한 마리에게만 적용돼요.\n반복 놀이·훈련은 가능하며, 완료 보상은 3분 간격, 골인마다 즉시 씨앗 +1을 받아요.\n성장 영양제는 아기 행동 메뉴에서 먹이며, 나이와 수명에는 영향을 주지 않아요."});
             var collection=new TabPage("성체 도감") {BackColor=Art.Cream};tabs.TabPages.Add(collection);dex=Flow(collection);
             var memories=new TabPage("추억 앨범") {BackColor=Art.Cream};tabs.TabPages.Add(memories);album=Flow(memories);
+            var defense=new TabPage("버러지 디펜스") {BackColor=Art.Cream};tabs.TabPages.Add(defense);
+            defense.Controls.Add(new Label {Left=30,Top=30,Width=850,Height=130,Text="고구마 버러지 디펜스 · 무한 웨이브\n살아 있는 고구마 최대 5마리 편성 / 아기도 참가 가능\nShift + 왼쪽 클릭: 공격 표식 / 고구마 클릭: 고유 스킬\n10마리 처치마다 씨앗 +1 / 전투 중 육성 시간은 멈춰요."});
+            AddButton(defense,"디펜스 시작 · 편성하기",30,185,300,65,app.OpenDefense);
             var settings=new TabPage("저장 · 사용 안내") {BackColor=Art.Cream};tabs.TabPages.Add(settings);
             settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 180 EXP(자동 누적 3시간)예요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n3단계 성장과 집 꾸미기는 추후 업데이트 예정이에요.\n아기 이동·식사·발사·성장 준비 모션을 제공해요. 수면은 눈을 감은 전용 모션이에요."});
             AddButton(settings,"저장 데이터 내보내기",28,260,230,42,Export);
@@ -77,6 +80,7 @@ namespace GuMaGoChi {
                 if(MessageBox.Show("현재 육성 데이터를 가져온 파일로 교체합니다. 현재 데이터는 별도 백업합니다. 계속할까요?","저장 데이터 가져오기",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)return;
                 Directory.CreateDirectory(Storage.Folder);File.WriteAllText(Path.Combine(Storage.Folder,"before-import-"+DateTime.Now.ToString("yyyyMMdd-HHmmss")+".json"),Storage.Encode(app.Engine.Data));
                 if(app.Activity!=null)app.Activity.CancelActivity();
+                if(app.Defense!=null&&!app.Defense.IsDisposed)app.Defense.Close();
                 // Auto-start belongs to this PC, not to an imported save.
                 data.AutoStart=app.Engine.Data.AutoStart;app.Engine=new Engine(data);dexCount=-1;deadCount=-1;app.Change(()=>{});ShowMessage("저장 데이터를 가져왔어요.");
             }catch(Exception ex){MessageBox.Show(ex.Message,"가져오기 실패");}
