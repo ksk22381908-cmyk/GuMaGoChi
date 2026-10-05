@@ -61,7 +61,7 @@ namespace GuMaGoChi {
             basic.Reveal(baby);Check(baby.SpeciesId>=0&&baby.Age==Engine.AdultAge,"Basic care reaches growth after three hours");
             var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==Catalog.All.Length,"Low interaction retains basic candidates");
             untouchedPet.Training=100;for(int i=0;i<1000;i++)if(untouchedEngine.ChooseSpecies(untouchedPet)==6)throw new Exception("Excluded species selected");Check(true,"Excluded species never selected in repeated draws");
-            bool rejected=false;try{Storage.Decode("{\"Version\":3}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
+            bool rejected=false;try{Storage.Decode("{\"Version\":4}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
             var disease=new SaveData();var sickEngine=new Engine(disease);var sick=sickEngine.Adopt("아픈고구마",true);sick.Illness=99.99;sick.Hunger=100;sickEngine.Tick(60);Check(sick.Dead&&sick.Cause=="질병","Disease can kill before lifespan");
             var speech=new System.Collections.Generic.HashSet<string>();
             foreach(var species in Catalog.All) {
@@ -71,7 +71,7 @@ namespace GuMaGoChi {
                 Check(!String.IsNullOrEmpty(Dialogue.Activity(speaker,true))&&!String.IsNullOrEmpty(Dialogue.Activity(speaker,false))&&!String.IsNullOrEmpty(Dialogue.Clean(speaker))&&!String.IsNullOrEmpty(Dialogue.Greet(speaker)),"Activity dialogue: "+species.Name);
                 speaker.Illness=30;Check(Dialogue.Need(speaker).Contains("치료"),"Illness remains visible in dialogue: "+species.Name);
             }
-            Check(Dialogue.Get(new Pet {SpeciesId=30},0)=="배가 든든하구마~","Spy uses authored speech without numerical suffix");
+            Check(Dialogue.Options(new Pet {SpeciesId=30},0,"배가 든든하구마~").Contains(Dialogue.Get(new Pet {SpeciesId=30},0)),"Spy uses authored speech without numerical suffix");
             var revised=new SaveData {Seeds=90,StarterNutrientsClaimed=true};var revisedEngine=new Engine(revised,5);var young=revisedEngine.Adopt("경험치",true);
             revisedEngine.Tick(30);Check(young.Age==30&&young.GrowthExp==.5,"Fractional experience accumulates independently");
             young.Active=false;revisedEngine.Tick(120);Check(young.Age==30&&young.GrowthExp==.5,"Inactive freezes experience and age");young.Active=true;
@@ -92,7 +92,7 @@ namespace GuMaGoChi {
             young.Sleeping=true;oldSeeds=revised.Seeds;Check(!revisedEngine.ScoreGoal(young)&&revised.Seeds==oldSeeds,"Unavailable pet cannot score");young.Sleeping=false;
             var legacy=new SaveData {Version=1};legacy.Pets.Add(new Pet {Age=5400,PetCooldown=800,TrainCooldown=1200});legacy.Pets.Add(new Pet {Age=20000});legacy.Pets.Add(new Pet {Age=28800,GrowthReady=true,PendingSpecies=23});legacy.Pets.Add(new Pet {Age=40000,SpeciesId=30});
             var migrated=Storage.Decode(Storage.Encode(legacy));var migratedEngine=new Engine(migrated,4);
-            Check(migrated.Version==2&&migrated.Pets[0].Age==5400&&migrated.Pets[0].GrowthExp==90&&migrated.Pets[0].PetCooldown==180,"Legacy baby progress migrates preserving age");
+            Check(migrated.Version==3&&migrated.Pets[0].Age==5400&&migrated.Pets[0].GrowthExp==90&&migrated.Pets[0].PetCooldown==180,"Legacy baby progress migrates preserving age");
             Check(migrated.Pets[1].GrowthReady&&migrated.Pets[1].Age==20000&&migrated.Pets[1].PendingSpecies>=0,"Older legacy baby becomes ready without age reset");
             Check(migrated.Pets[2].PendingSpecies==23&&migrated.Pets[3].SpeciesId==30&&migrated.Pets[3].Age==40000,"Legacy growth result and adult retained");
             revised.Nutrients=2;var roundtrip=Storage.Decode(Storage.Encode(revised));Check(roundtrip.Nutrients==2&&roundtrip.Pets[0].GrowthExp==180,"New experience and inventory survive save roundtrip");
@@ -115,7 +115,11 @@ namespace GuMaGoChi {
             double power=BallPhysics.Strength(1920,false)*BallPhysics.MaxDrag;Check(Math.Abs(power*power/BallPhysics.Gravity-1888)<1,"Full power reaches screen width");
             var edgePull=BallPhysics.Pull(new System.Drawing.PointF(100,900),new System.Drawing.PointF(16,964),1920,980);Check(Math.Abs(Math.Sqrt(edgePull.X*edgePull.X+edgePull.Y*edgePull.Y)-280)<.01,"Screen edge drag can reach full power without leaving monitor");
             foreach(var species in Catalog.All){Check(!String.IsNullOrEmpty(Dialogue.Hit(new Pet {SpeciesId=species.Id})),"Species hit reaction");}
-            Check(Dialogue.Hit(new Pet {SpeciesId=2})=="일부러 그런 거 아니지?"&&Dialogue.Hit(new Pet {SpeciesId=30})=="감… 고구마 살려주구마!","Requested hit reactions preserved");
+            Check(Dialogue.Options(new Pet {SpeciesId=2},8,"일부러 그런 거 아니지?")[0]=="일부러 그런 거 아니지?"&&Dialogue.Options(new Pet {SpeciesId=30},8,"감… 고구마 살려주구마!")[0]=="감… 고구마 살려주구마!","Requested hit reactions preserved");
+            count+=DialogueTests.Run();
+            count+=EvolutionTests.Run();
+            count+=RunnerTests.Run();
+            count+=LunchTests.Run();
             var hitTarget=new Pet();Check(ActivityWindow.CanHit(challengePet,hitTarget)&&!ActivityWindow.CanHit(challengePet,challengePet),"Other pet collision excludes thrower");hitTarget.Sleeping=true;Check(!ActivityWindow.CanHit(challengePet,hitTarget),"Sleeping pet excluded");
             return "PASS: "+count+" checks\r\nCare, growth, save migration, challenge progression, goal physics, rewards, best score and dialogue verified.\r\n";
         }
@@ -182,7 +186,9 @@ namespace GuMaGoChi {
                 app.StartActivity(pet,false);var companion=new Pet {Name="간첩",SpeciesId=30,X=pet.X+220,Y=pet.Y};data.Pets.Add(companion);app.SyncWindows();var friendWindow=app.Windows[companion.Id];
                 var hitMethod=typeof(ActivityWindow).GetMethod("HitOthers",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);
                 var hitFrom=new System.Drawing.PointF(friendWindow.Left-app.Activity.Left-50,friendWindow.Top-app.Activity.Top+120);var hitTo=new System.Drawing.PointF(hitFrom.X+250,hitFrom.Y);
-                hitMethod.Invoke(app.Activity,new object[]{hitFrom,hitTo});Check(friendWindow.Bubble=="감… 고구마 살려주구마!","Fetch collision displays spy reaction");friendWindow.Bubble="";
+                hitMethod.Invoke(app.Activity,new object[]{hitFrom,hitTo});Check(Dialogue.Options(friendWindow.Pet,8,"감… 고구마 살려주구마!").Contains(friendWindow.Bubble),"Fetch collision displays spy reaction");
+                string hitFeedback=(string)typeof(ActivityWindow).GetField("feedback",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(app.Activity);
+                Check(hitFeedback==friendWindow.Pet.Name+": "+friendWindow.Bubble,"Fetch collision feedback matches bubble");friendWindow.Bubble="";
                 hitMethod.Invoke(app.Activity,new object[]{hitFrom,hitTo});Check(friendWindow.Bubble=="","Repeated hit in same throw does not repeat interaction");app.Activity.CancelActivity();
                 pet.TrainCooldown=0;app.StartActivity(pet,true);var challengeWindow=app.Activity;var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;var challenge=(TrainingRun)typeof(ActivityWindow).GetField("run",flags).GetValue(challengeWindow);int challengeSeeds=data.Seeds,trainingBefore=pet.Training;
                 var frame=typeof(ActivityWindow).GetMethod("Frame",flags);var reset=typeof(ActivityWindow).GetMethod("ResetBall",flags);

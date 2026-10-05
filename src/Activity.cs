@@ -57,10 +57,10 @@ namespace GuMaGoChi {
                 Pet target=w.Pet;if(!w.Visible||!CanHit(Pet,target)||hitPets.Contains(target.Id))continue;
                 Rectangle body=new Rectangle(w.Left-Left+PetWindow.SpriteBounds.X,w.Top-Top+PetWindow.SpriteBounds.Y,PetWindow.SpriteBounds.Width,PetWindow.SpriteBounds.Height);
                 if(!BallPhysics.HitsBody(old,current,body))continue;
-                hitPets.Add(target.Id);w.Say(Dialogue.Hit(target));w.Animate("throw",velocity.X<0);
+                string reaction=Dialogue.Hit(target);hitPets.Add(target.Id);w.Say(reaction);w.Animate("throw",velocity.X<0);
                 ball.X=velocity.X>0?body.Left-BallPhysics.Radius-1:body.Right+BallPhysics.Radius+1;
                 velocity.X=-velocity.X*.55f;velocity.Y=-Math.Max(100,Math.Abs(velocity.Y)*.4f);
-                feedback=target.Name+": "+Dialogue.Hit(target);feedbackTime=4;break;
+                feedback=target.Name+": "+reaction;feedbackTime=4;break;
             }
         }
         void Frame(object s,EventArgs e) {

@@ -29,6 +29,73 @@ namespace GuMaGoChi {
             }
         }
         // Binary alpha avoids blending generated halos onto the magenta color-key
+        static Clip LoadEvolution(string key,int id) {
+            string cacheKey="evolution:"+id+":"+key;Clip cached;if(clips.TryGetValue(cacheKey,out cached))return cached;
+            string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","evolutions",Evolutions.All[id].Asset+"-atlas.png");
+            if(!File.Exists(path))return null;
+            string[] keys={"stand","walk","eat","throw","sleep","burrow"};int maxWidth=0,maxHeight=0;
+            using(var source=new Bitmap(path)) {
+                var rows=EvolutionRows(source);
+                string correctedPath=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","evolutions","horangoma-walk-corrected.png");
+                using(var corrected=id==2?new Bitmap(correctedPath):null) {
+                var correctedRows=corrected==null?null:EvolutionRows(corrected);
+                for(int row=0;row<6;row++) {
+                var clip=new Clip {Frames=new Bitmap[4]};int y=rows[row].Top,bottom=rows[row].Bottom;
+                for(int col=0;col<4;col++) {
+                    // The generated Chiwama throw starts with a leftover drinking cup.
+                    // Reuse its clean wind-up frame rather than display the cup during a throw.
+                    int sourceCol=id==5&&row==3&&col==0?1:col;
+                    int x=sourceCol*source.Width/4,right=(sourceCol+1)*source.Width/4;
+                    using(var cell=source.Clone(new Rectangle(x,y,right-x,bottom-y),PixelFormat.Format32bppArgb)) {
+                        if(corrected!=null&&row==1) {
+                            int cx=col*corrected.Width/4,cr=(col+1)*corrected.Width/4;
+                            using(var walk=corrected.Clone(new Rectangle(cx,correctedRows[1].Top,cr-cx,correctedRows[1].Height),PixelFormat.Format32bppArgb)) {
+                                RemoveWhiteBackground(walk);using(var cut=Cutout(walk)) {
+                                    float scale=source.Width/(float)corrected.Width;
+                                    clip.Frames[col]=new Bitmap(Math.Max(1,(int)Math.Round(cut.Width*scale)),Math.Max(1,(int)Math.Round(cut.Height*scale)),PixelFormat.Format32bppArgb);
+                                    using(var g=Graphics.FromImage(clip.Frames[col])){g.InterpolationMode=System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;g.PixelOffsetMode=System.Drawing.Drawing2D.PixelOffsetMode.Half;g.DrawImage(cut,new Rectangle(Point.Empty,clip.Frames[col].Size));}
+                                }
+                            }
+                        }else{RemoveWhiteBackground(cell);clip.Frames[col]=Cutout(cell,row==5);}
+                    }
+                    maxWidth=Math.Max(maxWidth,clip.Frames[col].Width);maxHeight=Math.Max(maxHeight,clip.Frames[col].Height);
+                }
+                clips["evolution:"+id+":"+keys[row]]=clip;
+                }
+                }
+            }
+            // One scale for the whole character, including sleeping and burrowing.
+            foreach(string pose in keys){clips["evolution:"+id+":"+pose].MaxWidth=maxWidth;clips["evolution:"+id+":"+pose].MaxHeight=maxHeight;}
+            return clips.TryGetValue(cacheKey,out cached)?cached:null;
+        }
+        static bool WhitePixel(int pixel){Color c=Color.FromArgb(pixel);return c.A<230||(c.R>=225&&c.G>=225&&c.B>=225&&Math.Max(c.R,Math.Max(c.G,c.B))-Math.Min(c.R,Math.Min(c.G,c.B))<25);}
+        static bool BackgroundPixel(int pixel){Color c=Color.FromArgb(pixel);return c.A<230||(c.R>=180&&c.G>=180&&c.B>=180&&Math.Max(c.R,Math.Max(c.G,c.B))-Math.Min(c.R,Math.Min(c.G,c.B))<45);}
+        static Rectangle[] EvolutionRows(Bitmap source) {
+            int w=source.Width,h=source.Height;var pixels=new int[w*h];var bands=new List<Rectangle>();
+            var data=source.LockBits(new Rectangle(0,0,w,h),ImageLockMode.ReadOnly,PixelFormat.Format32bppArgb);
+            for(int y=0;y<h;y++)Marshal.Copy(IntPtr.Add(data.Scan0,y*data.Stride),pixels,y*w,w);source.UnlockBits(data);
+            int top=-1,last=-1;
+            for(int y=0;y<h;y++) {
+                int ink=0;for(int x=0;x<w;x++)if(!WhitePixel(pixels[y*w+x]))ink++;
+                if(ink>5){if(top<0)top=y;last=y;}
+                if(top>=0&&(y-last>8||y==h-1)) {
+                    int start=Math.Max(0,top-3),end=Math.Min(h,last+4);bands.Add(new Rectangle(0,start,w,end-start));top=-1;
+                }
+            }
+            if(bands.Count!=6)throw new InvalidDataException("2차 진화 시트의 6개 동작 행을 확인할 수 없습니다.");
+            return bands.ToArray();
+        }
+        // Flood only the exterior so white teeth, highlights and cups are preserved.
+        static void RemoveWhiteBackground(Bitmap cell) {
+            int w=cell.Width,h=cell.Height;var pixels=new int[w*h];var removed=new bool[w*h];var queue=new Queue<int>();
+            var data=cell.LockBits(new Rectangle(0,0,w,h),ImageLockMode.ReadWrite,PixelFormat.Format32bppArgb);
+            for(int y=0;y<h;y++)Marshal.Copy(IntPtr.Add(data.Scan0,y*data.Stride),pixels,y*w,w);
+            for(int i=0;i<pixels.Length;i++)if((i/w==0||i/w==h-1||i%w==0||i%w==w-1)&&BackgroundPixel(pixels[i])){removed[i]=true;queue.Enqueue(i);}
+            while(queue.Count>0){int n=queue.Dequeue(),x=n%w,y=n/w;for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){int xx=x+dx,yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h)continue;int v=yy*w+xx;if(!removed[v]&&BackgroundPixel(pixels[v])){removed[v]=true;queue.Enqueue(v);}}}
+            for(int i=0;i<pixels.Length;i++)if(removed[i])pixels[i]=0;
+            for(int y=0;y<h;y++)Marshal.Copy(pixels,y*w,IntPtr.Add(data.Scan0,y*data.Stride),w);cell.UnlockBits(data);
+        }
+        public static Image EvolutionStand(int id){Clip clip=LoadEvolution("stand",id);return clip==null?null:clip.Frames[0];}
         static void LoadSpy(){
             string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","gancheopma","actions-atlas-draft.png");if(!File.Exists(path))return;
             string[] keys={"stand","walk","eat","throw","sleep","burrow"};int maxWidth=0,maxHeight=0;
@@ -65,8 +132,8 @@ namespace GuMaGoChi {
             return result;
         }
         public static Image AdultStand(int species){Clip clip=Load("stand",species);return clip==null?null:clip.Frames[0];}
-        public static bool Draw(Graphics g,Rectangle box,string key,double time,bool flip,int species=-1) {
-            Clip clip=Load(key,species);if(clip==null)return false;
+        public static bool Draw(Graphics g,Rectangle box,string key,double time,bool flip,int species=-1,int evolution=-1) {
+            Clip clip=evolution>=0?LoadEvolution(key,evolution):Load(key,species);if(clip==null)return false;
             bool once=key=="eat"||key=="throw"||key=="burrow";
             int frame=(int)(Math.Max(0,time)*(key=="sleep"?2:species>=0?4:8));frame=once?Math.Min(clip.Frames.Length-1,frame):frame%clip.Frames.Length;
             Bitmap image=clip.Frames[frame];float scale=Math.Min(box.Width/(float)clip.MaxWidth,box.Height/(float)clip.MaxHeight);

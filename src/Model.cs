@@ -33,7 +33,7 @@ namespace GuMaGoChi {
     }
     public class Pet {
         public string Id=Guid.NewGuid().ToString(), Name="고구마", LastWords="", DiedAt="", Cause="";
-        public int SpeciesId=-1, PendingSpecies=-1, Waste=0, X=0, Y=0;
+        public int SpeciesId=-1, PendingSpecies=-1, EvolutionId=-1, Waste=0, X=0, Y=0;
         public bool Active=true, Home=false, Sleeping=false, GrowthReady=false, Dead=false;
         public double Age=0, GrowthExp=0, Hunger=15, Dirt=5, Fatigue=5, Illness=0;
         public double FoodCooldown=0, MedicineCooldown=0, PetCooldown=0, PlayCooldown=0, TrainCooldown=0;
@@ -41,15 +41,19 @@ namespace GuMaGoChi {
         public int Affection=0, Play=0, Training=0, Shots=0, Goals=0, Care=0;
         public List<int> GrowthHistory=new List<int>();
         public Dictionary<string,int> Friends=new Dictionary<string,int>();
-        public string Kind { get { return SpeciesId<0 ? "아기 고구마" : Catalog.All[SpeciesId].Name; } }
+        public string Kind { get { return EvolutionId>=0 ? Evolutions.All[EvolutionId].Name : SpeciesId<0 ? "아기 고구마" : Catalog.All[SpeciesId].Name; } }
         public string Skill { get { return SpeciesId<0 ? "성장 중" : Catalog.All[SpeciesId].Skill; } }
-        public string Personality { get { return SpeciesId<0 ? "호기심 많은 아기" : Catalog.All[SpeciesId].Personality; } }
+        public string Personality { get { return EvolutionId>=0 ? Evolutions.All[EvolutionId].Personality : SpeciesId<0 ? "호기심 많은 아기" : Catalog.All[SpeciesId].Personality; } }
     }
     public class SaveData {
-        public int Version=2, Seeds=0, Dew=0, Medicine=0, Nutrients=0, BestGoals=0;
+        public int Version=3, Seeds=0, Dew=0, Medicine=0, Nutrients=0, BestGoals=0;
         public int DefenseBestWave=0,DefenseBestKills=0;
+        public int RunnerBest=0,RunnerRewardPaid=0;
+        public string RunnerRewardDay="";
+        public List<string> LunchMenus=new List<string>();
         public List<Pet> Pets=new List<Pet>();
         public List<int> Discovered=new List<int>();
+        public List<int> DiscoveredEvolutions=new List<int>();
         public bool AutoStart=false, StarterNutrientsClaimed=false;
     }
     public class Engine {
@@ -163,17 +167,24 @@ namespace GuMaGoChi {
         public static string Encode(SaveData data) {return Serializer().Serialize(data);}
         public static SaveData Decode(string json) {
             SaveData d=Serializer().Deserialize<SaveData>(json);
-            if(d==null || (d.Version!=1&&d.Version!=2) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.BestGoals<0 || d.BestGoals>15 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
+            if(d==null || (d.Version!=1&&d.Version!=2&&d.Version!=3) || d.Pets==null || d.Discovered==null || d.Seeds<0 || d.Dew<0 || d.Medicine<0 || d.Nutrients<0 || d.BestGoals<0 || d.BestGoals>15 || d.Pets.Count>500)throw new InvalidDataException("지원하지 않거나 손상된 저장 데이터입니다.");
             if(d.DefenseBestWave<0||d.DefenseBestKills<0)throw new InvalidDataException("디펜스 기록이 올바르지 않습니다.");
+            if(d.RunnerBest<0||d.RunnerRewardPaid<0||d.RunnerRewardPaid>20)throw new InvalidDataException("달리기 기록이 올바르지 않습니다.");
             var ids=new HashSet<string>();
             foreach(Pet p in d.Pets) {
                 if(p==null || String.IsNullOrWhiteSpace(p.Id) || !ids.Add(p.Id) || String.IsNullOrWhiteSpace(p.Name) || p.Name.Length>20 || p.SpeciesId< -1 || p.SpeciesId>=Catalog.All.Length || p.PendingSpecies< -1 || p.PendingSpecies>=Catalog.All.Length || p.Age<0 || p.Age>Engine.Life || Double.IsNaN(p.Age) || Double.IsInfinity(p.Age))throw new InvalidDataException("개체 정보가 올바르지 않습니다.");
+                if(p.EvolutionId< -1||(p.EvolutionId>=0&&(!Evolutions.Valid(p.EvolutionId,p.SpeciesId)||p.GrowthReady)))throw new InvalidDataException("2차 진화 정보가 올바르지 않습니다.");
                 if(new[]{p.Hunger,p.Dirt,p.Fatigue,p.Illness}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)||v<0||v>100) || new[]{p.FoodCooldown,p.MedicineCooldown,p.PetCooldown,p.PlayCooldown,p.TrainCooldown,p.WasteClock,p.SleepClock,p.TalkClock}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)) || p.Waste<0 || p.Waste>6 || (p.GrowthReady && p.PendingSpecies<0))throw new InvalidDataException("상태 정보가 올바르지 않습니다.");
                 if(p.Friends==null)p.Friends=new Dictionary<string,int>();if(p.GrowthHistory==null)p.GrowthHistory=new List<int>();
                 if(d.Version==1) {p.GrowthExp=p.SpeciesId>=0||p.GrowthReady?Engine.AdultExp:Math.Min(Engine.AdultExp,p.Age/60);p.PetCooldown=Math.Min(180,Math.Max(0,p.PetCooldown));p.PlayCooldown=Math.Min(180,Math.Max(0,p.PlayCooldown));p.TrainCooldown=Math.Min(180,Math.Max(0,p.TrainCooldown));}
                 if(Double.IsNaN(p.GrowthExp)||Double.IsInfinity(p.GrowthExp)||p.GrowthExp<0||p.GrowthExp>Engine.AdultExp)throw new InvalidDataException("성장 경험치가 올바르지 않습니다.");
             }
-            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");d.Version=2;return d;
+            if(d.DiscoveredEvolutions==null)d.DiscoveredEvolutions=new List<int>();
+            if(d.LunchMenus==null)d.LunchMenus=new List<string>();
+            if(d.LunchMenus.Count>0&&(d.LunchMenus.Count<5||d.LunchMenus.Count>200||d.LunchMenus.Any(m=>String.IsNullOrWhiteSpace(m)||m.Length>40)||d.LunchMenus.Distinct().Count()!=d.LunchMenus.Count))throw new InvalidDataException("점심 메뉴 목록이 올바르지 않습니다.");
+            if(d.DiscoveredEvolutions.Any(i=>i<0||i>=Evolutions.All.Length))throw new InvalidDataException("2차 진화 도감 정보가 올바르지 않습니다.");
+            foreach(var p in d.Pets.Where(p=>p.EvolutionId>=0))if(!d.DiscoveredEvolutions.Contains(p.EvolutionId))d.DiscoveredEvolutions.Add(p.EvolutionId);
+            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");d.Version=3;return d;
         }
         public static SaveData Load(out string warning) {
             warning=null;if(!File.Exists(PathName))return new SaveData();

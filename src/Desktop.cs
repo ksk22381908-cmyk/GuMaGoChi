@@ -55,10 +55,10 @@ namespace GuMaGoChi {
         }
         public static void Pet(Graphics g,Pet p,Rectangle box,double phase,string motion="stand",bool flip=false) {
             g.InterpolationMode=InterpolationMode.NearestNeighbor;g.PixelOffsetMode=PixelOffsetMode.Half;
-            if(p.GrowthReady) {if(!Sprites.Draw(g,box,"burrow",phase,flip,p.SpeciesId))Soil(g,box);return;}
-            Image img=ImageFor(p.SpeciesId);
-            if(p.Sleeping){if(!Sprites.Draw(g,box,"sleep",phase,flip,p.SpeciesId)){if(img!=null)Adult(g,img,box,"sleep",phase,flip);else Baby(g,box);}}
-            else if(img!=null){if(!Sprites.Draw(g,box,motion,phase,flip,p.SpeciesId))Adult(g,img,box,motion,phase,flip);}else if(!Sprites.Draw(g,box,motion,phase,flip))Baby(g,box);
+            if(p.GrowthReady) {if(!Sprites.Draw(g,box,"burrow",phase,flip,p.SpeciesId,p.EvolutionId))Soil(g,box);return;}
+            Image img=p.EvolutionId>=0?Sprites.EvolutionStand(p.EvolutionId):ImageFor(p.SpeciesId);
+            if(p.Sleeping){if(!Sprites.Draw(g,box,"sleep",phase,flip,p.SpeciesId,p.EvolutionId)){if(img!=null)Adult(g,img,box,"sleep",phase,flip);else Baby(g,box);}}
+            else if(img!=null){if(!Sprites.Draw(g,box,motion,phase,flip,p.SpeciesId,p.EvolutionId))Adult(g,img,box,motion,phase,flip);}else if(!Sprites.Draw(g,box,motion,phase,flip,p.SpeciesId,p.EvolutionId))Baby(g,box);
             if(p.Sleeping) {using(var f=new Font("Segoe UI",14,FontStyle.Bold))g.DrawString("z Z",f,Brushes.SlateBlue,box.Right-35,box.Top+8);}
             if(p.Illness>30)g.FillRectangle(Brushes.LightSkyBlue,box.Right-20,box.Top+30,6,10);
             if(p.Dirt>65) {using(var brush=new SolidBrush(Color.FromArgb(130,100,62,36))) {g.FillRectangle(brush,box.Left+box.Width/3,box.Top+box.Height*2/3,10,8);g.FillRectangle(brush,box.Left+box.Width/2,box.Top+box.Height/2,8,6);}}
@@ -175,7 +175,7 @@ namespace GuMaGoChi {
     }
     public class DesktopApp:ApplicationContext {
         public Engine Engine;public Dictionary<string,PetWindow> Windows=new Dictionary<string,PetWindow>();
-        public HomeWindow Home; public ActivityWindow Activity;public DefenseWindow Defense;
+        public HomeWindow Home; public ActivityWindow Activity;public DefenseWindow Defense;public RunnerWindow Runner;public LunchWindow Lunch;
         public bool ManualPause=false,AutoPause=false;bool suspended=false,locked=false,exiting=false;
         public bool Paused {get{return ManualPause||AutoPause||suspended||locked;}}
         NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
@@ -214,7 +214,7 @@ namespace GuMaGoChi {
                 if(refreshClock>=1){SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();refreshClock=0;}
             }
         }
-        string Talk(Pet p) { return Dialogue.Need(p)??(p.SpeciesId<0?Engine.Hint(p):Dialogue.Get(p,3)); }
+        string Talk(Pet p) { return Dialogue.Need(p)??(p.SpeciesId<0?Dialogue.Idle(p,Engine.Hint(p)):Dialogue.Get(p,3)); }
         void Interact() {
             if(Activity!=null || Windows.Values.Any(w=>w.Bubble!=""))return;
             var list=Windows.Values.Where(w=>w.Visible && Engine.CanCare(w.Pet)).ToArray();
@@ -242,7 +242,7 @@ namespace GuMaGoChi {
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
         public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,p.Kind+" · "+p.Name+"\n"+Dialogue.Get(p,3));}});}
         public void OpenHome(Pet p) {if(Home==null||Home.IsDisposed)Home=new HomeWindow(this);Home.RefreshData();if(p!=null)Home.SelectPet(p.Id);Home.Show();Home.Activate();}
-        public void OpenDefense(){if(Activity!=null){OpenHome(null);Home.ShowMessage("놀이·훈련을 끝낸 뒤 디펜스를 시작해 주세요.");return;}if(Defense==null||Defense.IsDisposed)Defense=new DefenseWindow(this);Defense.Show();Defense.Activate();}
+        public void OpenDefense(){if(Activity!=null||Runner!=null){OpenHome(null);Home.ShowMessage("놀이·훈련을 끝낸 뒤 디펜스를 시작해 주세요.");return;}if(Defense==null||Defense.IsDisposed)Defense=new DefenseWindow(this);Defense.Show();Defense.Activate();}
         public void Adopt(bool first=false) {
             if(!first && Engine.Data.Pets.Any(p=>!p.Dead) && Engine.Data.Seeds<Engine.AdoptPrice){MessageBox.Show("입양에는 씨앗 100개가 필요해요.");return;}
             using(var dialog=new NameDialog("새 아기 고구마의 이름", ""))if(dialog.ShowDialog()==DialogResult.OK)Change(()=>{Pet p=Engine.Adopt(dialog.PetName,first);if(p!=null){SyncWindows();Say(p,"안녕! 나는 "+p.Name+"야.\n잘 부탁해!");}});
@@ -259,7 +259,7 @@ namespace GuMaGoChi {
             var menu=new DismissibleMenu {Font=new Font("맑은 고딕",9)};petMenus[p.Id]=menu;
             menu.Items.Add(Item(p.Name+" · "+p.Kind,()=>OpenHome(p)));
             menu.Items.Add(new ToolStripLabel("배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+" · 피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)));
-            menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Engine.CanCare(p);
+            menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Runner==null&&Engine.CanCare(p);
             var food=new ToolStripMenuItem("먹이 주기"+(p.FoodCooldown>0?" · "+Engine.TimeText(p.FoodCooldown):""));
             food.DropDownItems.Add(Item("수돗물 · 무료 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-10)),()=>Feed(p,false),care&&p.Hunger>0&&p.FoodCooldown<=0));
             food.DropDownItems.Add(Item("아침 이슬 · "+Engine.Data.Dew+"개 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-30)),()=>Feed(p,true),care&&p.Hunger>0&&p.FoodCooldown<=0&&Engine.Data.Dew>0));menu.Items.Add(food);
@@ -268,8 +268,22 @@ namespace GuMaGoChi {
             medicine.DropDownItems.Add(Item("상위 치료 · "+Engine.Data.Medicine+"개 · 병세 −30",()=>Change(()=>Say(p,Engine.Treat(p,true))),care&&p.Illness>0&&p.MedicineCooldown<=0&&Engine.Data.Medicine>0));menu.Items.Add(medicine);
             menu.Items.Add(Item("쓰다듬기"+(p.PetCooldown>0?" · "+Engine.TimeText(p.PetCooldown):" · 피로 +1"),()=>Change(()=>Say(p,Engine.Stroke(p))),care&&p.PetCooldown<=0));
             menu.Items.Add(Item("성장 영양제 먹이기 · "+Engine.Data.Nutrients+"개 · +30 EXP",()=>Nourish(p),care&&Engine.CanNourish(p)&&Engine.Data.Nutrients>0));
+            if(Evolutions.For(p.SpeciesId).Any()) {
+                bool changeable=care&&Activity==null&&(Defense==null||!Defense.BattleRunning);
+                var evolutionMenu=new ToolStripMenuItem("2차 진화 모습 선택") {Enabled=changeable};
+                foreach(var evolution in Evolutions.For(p.SpeciesId)) {
+                    int target=evolution.Id;
+                    var choice=Item(evolution.Name,()=>Change(()=>{if(Evolutions.Change(Engine.Data,p,target)){PetWindow window;if(Windows.TryGetValue(p.Id,out window))window.Animate("stand");Say(p,Evolutions.RevealLine(p));}}),p.EvolutionId!=target);
+                    choice.Checked=p.EvolutionId==target;evolutionMenu.DropDownItems.Add(choice);
+                }
+                evolutionMenu.DropDownItems.Add(new ToolStripSeparator());
+                evolutionMenu.DropDownItems.Add(Item("1차 모습으로 돌아가기",()=>Change(()=>Evolutions.Change(Engine.Data,p,-1)),p.EvolutionId>=0));
+                menu.Items.Add(evolutionMenu);
+            }
             menu.Items.Add(Item("공 가져오기"+(p.PlayCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.PlayCooldown):""),()=>StartActivity(p,false),care&&!p.Home&&Activity==null));
             menu.Items.Add(Item("골인 훈련"+(p.TrainCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.TrainCooldown):""),()=>StartActivity(p,true),care&&!p.Home&&Activity==null));
+            menu.Items.Add(Item("고구마 밭 달리기 · 최고 "+Engine.Data.RunnerBest+"점",()=>StartRunner(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
+            menu.Items.Add(Item("점심 뭐 먹지? · 곡선 사다리",()=>OpenLunch(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
             menu.Items.Add(new ToolStripSeparator());
             if(p.GrowthReady)menu.Items.Add(Item("흙더미 열기 · 성장하기",()=>Reveal(p),!Paused));
             menu.Items.Add(Item(p.Home?"외출하기":"집에 가기",()=>Change(()=>{p.Home=!p.Home;if(p.Home)OpenHome(p);}),!p.Dead&&!p.Sleeping&&Activity==null));
@@ -285,7 +299,7 @@ namespace GuMaGoChi {
             if(!Engine.Data.Pets.Contains(p))return;
             string text="‘"+p.Name+"’로 맛탕을 만들까요?\n이 고구마와 돌봄 기록을 삭제하며, 추억 앨범에는 남지 않습니다.";
             if(MessageBox.Show(text,"맛탕 만들기",MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
-            if(Activity!=null&&Activity.Pet==p)Activity.CancelActivity();
+            if(Activity!=null&&Activity.Pet==p)Activity.CancelActivity();if(Runner!=null)Runner.Close();
             Change(()=>{if(Engine.MakeMattang(p))warnings.Remove(p.Id);});
             if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(p.Name+"로 맛탕을 만들었어요.");
         }
@@ -295,7 +309,9 @@ namespace GuMaGoChi {
             if(p.GrowthExp>150&&MessageBox.Show("남은 성장 경험치는 "+(Engine.AdultExp-p.GrowthExp).ToString("0.##")+" EXP입니다. 초과분은 적용되지 않습니다. 사용할까요?","성장 영양제",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)return;
             Change(()=>{if(Engine.Nourish(p)){Say(p,Dialogue.Get(p,0));PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate(p.GrowthReady?"burrow":"eat");if(Home!=null&&!Home.IsDisposed)Home.AnimateMeal(p);}});
         }
-        public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||(Defense!=null&&Defense.BattleRunning)||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();Activity.Activate();}
+        public void StartActivity(Pet p,bool train) {if(Paused||Activity!=null||Runner!=null||(Defense!=null&&Defense.BattleRunning)||!Engine.CanCare(p)||p.Home)return;Activity=new ActivityWindow(this,p,train);Activity.Show();Activity.Activate();}
+        public void StartRunner(Pet p){if(Paused||Activity!=null||Runner!=null||(Defense!=null&&Defense.BattleRunning)||!Engine.CanCare(p))return;Runner=new RunnerWindow(this,p);Runner.Show();Runner.Activate();}
+        public void OpenLunch(Pet p){if(Lunch!=null&&!Lunch.IsDisposed){Lunch.Activate();return;}if(Paused||Activity!=null||Runner!=null||(Defense!=null&&Defense.BattleRunning)||!Engine.CanCare(p))return;Lunch=new LunchWindow(this,p);Lunch.Show();Lunch.Activate();}
         void RefreshTray() {
             if(trayMenu.Visible)return;
             foreach(ToolStripItem old in trayMenu.Items.Cast<ToolStripItem>().ToArray())old.Dispose();
@@ -309,7 +325,7 @@ namespace GuMaGoChi {
             trayMenu.Items.Add(Item("종료 · 저장 후 닫기",Exit));tray.Icon=needs.Length>0?alertIcon:icon;tray.Text=needs.Length>0?"GuMaGoChi · "+needs.Length+"마리 돌봄 필요":"GuMaGoChi · 고구마와 함께";
         }
         void ToggleAutoStart() {try {using(var key=Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run")) {if(Engine.Data.AutoStart)key.DeleteValue("GuMaGoChi",false);else key.SetValue("GuMaGoChi","\""+Application.ExecutablePath+"\"");}Change(()=>Engine.Data.AutoStart=!Engine.Data.AutoStart);}catch(Exception ex){MessageBox.Show(ex.Message,"자동 실행 설정 실패");}}
-        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
+        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
     }
     public class NameDialog:Form {
         TextBox input;public string PetName {get{return input.Text.Trim();}}

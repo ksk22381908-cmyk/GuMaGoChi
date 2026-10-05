@@ -24,7 +24,7 @@ namespace GuMaGoChi {
         public static bool HasDamagingSkill(int id){return id>=0&&!new[]{0,1,4,5,6,7,8,10,14,15,20}.Contains(id);}
     }
     public class Defender {
-        public Pet Pet;public DefenseStats Stats;public float X,Y;public double ShotClock,SkillClock,Motion=10,BubbleClock;
+        public Pet Pet;public DefenseStats Stats;public float X,Y;public double ShotClock,SkillClock,Motion=10,BubbleClock;public string BubbleLine="";
         public double PowerTime,SpeedTime,DoubleTime,SelfTime,EmpowerTime;public int EmpowerShots,Shots,LastTarget=-1,Consecutive,Slot;
         public double DamageBonus=1,SpeedBonus=1,SkillBonus=1,CooldownBonus=1;
         public double AttackPower {get{return Stats.Damage*DamageBonus;}}
@@ -32,7 +32,7 @@ namespace GuMaGoChi {
         public double SkillPower {get{return AttackPower*SkillBonus;}}
         public double SkillCooldown {get{return Math.Max(5,Stats.Cooldown*CooldownBonus);}}
         public PointF Point {get{return new PointF(X,Y);}}
-        public Defender(Pet pet,int slot){Pet=new Pet {Id=pet.Id,Name=pet.Name,SpeciesId=pet.SpeciesId};Stats=DefenseStats.For(Pet.SpeciesId);Slot=slot;X=920;Y=210+slot*62;}
+        public Defender(Pet pet,int slot){Pet=new Pet {Id=pet.Id,Name=pet.Name,SpeciesId=pet.SpeciesId,EvolutionId=pet.EvolutionId};Stats=DefenseStats.For(Pet.SpeciesId);Slot=slot;X=920;Y=210+slot*62;}
     }
     public class DefenseEnemy {
         public int Id,Type;public float X,Y;public double HP,MaxHP,Age,SlowTime,Slow=.0,StopTime,StopImmune,WeakTime,Weak=1,ArmorTime,PoisonTime,PoisonRate;
@@ -81,7 +81,7 @@ namespace GuMaGoChi {
         void Impact(DefenseShot shot,PointF p){int id=shot.Owner.Pet.SpeciesId;if(shot.Skill){if(id==30)Area(p,90,shot.Damage,.3,3);else Area(p,id==12?65:35,shot.Damage,0,0,0,id==2||id==23?1:0);}else if(shot.Trajectory=="parabolic"){foreach(var e in Enemies.ToArray())if(!e.Dead&&HitDistance(e.Point,p)<40*.7+e.Radius)OnBasicHit(shot,e);}Effect(shot.Owner,p,shot.Skill);}
         void Volley(Defender d,PointF target,int count,double multiplier,double interval,string trajectory,int pierce=1){Volleys.Add(new DefenseVolley {Owner=d,Target=target,Count=count,Damage=d.SkillPower*multiplier,Interval=interval,Trajectory=trajectory,Pierce=pierce});d.Motion=0;}
         void Zone(Defender d,PointF target,double life,double rate,double slow=0,double pull=0){Zones.Add(new DefenseZone {Owner=d,Point=target,Left=life,Rate=rate,Slow=slow,Pull=pull});Effect(d,target,true,life,true);}
-        public bool Skill(Defender d){if(!Running||ChoosingCard||Between>0||d.SkillClock>0)return false;var foe=Closest(d);PointF target=Marker??(foe!=null?foe.Point:new PointF(Math.Max(0,d.X-250),d.Y));int id=d.Pet.SpeciesId;bool support=new[]{0,4,5,7,8,15,20,28}.Contains(id);if(!support&&!InRange(d,target))return false;d.SkillClock=d.SkillCooldown;d.BubbleClock=2;d.Motion=0;double a=d.SkillPower;
+        public bool Skill(Defender d){if(!Running||ChoosingCard||Between>0||d.SkillClock>0)return false;var foe=Closest(d);PointF target=Marker??(foe!=null?foe.Point:new PointF(Math.Max(0,d.X-250),d.Y));int id=d.Pet.SpeciesId;bool support=new[]{0,4,5,7,8,15,20,28}.Contains(id);if(!support&&!InRange(d,target))return false;d.SkillClock=d.SkillCooldown;d.BubbleLine=Dialogue.Skill(d.Pet,d.Stats.Line);d.BubbleClock=2;d.Motion=0;double a=d.SkillPower;
             switch(id){
                 case 0:d.SelfTime=8;Effect(d,d.Point,true,8,false,d);break;
                 case 1:Zone(d,target,5,0,.4);break;

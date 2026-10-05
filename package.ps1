@@ -13,6 +13,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/adults-v2') -
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/adult-actions') -Destination (Join-Path $packagePath 'assets/higgsfield') -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/sleep') -Destination (Join-Path $packagePath 'assets/higgsfield') -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/gancheopma') -Destination (Join-Path $packagePath 'assets/higgsfield') -Recurse -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/evolutions') -Destination (Join-Path $packagePath 'assets/higgsfield') -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/defense/고구마버러지디펜스Intro.png') -Destination (New-Item -ItemType Directory -Path (Join-Path $packagePath 'assets/higgsfield/defense') -Force).FullName -Force
 foreach($assetKind in @('basic-attacks','skills','enemies')) {
     $assetSource = Join-Path $PSScriptRoot "assets/higgsfield/defense/$assetKind"
