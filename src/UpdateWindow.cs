@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace GuMaGoChi {
     public sealed class UpdateWindow:GameForm {
         readonly DesktopApp app;readonly Label versions,status;readonly TextBox notes;readonly ProgressBar progress;readonly Button check,install,close;
-        WebClient client;UpdateRelease release;UpdateAsset archiveAsset,checksumAsset;bool busy,closed;string stage,archive,checksum;
+        WebClient client;UpdateRelease release;UpdateAsset archiveAsset,checksumAsset;bool busy,closed,partial;string stage,archive,checksum,deltaJson;
         public UpdateWindow(DesktopApp owner):this(owner,true){}
         internal UpdateWindow(DesktopApp owner,bool autoCheck){
             app=owner;Text="GuMaGoChi 업데이트";ClientSize=new Size(560,440);FormBorderStyle=FormBorderStyle.FixedDialog;MaximizeBox=false;MinimizeBox=false;StartPosition=FormStartPosition.CenterScreen;BackColor=Art.Cream;Font=new Font("맑은 고딕",10);
@@ -33,7 +33,13 @@ namespace GuMaGoChi {
         void Download(){
             if(busy||release==null)return;
             if(MessageBox.Show(this,"게임을 저장하고 종료한 뒤 업데이트를 설치하고 다시 실행합니다.\n계속할까요?","GuMaGoChi 업데이트",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
-            try{Updates.CheckWritable(Paths.BaseDirectory);stage=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"GuMaGoChi-Updater",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(stage);archive=Path.Combine(stage,archiveAsset.name);Begin("검증 파일 다운로드 중…");NewClient();client.DownloadStringCompleted+=(s,e)=>{
+            try{Updates.CheckWritable(Paths.BaseDirectory);stage=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"GuMaGoChi-Updater",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(stage);partial=false;deltaJson=null;archiveAsset=Updates.Asset(release,false);checksumAsset=Updates.Asset(release,true);Begin("변경 파일 확인 중…");var manifest=Updates.NamedAsset(release,Updates.DeltaName(release)+".json",8*1024*1024,true);if(manifest==null){DownloadChecksum();return;}NewClient();client.DownloadStringCompleted+=(s,e)=>{
+                if(closed)return;if(e.Cancelled||e.Error!=null){Failure(e.Error??new OperationCanceledException("확인이 취소됐습니다."));return;}string json=e.Result;
+                ThreadPool.QueueUserWorkItem(state=>{try{bool matches=Updates.CanUseDelta(json,release,Paths.BaseDirectory);OnUi(()=>{try{if(matches){archiveAsset=Updates.NamedAsset(release,Updates.DeltaName(release)+".zip",Updates.MaxDownload);checksumAsset=Updates.NamedAsset(release,archiveAsset.name+".sha256",4096);partial=true;deltaJson=json;}DownloadChecksum();}catch(Exception ex){Failure(ex);}});}catch(Exception ex){OnUi(()=>Failure(ex));}});
+            };client.DownloadStringAsync(new Uri(manifest.browser_download_url));}catch(Exception ex){Failure(ex);}
+        }
+        void DownloadChecksum(){
+            try{archive=Path.Combine(stage,archiveAsset.name);status.Text=(partial?"변경 파일 패치":"전체 파일 업데이트")+" · "+(archiveAsset.size/1024)+" KB · 검증 파일 다운로드 중…";NewClient();client.DownloadStringCompleted+=(s,e)=>{
                 if(closed)return;if(e.Cancelled||e.Error!=null){Failure(e.Error??new OperationCanceledException("다운로드가 취소됐습니다."));return;}checksum=e.Result;DownloadArchive();
             };client.DownloadStringAsync(new Uri(checksumAsset.browser_download_url));}catch(Exception ex){Failure(ex);}
         }
@@ -43,7 +49,7 @@ namespace GuMaGoChi {
         void OnUi(Action action){if(closed||IsDisposed||!IsHandleCreated)return;try{BeginInvoke((MethodInvoker)(()=>{if(!closed)action();}));}catch(InvalidOperationException){}}
         void Prepare(){
             ThreadPool.QueueUserWorkItem(state=>{
-                try{if(new FileInfo(archive).Length!=archiveAsset.size)throw new InvalidDataException("다운로드 파일 크기가 일치하지 않습니다.");Updates.VerifyChecksum(archive,checksum);string payload=Path.Combine(stage,"payload");Version version=Updates.ReleaseVersion(release);Updates.Extract(archive,payload,version);
+                try{if(new FileInfo(archive).Length!=archiveAsset.size)throw new InvalidDataException("다운로드 파일 크기가 일치하지 않습니다.");Updates.VerifyChecksum(archive,checksum);if(partial&&!Updates.CanUseDelta(deltaJson,release,Paths.BaseDirectory))throw new InvalidDataException("설치 파일이 변경됐습니다. 다시 확인해 주세요.");string payload=Path.Combine(stage,"payload");Version version=Updates.ReleaseVersion(release);Updates.Extract(archive,payload,version,partial);
                     string helper=Path.Combine(stage,"GuMaGoChi-updater.exe");File.Copy(Path.Combine(Paths.BaseDirectory,"GuMaGoChi.exe"),helper);File.Copy(Path.Combine(Paths.BaseDirectory,"GuMaGoChi.exe.config"),helper+".config");
                     OnUi(()=>Install(helper,payload,version));
                 }catch(Exception ex){OnUi(()=>Failure(ex));}

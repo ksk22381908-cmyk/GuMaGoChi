@@ -3,5 +3,5 @@ using System.Reflection;
 [assembly: AssemblyTitle("GuMaGoChi")]
 [assembly: AssemblyProduct("GuMaGoChi")]
 [assembly: AssemblyDescription("Desktop sweet potato pet and defense game")]
-[assembly: AssemblyVersion("0.2.6.0")]
-[assembly: AssemblyFileVersion("0.2.6.0")]
+[assembly: AssemblyVersion("0.2.8.0")]
+[assembly: AssemblyFileVersion("0.2.8.0")]
