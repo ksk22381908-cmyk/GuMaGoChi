@@ -198,7 +198,7 @@ namespace GuMaGoChi {
             RefreshTray();SystemEvents.PowerModeChanged+=Power;SystemEvents.SessionSwitch+=Session;
             timer=new Timer {Interval=125};timer.Tick+=Tick;timer.Start();
             emergencyTimer=new Timer {Interval=20};emergencyTimer.Tick+=(s,e)=>CheckEmergencyKeys((Native.GetAsyncKeyState((int)Keys.Space)&0x8000)!=0,(Native.GetAsyncKeyState((int)Keys.E)&0x8000)!=0);emergencyTimer.Start();
-            if(data.Pets.Count==0) {OpenHome(null);Adopt(true);}else SyncWindows();
+            if(data.Pets.Count==0) {OpenHome(null);Adopt(true);}else {SyncWindows();if(persist)OpenHome(null);}
             if(warning!=null)MessageBox.Show(warning,"저장 복구");
         }
         Icon CreateIcon(bool alert) {using(var bmp=new Bitmap(32,32)) {using(Graphics g=Graphics.FromImage(bmp)){Art.Baby(g,new Rectangle(0,0,32,32));if(alert){g.FillEllipse(Brushes.OrangeRed,21,0,11,11);g.DrawEllipse(Pens.White,21,0,10,10);}}IntPtr h=bmp.GetHicon();try{return (Icon)Icon.FromHandle(h).Clone();}finally{Native.DestroyIcon(h);}}}

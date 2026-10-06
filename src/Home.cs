@@ -22,8 +22,8 @@ namespace GuMaGoChi {
             var detailPanel=new Panel {Left=12,Top=206,Width=235,Height=307,AutoScroll=true,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Bottom};detail=new PetDetails {Width=214,Height=305,ForeColor=Art.Ink,Font=new Font("맑은 고딕",9)};detailPanel.Controls.Add(detail);home.Controls.Add(detailPanel);
             habitat=new Habitat(app) {Left=260,Top=16,Width=672,Height=360,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};habitat.SelectedPet+=(p)=>SelectPet(p.Id);home.Controls.Add(habitat);home.Resize+=(s,e)=>{habitat.Width=Math.Max(DisplayZoom.Pixels(200,UiZoom),home.ClientSize.Width-habitat.Left-DisplayZoom.Pixels(20,UiZoom));};
             previous=new Button {Text="‹ 이전",Left=274,Top=388,Width=85,Height=36};previous.Click+=(s,e)=>{habitat.SetPage(habitat.Page-1);RefreshPages();};home.Controls.Add(previous);
-            pageLabel=new Label {Left=369,Top=388,Width=250,Height=36,TextAlign=ContentAlignment.MiddleCenter};home.Controls.Add(pageLabel);
-            next=new Button {Text="다음 ›",Left=629,Top=388,Width=85,Height=36};next.Click+=(s,e)=>{habitat.SetPage(habitat.Page+1);RefreshPages();};home.Controls.Add(next);
+            pageLabel=new Label {Left=369,Top=388,Width=320,Height=36,TextAlign=ContentAlignment.MiddleCenter};home.Controls.Add(pageLabel);
+            next=new Button {Text="다음 ›",Left=699,Top=388,Width=85,Height=36};next.Click+=(s,e)=>{habitat.SetPage(habitat.Page+1);RefreshPages();};home.Controls.Add(next);
             var shop=new TabPage("씨앗 상점 · 공용 가방") {BackColor=Art.Cream};tabs.TabPages.Add(shop);
             bag=new Label {Left=28,Top=25,Width=850,Height=90,Font=new Font("맑은 고딕",14,FontStyle.Bold)};shop.Controls.Add(bag);
             AddButton(shop,"아침 이슬 구매 · 씨앗 8개\n배고픔 −30 / 1개",30,140,260,80,()=>app.Change(()=>ShowMessage(app.Engine.Buy(false)?"아침 이슬 1개를 가방에 넣었어요.":"씨앗이 부족해요.")));
