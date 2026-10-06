@@ -128,7 +128,7 @@ namespace GuMaGoChi {
         static void Check(bool condition,string label) {if(!condition)throw new Exception(label);}
         static ToolStripMenuItem Find(ContextMenuStrip menu,string prefix) {return menu.Items.OfType<ToolStripMenuItem>().First(i=>i.Text.StartsWith(prefix));}
         public static string Run() {
-            Application.EnableVisualStyles();var data=new SaveData {Seeds=150,Dew=1,Medicine=1};var pet=new Pet {Name="테스트",Hunger=70};data.Pets.Add(pet);
+            Application.EnableVisualStyles();UiLayoutTests.Run();var data=new SaveData {Seeds=150,Dew=1,Medicine=1};var pet=new Pet {Name="테스트",Hunger=70};data.Pets.Add(pet);
             using(var app=new DesktopApp(data,null,false))try {
                 Application.DoEvents();var w=app.Windows[pet.Id];Check(w.Visible&&w.TopMost&&w.TransparencyKey==System.Drawing.Color.Magenta,"Transparent topmost pet window");
                 int initialX=w.Left,initialY=w.Top;w.Say("이동 중에도 말해요");w.Step(.5,true);Check(w.Left!=initialX,"Autonomous walking starts immediately and continues during speech");Check(w.Top!=initialY,"Autonomous walking also changes Y");

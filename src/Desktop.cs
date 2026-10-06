@@ -256,10 +256,10 @@ namespace GuMaGoChi {
                 if(previousMenu.Visible)return previousMenu;
                 if(!previousMenu.IsDisposed)previousMenu.Dispose();
             }
-            var menu=new DismissibleMenu {Font=new Font("맑은 고딕",9)};petMenus[p.Id]=menu;
+            var menu=new DismissibleMenu {Font=new Font("맑은 고딕",10),Padding=new Padding(4),BackColor=Art.Cream,ShowImageMargin=false,Renderer=new ReadableMenuRenderer()};petMenus[p.Id]=menu;
             menu.Items.Add(Item(p.Name+" · "+p.Kind,()=>OpenHome(p)));
             menu.Items.Add(new ToolStripLabel("배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+" · 피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)));
-            menu.Items.Add(new ToolStripSeparator());bool care=!Paused&&Runner==null&&Engine.CanCare(p);
+            menu.Items.Add(new ToolStripSeparator());menu.Items.Add(MenuHeading("돌봄"));bool care=!Paused&&Runner==null&&Engine.CanCare(p);
             var food=new ToolStripMenuItem("먹이 주기"+(p.FoodCooldown>0?" · "+Engine.TimeText(p.FoodCooldown):""));
             food.DropDownItems.Add(Item("수돗물 · 무료 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-10)),()=>Feed(p,false),care&&p.Hunger>0&&p.FoodCooldown<=0));
             food.DropDownItems.Add(Item("아침 이슬 · "+Engine.Data.Dew+"개 · "+Math.Round(p.Hunger)+" → "+Math.Round(Math.Max(0,p.Hunger-30)),()=>Feed(p,true),care&&p.Hunger>0&&p.FoodCooldown<=0&&Engine.Data.Dew>0));menu.Items.Add(food);
@@ -267,6 +267,7 @@ namespace GuMaGoChi {
             medicine.DropDownItems.Add(Item("기본 치료 · 무료 · 병세 −10",()=>Change(()=>Say(p,Engine.Treat(p,false))),care&&p.Illness>0&&p.MedicineCooldown<=0));
             medicine.DropDownItems.Add(Item("상위 치료 · "+Engine.Data.Medicine+"개 · 병세 −30",()=>Change(()=>Say(p,Engine.Treat(p,true))),care&&p.Illness>0&&p.MedicineCooldown<=0&&Engine.Data.Medicine>0));menu.Items.Add(medicine);
             menu.Items.Add(Item("쓰다듬기"+(p.PetCooldown>0?" · "+Engine.TimeText(p.PetCooldown):" · 피로 +1"),()=>Change(()=>Say(p,Engine.Stroke(p))),care&&p.PetCooldown<=0));
+            menu.Items.Add(new ToolStripSeparator());menu.Items.Add(MenuHeading("성장"));
             menu.Items.Add(Item("성장 영양제 먹이기 · "+Engine.Data.Nutrients+"개 · +30 EXP",()=>Nourish(p),care&&Engine.CanNourish(p)&&Engine.Data.Nutrients>0));
             if(Evolutions.For(p.SpeciesId).Any()) {
                 bool changeable=care&&Activity==null&&(Defense==null||!Defense.BattleRunning);
@@ -280,12 +281,13 @@ namespace GuMaGoChi {
                 evolutionMenu.DropDownItems.Add(Item("1차 모습으로 돌아가기",()=>Change(()=>Evolutions.Change(Engine.Data,p,-1)),p.EvolutionId>=0));
                 menu.Items.Add(evolutionMenu);
             }
+            menu.Items.Add(new ToolStripSeparator());menu.Items.Add(MenuHeading("놀이 · 훈련"));
             menu.Items.Add(Item("공 가져오기"+(p.PlayCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.PlayCooldown):""),()=>StartActivity(p,false),care&&!p.Home&&Activity==null));
             menu.Items.Add(Item("골인 훈련"+(p.TrainCooldown>0?" · 성장 보상 대기 "+Engine.TimeText(p.TrainCooldown):""),()=>StartActivity(p,true),care&&!p.Home&&Activity==null));
             menu.Items.Add(Item("고구마 밭 달리기 · 최고 "+Engine.Data.RunnerBest+"점",()=>StartRunner(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
             menu.Items.Add(Item("점심 뭐 먹지? · 곡선 사다리",()=>OpenLunch(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
             menu.Items.Add(new ToolStripSeparator());
-            if(p.GrowthReady)menu.Items.Add(Item("흙더미 열기 · 성장하기",()=>Reveal(p),!Paused));
+            menu.Items.Add(MenuHeading("생활 · 관리"));if(p.GrowthReady)menu.Items.Add(Item("흙더미 열기 · 성장하기",()=>Reveal(p),!Paused));
             menu.Items.Add(Item(p.Home?"외출하기":"집에 가기",()=>Change(()=>{p.Home=!p.Home;if(p.Home)OpenHome(p);}),!p.Dead&&!p.Sleeping&&Activity==null));
             menu.Items.Add(Item(p.Sleeping?"깨우기":"집에서 재우기",()=>Change(()=>{p.Home=true;p.Sleeping=!p.Sleeping;p.SleepClock=0;OpenHome(p);}),!p.Dead&&p.Active&&!p.GrowthReady&&Activity==null));
             menu.Items.Add(Item("위치 옮기기 · 몸을 잡아 드래그",()=>{PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.BeginMove();},!p.Home&&p.Active&&!Paused&&Activity==null));
@@ -293,8 +295,10 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("이름 변경",()=>{using(var d=new NameDialog("이름 변경",p.Name))if(d.ShowDialog()==DialogResult.OK)Change(()=>p.Name=d.PetName);}));
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(Item("맛탕 만들기",()=>MakeMattang(p),Engine.Data.Pets.Contains(p)&&!p.Dead));return menu;
+            var remove=Item("맛탕 만들기",()=>MakeMattang(p),Engine.Data.Pets.Contains(p)&&!p.Dead);remove.ForeColor=Color.Firebrick;menu.Items.Add(remove);StyleMenu(menu.Items);return menu;
         }
+        static ToolStripLabel MenuHeading(string text){return new ToolStripLabel(text) {ForeColor=Art.Green,TextAlign=ContentAlignment.MiddleLeft};}
+        static void StyleMenu(ToolStripItemCollection items){foreach(ToolStripItem item in items){if(!(item is ToolStripSeparator))item.Padding=new Padding(12,4,12,4);var parent=item as ToolStripMenuItem;if(parent!=null&&parent.HasDropDownItems){parent.DropDown.Font=parent.Owner.Font;parent.DropDown.BackColor=Art.Cream;parent.DropDown.Renderer=parent.Owner.Renderer;StyleMenu(parent.DropDownItems);}}}
         public void MakeMattang(Pet p) {
             if(!Engine.Data.Pets.Contains(p))return;
             string text="‘"+p.Name+"’로 맛탕을 만들까요?\n이 고구마와 돌봄 기록을 삭제하며, 추억 앨범에는 남지 않습니다.";
@@ -330,10 +334,10 @@ namespace GuMaGoChi {
     public class NameDialog:Form {
         TextBox input;public string PetName {get{return input.Text.Trim();}}
         public NameDialog(string title,string initial) {
-            Text=title;ClientSize=new Size(370,160);FormBorderStyle=FormBorderStyle.FixedDialog;StartPosition=FormStartPosition.CenterScreen;MaximizeBox=false;MinimizeBox=false;BackColor=Art.Cream;Font=new Font("맑은 고딕",10);
-            Controls.Add(new Label {Text="함께할 고구마의 이름을 지어 주세요. (1~20자)",Left=18,Top=20,Width=335,Height=25});input=new TextBox {Text=initial,Left=20,Top=60,Width=330,MaxLength=20};Controls.Add(input);
-            var ok=new Button {Text="함께하기",Left=155,Top=108,Width=95};ok.Click+=(s,e)=>{if(PetName.Length>0){DialogResult=DialogResult.OK;Close();}};Controls.Add(ok);
-            var cancel=new Button {Text="나중에",Left=260,Top=108,Width=90,DialogResult=DialogResult.Cancel};Controls.Add(cancel);AcceptButton=ok;CancelButton=cancel;
+            Text=title;ClientSize=new Size(410,210);AutoScaleMode=AutoScaleMode.Font;FormBorderStyle=FormBorderStyle.FixedDialog;StartPosition=FormStartPosition.CenterScreen;MaximizeBox=false;MinimizeBox=false;BackColor=Art.Cream;Font=new Font("맑은 고딕",10);
+            Controls.Add(new Label {Text="함께할 고구마의 이름을 지어 주세요. (1~20자)",Left=20,Top=20,Width=370,Height=44});input=new TextBox {Text=initial,Left=20,Top=72,Width=370,MaxLength=20,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};Controls.Add(input);
+            var ok=UiLayout.DialogButton("함께하기");ok.Click+=(s,e)=>{if(PetName.Length>0){DialogResult=DialogResult.OK;Close();}};
+            var cancel=UiLayout.DialogButton("나중에");cancel.DialogResult=DialogResult.Cancel;Controls.Add(UiLayout.DialogActions(ok,cancel));AcceptButton=ok;CancelButton=cancel;AutoScaleDimensions=CurrentAutoScaleDimensions;
         }
     }
 }

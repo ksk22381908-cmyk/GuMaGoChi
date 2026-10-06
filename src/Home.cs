@@ -7,20 +7,23 @@ using System.Windows.Forms;
 
 namespace GuMaGoChi {
     public class HomeWindow:Form {
-        DesktopApp app;ListBox pets;Label header,detail,message;Button actions,adopt;
+        DesktopApp app;ListBox pets;Label header,message,pageLabel;PetDetails detail;Button actions,adopt,previous,next;
         TabControl tabs;Habitat habitat;FlowLayoutPanel dex,album;Label bag;
+        bool refreshingList;
         public HomeWindow(DesktopApp owner) {
             app=owner;Text="GuMaGoChi · 땅속 고구마 집";ClientSize=new Size(1000,720);MinimumSize=new Size(860,650);StartPosition=FormStartPosition.CenterScreen;BackColor=Art.Cream;Font=new Font("맑은 고딕",10);DoubleBuffered=true;
             header=new Label {Left=24,Top=18,Width=940,Height=40,Font=new Font("맑은 고딕",17,FontStyle.Bold),ForeColor=Art.Ink};Controls.Add(header);
             var note=new Label {Left=24,Top=57,Width=940,Height=25,Text="집 창을 닫아도 활성 고구마는 계속 생활해요. 멈추려면 비활성화 또는 트레이의 ‘잠시 쉬기’를 선택하세요.",ForeColor=Art.Ink};Controls.Add(note);
-            tabs=new TabControl {Left=20,Top=94,Width=960,Height=555,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right|AnchorStyles.Bottom};Controls.Add(tabs);
+            tabs=new TabControl {Left=20,Top=94,Width=960,Height=555,Padding=new Point(18,10),DrawMode=TabDrawMode.OwnerDrawFixed,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right|AnchorStyles.Bottom};tabs.DrawItem+=DrawTab;Controls.Add(tabs);
             var home=new TabPage("땅속 집 · 돌봄") {BackColor=Art.Cream};tabs.TabPages.Add(home);
-            pets=new ListBox {Left=12,Top=16,Width=235,Height=210,Font=new Font("맑은 고딕",10)};pets.SelectedIndexChanged+=(s,e)=>RefreshDetail();home.Controls.Add(pets);
-            actions=new Button {Text="선택한 고구마의 행동 메뉴 ▾",Left=12,Top=235,Width=235,Height=36};actions.Click+=(s,e)=>{Pet p=Selected();if(p!=null)app.MenuFor(p).Show(actions,new Point(0,actions.Height));};home.Controls.Add(actions);
-            adopt=new Button {Text="새 아기 입양",Left=12,Top=280,Width=235,Height=36};adopt.Click+=(s,e)=>app.Adopt();home.Controls.Add(adopt);
-            detail=new Label {Left=12,Top=325,Width=235,Height=210,ForeColor=Art.Ink};home.Controls.Add(detail);
-            habitat=new Habitat(app) {Left=260,Top=16,Width=672,Height=340,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};home.Controls.Add(habitat);home.Resize+=(s,e)=>{habitat.Width=Math.Max(200,home.ClientSize.Width-habitat.Left-20);};
-            var help=new Label {Left=274,Top=373,Width=640,Height=70,ForeColor=Art.Ink,Text="고구마 우클릭: 먹이·치료·수면·외출\n배설물 클릭: 직접 청소 / 흙더미 클릭: 성장 공개\n목록에서 비활성 개체도 선택할 수 있어요. 수치는 낮을수록 양호해요."};home.Controls.Add(help);
+            pets=new ListBox {Left=12,Top=16,Width=235,Height=90,Font=new Font("맑은 고딕",10)};pets.SelectedIndexChanged+=(s,e)=>{RefreshDetail();if(!refreshingList&&habitat!=null&&Selected()!=null){habitat.ShowPet(Selected().Id);RefreshPages();}};home.Controls.Add(pets);
+            actions=new Button {Text="선택한 고구마 행동 메뉴 ▾",Left=12,Top=114,Width=235,Height=36};actions.Click+=(s,e)=>{Pet p=Selected();if(p!=null)app.MenuFor(p).Show(actions,new Point(0,actions.Height));};home.Controls.Add(actions);
+            adopt=new Button {Text="새 아기 입양",Left=12,Top=158,Width=235,Height=36};adopt.Click+=(s,e)=>app.Adopt();home.Controls.Add(adopt);
+            var detailPanel=new Panel {Left=12,Top=206,Width=235,Height=307,AutoScroll=true,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Bottom};detail=new PetDetails {Width=214,Height=305,ForeColor=Art.Ink,Font=new Font("맑은 고딕",9)};detailPanel.Controls.Add(detail);home.Controls.Add(detailPanel);
+            habitat=new Habitat(app) {Left=260,Top=16,Width=672,Height=360,Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};habitat.SelectedPet+=(p)=>SelectPet(p.Id);home.Controls.Add(habitat);home.Resize+=(s,e)=>{habitat.Width=Math.Max(200,home.ClientSize.Width-habitat.Left-20);};
+            previous=new Button {Text="‹ 이전",Left=274,Top=388,Width=85,Height=36};previous.Click+=(s,e)=>{habitat.SetPage(habitat.Page-1);RefreshPages();};home.Controls.Add(previous);
+            pageLabel=new Label {Left=369,Top=388,Width=250,Height=36,TextAlign=ContentAlignment.MiddleCenter};home.Controls.Add(pageLabel);
+            next=new Button {Text="다음 ›",Left=629,Top=388,Width=85,Height=36};next.Click+=(s,e)=>{habitat.SetPage(habitat.Page+1);RefreshPages();};home.Controls.Add(next);
             var shop=new TabPage("씨앗 상점 · 공용 가방") {BackColor=Art.Cream};tabs.TabPages.Add(shop);
             bag=new Label {Left=28,Top=25,Width=850,Height=90,Font=new Font("맑은 고딕",14,FontStyle.Bold)};shop.Controls.Add(bag);
             AddButton(shop,"아침 이슬 구매 · 씨앗 8개\n배고픔 −30 / 1개",30,140,260,80,()=>app.Change(()=>ShowMessage(app.Engine.Buy(false)?"아침 이슬 1개를 가방에 넣었어요.":"씨앗이 부족해요.")));
@@ -43,24 +46,25 @@ namespace GuMaGoChi {
             FormClosing+=(s,e)=>{if(e.CloseReason==CloseReason.UserClosing){e.Cancel=true;Hide();}};
             tabs.SelectedIndexChanged+=(s,e)=>RefreshData();RefreshData();
         }
+        void DrawTab(object sender,DrawItemEventArgs e) {Rectangle r=tabs.GetTabRect(e.Index);bool selected=e.Index==tabs.SelectedIndex;using(var fill=new SolidBrush(selected?Art.Cream:Color.FromArgb(235,234,225)))e.Graphics.FillRectangle(fill,r);using(var pen=new Pen(Color.FromArgb(190,195,181)))e.Graphics.DrawLine(pen,r.Right-1,r.Top+5,r.Right-1,r.Bottom-5);if(selected)using(var brush=new SolidBrush(Art.Green))e.Graphics.FillRectangle(brush,r.Left,r.Bottom-3,r.Width,3);TextRenderer.DrawText(e.Graphics,tabs.TabPages[e.Index].Text,Font,r,selected?Art.Green:Art.Ink,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);}
+        void RefreshPages() {if(habitat==null||pageLabel==null)return;habitat.SetPage(habitat.Page);pageLabel.Text=(habitat.Page+1)+" / "+habitat.PageCount+"  ·  집에 있는 고구마 "+habitat.ResidentCount+"마리";previous.Enabled=habitat.Page>0;next.Enabled=habitat.Page+1<habitat.PageCount;}
         FlowLayoutPanel Flow(Control parent) {var panel=new FlowLayoutPanel {Dock=DockStyle.Fill,AutoScroll=true,Padding=new Padding(15),BackColor=Art.Cream};parent.Controls.Add(panel);return panel;}
         void AddButton(Control parent,string text,int x,int y,int width,int height,Action action) {var b=new Button {Text=text,Left=x,Top=y,Width=width,Height=height,BackColor=Color.FromArgb(226,235,206),ForeColor=Art.Ink,FlatStyle=FlatStyle.Flat};b.Click+=(s,e)=>action();parent.Controls.Add(b);}
         public class PetEntry {public Pet Pet;public override string ToString(){return Text;}public string Text {get{return (Pet.Active?"● ":"○ ")+Pet.Name+" · "+(Pet.GrowthReady?"성장 대기":Pet.Sleeping?"수면":Pet.Home?"집":"바탕화면");}}}
         public Pet Selected() {return pets.SelectedItem is PetEntry?((PetEntry)pets.SelectedItem).Pet:null;}
-        public void SelectPet(string id) {tabs.SelectedIndex=0;for(int i=0;i<pets.Items.Count;i++)if(((PetEntry)pets.Items[i]).Pet.Id==id){pets.SelectedIndex=i;break;}}
+        public void SelectPet(string id) {tabs.SelectedIndex=0;for(int i=0;i<pets.Items.Count;i++)if(((PetEntry)pets.Items[i]).Pet.Id==id){pets.SelectedIndex=i;habitat.ShowPet(id);RefreshPages();break;}}
         public void ShowMessage(string text) {message.Text=text;}
         public void AnimateMeal(Pet p) {habitat.AnimateMeal(p);}
         void RefreshDetail() {
-            Pet p=Selected();if(habitat!=null){habitat.Preview=p;habitat.Invalidate();}actions.Enabled=p!=null;if(p==null){detail.Text="함께할 고구마를 입양해 보세요.";return;}
-            detail.Text=p.Name+" · "+p.Kind+"\n"+p.Personality+" / "+p.Skill+"\n나이 "+(p.Age/3600).ToString("0.00")+" / 100시간\n성장 경험치 "+p.GrowthExp.ToString("0.0")+" / 180 EXP\n배고픔 "+Math.Round(p.Hunger)+" · 청결 "+Math.Round(p.Dirt)+"\n피로 "+Math.Round(p.Fatigue)+" · 병세 "+Math.Round(p.Illness)+"\n"+(p.SpeciesId<0?Engine.Hint(p):Evolutions.Status(p))+"\n교감 "+p.Affection+" / 놀이 "+p.Play+" / 훈련 "+p.Training;
+            Pet p=Selected();if(habitat!=null){habitat.Preview=p;habitat.Invalidate();}actions.Enabled=p!=null;detail.Pet=p;detail.Invalidate();RefreshPages();
         }
         int dexCount=-1,deadCount=-1;
         public void RefreshData() {
             if(IsDisposed)return;header.Text="작은 땅속 집  ·  씨앗 "+app.Engine.Data.Seeds+"개"+(app.Paused?"  [육성 일시정지]":"");
             string selected=Selected()==null?null:Selected().Id;var living=app.Engine.Data.Pets.Where(p=>!p.Dead).ToArray();
-            pets.BeginUpdate();pets.Items.Clear();foreach(Pet p in living)pets.Items.Add(new PetEntry {Pet=p});pets.EndUpdate();
+            refreshingList=true;pets.BeginUpdate();pets.Items.Clear();foreach(Pet p in living)pets.Items.Add(new PetEntry {Pet=p});pets.EndUpdate();
             if(selected!=null){for(int i=0;i<pets.Items.Count;i++)if(((PetEntry)pets.Items[i]).Pet.Id==selected){pets.SelectedIndex=i;break;}}
-            if(pets.SelectedIndex<0&&pets.Items.Count>0)pets.SelectedIndex=0;RefreshDetail();habitat.Invalidate();
+            if(pets.SelectedIndex<0&&pets.Items.Count>0)pets.SelectedIndex=0;refreshingList=false;RefreshDetail();habitat.Invalidate();
             bool rescue=living.Length==0&&app.Engine.Data.Seeds<Engine.AdoptPrice;adopt.Text=rescue?"무료 아기 입양 · 다시 시작":"새 아기 입양 · 씨앗 100개";
             bag.Text="씨앗 "+app.Engine.Data.Seeds+"개\n공용 가방: 아침 이슬 "+app.Engine.Data.Dew+"개 / 상위 치료 "+app.Engine.Data.Medicine+"개\n성장 영양제 "+app.Engine.Data.Nutrients+"개";
             if(dexCount!=app.Engine.Data.Discovered.Count+app.Engine.Data.DiscoveredEvolutions.Count) {
@@ -88,30 +92,45 @@ namespace GuMaGoChi {
             }catch(Exception ex){MessageBox.Show(ex.Message,"가져오기 실패");}
         }
     }
+    public class PetDetails:Control {
+        public Pet Pet;
+        public PetDetails(){DoubleBuffered=true;}
+        protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Pet==null){TextRenderer.DrawText(e.Graphics,"함께할 고구마를 입양해 보세요.",Font,ClientRectangle,Art.Ink,TextFormatFlags.WordBreak);return;}Pet p=Pet;int y=0;TextRenderer.DrawText(e.Graphics,p.Name+" · "+p.Kind,Font,new Rectangle(0,y,Width,24),Art.Green,TextFormatFlags.EndEllipsis);y+=26;TextRenderer.DrawText(e.Graphics,p.Personality,Font,new Rectangle(0,y,Width,36),Art.Ink,TextFormatFlags.WordBreak);y+=40;
+            string[,] rows={{"대표 특기",p.Skill},{"나이",(p.Age/3600).ToString("0.00")+" / 100시간"},{"성장 EXP",p.GrowthExp.ToString("0.0")+" / 180"},{"배고픔",Math.Round(p.Hunger)+" / 100"},{"청결 오염",Math.Round(p.Dirt)+" / 100"},{"피로",Math.Round(p.Fatigue)+" / 100"},{"병세",Math.Round(p.Illness)+" / 100"},{"교감 / 놀이 / 훈련",p.Affection+" / "+p.Play+" / "+p.Training}};
+            using(var pen=new Pen(Color.FromArgb(217,210,189)))for(int i=0;i<rows.GetLength(0);i++){e.Graphics.DrawLine(pen,0,y,Width,y);TextRenderer.DrawText(e.Graphics,rows[i,0],Font,new Rectangle(2,y+2,Width/2,22),Color.FromArgb(105,100,88),TextFormatFlags.EndEllipsis);TextRenderer.DrawText(e.Graphics,rows[i,1],Font,new Rectangle(Width/2,y+2,Width/2-2,22),Art.Ink,TextFormatFlags.Right|TextFormatFlags.EndEllipsis);y+=23;}
+            TextRenderer.DrawText(e.Graphics,p.SpeciesId<0?Engine.Hint(p):Evolutions.Status(p),Font,new Rectangle(0,y+7,Width,46),Art.Green,TextFormatFlags.WordBreak);
+        }
+    }
     public class Habitat:Control {
         public Pet Preview;
+        public event Action<Pet> SelectedPet;
+        public int Page {get;private set;}
+        public int ResidentCount {get{return Residents.Length;}}
+        public int PageCount {get{return Math.Max(1,(ResidentCount+5)/6);}}
+        public void SetPage(int page){Page=Math.Max(0,Math.Min(PageCount-1,page));Invalidate();}
+        public void ShowPet(string id){int index=Array.FindIndex(Residents,p=>p.Id==id);if(index>=0)SetPage(index/6);}
+        public Pet[] VisibleResidents {get{return Residents.Skip(Page*6).Take(6).ToArray();}}
         DesktopApp app;
         Timer animationTimer;double phase=0;Dictionary<string,double> meals=new Dictionary<string,double>(),growth=new Dictionary<string,double>();
         public Habitat(DesktopApp owner) {app=owner;DoubleBuffered=true;MouseDown+=ClickPet;animationTimer=new Timer {Interval=125};animationTimer.Tick+=(s,e)=>{if(!app.Paused){phase+=.125;if(Visible)Invalidate();}};animationTimer.Start();Disposed+=(s,e)=>{animationTimer.Stop();animationTimer.Dispose();};}
         public void AnimateMeal(Pet p) {meals[p.Id]=phase;Invalidate();}
         Pet[] Residents {get{return app.Engine.Data.Pets.Where(p=>p.Home&&p.Active&&!p.Dead).ToArray();}}
-        Rectangle Slot(int i) {int columns=Math.Max(1,(int)(Width*.65)/120);return new Rectangle((int)(Width*.18)+(i%columns)*120,(int)(Height*.78)-110+(i/columns)*160,110,110);}
+        public Rectangle Slot(int i) {int cellWidth=(Width-24)/3,cellHeight=(Height-24)/2,size=Math.Min(94,Math.Min(cellWidth-12,cellHeight-60));return new Rectangle(12+(i%3)*cellWidth+(cellWidth-size)/2,12+(i/3)*cellHeight,size,size);}
         void ClickPet(object s,MouseEventArgs e) {
-            var list=Residents;for(int i=0;i<list.Length;i++) {var r=Slot(i);if(r.Contains(e.Location)) {Pet p=list[i];if(e.Button==MouseButtons.Right)app.MenuFor(p).Show(this,e.Location);else if(p.GrowthReady)app.Reveal(p);else app.Say(p,p.Name+"가 집에서 쉬고 있어요.");return;}if(new Rectangle(r.X,r.Bottom+16,100,25).Contains(e.Location)&&e.Button==MouseButtons.Left&&!app.Paused) {Pet p=list[i];app.Change(()=>{if(app.Engine.Clean(p))app.Say(p,Dialogue.Clean(p));});return;}}
+            var list=VisibleResidents;for(int i=0;i<list.Length;i++) {var r=Slot(i);if(r.Contains(e.Location)) {Pet p=list[i];if(SelectedPet!=null)SelectedPet(p);if(e.Button==MouseButtons.Right)app.MenuFor(p).Show(this,e.Location);else if(p.GrowthReady)app.Reveal(p);else app.Say(p,p.Name+"가 집에서 쉬고 있어요.");return;}if(new Rectangle(r.X-10,r.Bottom+40,r.Width+20,24).Contains(e.Location)&&e.Button==MouseButtons.Left&&!app.Paused) {Pet p=list[i];app.Change(()=>{if(app.Engine.Clean(p))app.Say(p,Dialogue.Clean(p));});return;}}
         }
         protected override void OnPaint(PaintEventArgs e) {
             base.OnPaint(e);Graphics g=e.Graphics;g.Clear(Color.FromArgb(109,75,49));
             if(Sprites.Home!=null){g.InterpolationMode=System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;g.DrawImage(Sprites.Home,new Rectangle(0,0,Width,Height),0,0,Sprites.Home.Width,Sprites.Home.Height,GraphicsUnit.Pixel);}
             else {using(var b=new SolidBrush(Color.FromArgb(173,126,78)))g.FillRectangle(b,8,24,Width-16,Height-32);}
-            var list=Residents;
+            Page=Math.Max(0,Math.Min(PageCount-1,Page));var list=VisibleResidents;
             if(list.Length==0){
                 if(Preview!=null&&!Preview.Dead){Art.Pet(g,Preview,Slot(0),phase);string status=!Preview.Active?"비활성":Preview.Home?"집":"바탕화면";TextRenderer.DrawText(g,Preview.Name+" · "+status+" 미리보기",Font,new Rectangle(15,35,Width-30,24),Art.Cream,TextFormatFlags.HorizontalCenter);TextRenderer.DrawText(g,"집에서 보려면 왼쪽 행동 메뉴에서 ‘집에 가기’를 선택하세요.",Font,new Rectangle(15,65,Width-30,42),Art.Cream,TextFormatFlags.HorizontalCenter|TextFormatFlags.WordBreak);}
                 else TextRenderer.DrawText(g,"지금은 집이 조용해요.",Font,new Rectangle(30,120,Width-60,100),Art.Cream,TextFormatFlags.HorizontalCenter);
             }
-            for(int i=0;i<list.Length;i++) {Rectangle r=Slot(i);if(r.Top>Height-80)break;Pet p=list[i];double start;string key="stand";double time=phase;if(p.GrowthReady){if(!growth.TryGetValue(p.Id,out start)){start=phase;growth[p.Id]=start;}time=phase-start;}else if(meals.TryGetValue(p.Id,out start)&&phase-start<2){key="eat";time=phase-start;}Art.Pet(g,p,r,time,key);TextRenderer.DrawText(g,p.Name+(p.Sleeping?" · 수면":""),Font,new Rectangle(r.X,r.Bottom,120,20),Art.Cream,TextFormatFlags.HorizontalCenter);
-                if(p.Waste>0) {Art.Waste(g,new Rectangle(r.X,r.Bottom+21,27,20));TextRenderer.DrawText(g,"치우기 · "+p.Waste,Font,new Point(r.X+30,r.Bottom+20),Art.Cream);}
+            for(int i=0;i<list.Length;i++) {Rectangle r=Slot(i);Pet p=list[i];double start;string key="stand";double time=phase;if(p.GrowthReady){if(!growth.TryGetValue(p.Id,out start)){start=phase;growth[p.Id]=start;}time=phase-start;}else if(meals.TryGetValue(p.Id,out start)&&phase-start<2){key="eat";time=phase-start;}if(Preview==p)using(var pen=new Pen(Color.FromArgb(240,208,101),2))g.DrawRectangle(pen,r.X-5,r.Y-3,r.Width+10,r.Height+39);Art.Pet(g,p,r,time,key);var label=new Rectangle(r.X-15,r.Bottom,r.Width+30,20);using(var b=new SolidBrush(Color.FromArgb(185,48,34,18)))g.FillRectangle(b,new Rectangle(label.X,label.Y,label.Width,40));TextRenderer.DrawText(g,p.Name,Font,label,Art.Cream,TextFormatFlags.HorizontalCenter|TextFormatFlags.EndEllipsis);TextRenderer.DrawText(g,p.Sleeping?"수면":p.GrowthReady?"성장 대기":p.Kind,Font,new Rectangle(label.X,label.Y+20,label.Width,20),Art.Cream,TextFormatFlags.HorizontalCenter|TextFormatFlags.EndEllipsis);
+                if(p.Waste>0) {Art.Waste(g,new Rectangle(r.X,r.Bottom+42,22,18));TextRenderer.DrawText(g,"치우기 · "+p.Waste,Font,new Point(r.X+24,r.Bottom+40),Art.Cream);}
             }
-            if(list.Length>Math.Max(1,Width/135))TextRenderer.DrawText(g,"더 많은 개체는 왼쪽 목록에서 선택해 주세요.",Font,new Point(15,Height-26),Art.Cream);
         }
     }
     public class CollectionCard:Control {
