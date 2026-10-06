@@ -14,9 +14,33 @@ namespace GuMaGoChi {
             CheckZoomText();
             CheckEmergencyExit();
             CheckDisplayScale();
+            CheckScaledRunnerJump();
             foreach(float scale in new[]{1f,1.25f,1.5f,2f}){using(var dialog=new NameDialog("새 아기 고구마의 이름",""))CheckButtons(dialog,scale,"adoption-preview-"+scale.ToString("0.00",System.Globalization.CultureInfo.InvariantCulture)+".png");using(var dialog=new LunchMenuEditor(new List<string>()))CheckButtons(dialog,scale,"menu-editor-preview-"+scale.ToString("0.00",System.Globalization.CultureInfo.InvariantCulture)+".png");}
             var data=new SaveData {Seeds=442};for(int i=0;i<8;i++)data.Pets.Add(new Pet {Name="테스트 고구마 "+(i+1),SpeciesId=i,Home=true,Age=36000,GrowthExp=180,Waste=1});
             using(var app=new DesktopApp(data,null,false))try{using(var home=new HomeWindow(app)){home.Show();Application.DoEvents();var tab=home.Controls.OfType<TabControl>().Single();var habitat=tab.TabPages[0].Controls.OfType<Habitat>().Single();Check(habitat.PageCount==2&&habitat.VisibleResidents.Length==6,"first page shows six residents");for(int i=0;i<6;i++){var slot=habitat.Slot(i);Check(habitat.ClientRectangle.Contains(new Rectangle(slot.X-15,slot.Y,slot.Width+30,slot.Height+64)),"sprite, name and cleanup fit for slot "+i);for(int j=i+1;j<6;j++)Check(!slot.IntersectsWith(habitat.Slot(j)),"six sprite slots do not overlap");}using(var bmp=new Bitmap(home.Width,home.Height)){home.DrawToBitmap(bmp,new Rectangle(Point.Empty,bmp.Size));bmp.Save(Path.Combine(Paths.BaseDirectory,"home-six-preview.png"));}habitat.SetPage(1);home.RefreshData();Check(habitat.Page==1&&habitat.VisibleResidents.Length==2,"refresh preserves second page");home.SelectPet(data.Pets[0].Id);Check(habitat.Page==0,"selecting resident opens its page");habitat.SetPage(1);data.Pets.RemoveRange(6,2);home.RefreshData();Check(habitat.Page==0&&habitat.PageCount==1,"removing last page clamps pagination");using(var menu=app.MenuFor(data.Pets[0])){Check(menu.Items.OfType<ToolStripLabel>().Any(i=>i.Text=="돌봄"),"care section heading");Check(menu.Items.OfType<ToolStripMenuItem>().Last().Text=="맛탕 만들기","destructive action stays last");}home.Dispose();}}finally{app.Exit();}
+        }
+        static void CheckScaledRunnerJump(){
+            var data=new SaveData {StarterNutrientsClaimed=true};var pet=new Pet {SpeciesId=0,Home=true};data.Pets.Add(pet);
+            using(var app=new DesktopApp(data,null,false)){
+                app.ManualPause=true;
+                foreach(int percent in Enumerable.Range(1,20).Select(i=>i*10))foreach(bool jump in new[]{false,true})foreach(int edge in percent==50||percent==100||percent==200?new[]{0,1,2,3,4}:new[]{0}){
+                    DisplayZoom.Percent=percent;
+                    using(var window=new RunnerWindow(app,pet)){
+                    window.Location=new Point(-32000,-32000);window.Show();var run=window.Run;run.Obstacles.Clear();
+                    double straightWidth=run.Width-2*run.CornerRadius,straightHeight=run.Height-2*run.CornerRadius,arc=Math.PI*(run.CornerRadius-42)/2;
+                    double[] starts={0,straightWidth-50,straightWidth+arc+straightHeight/2,straightWidth+straightHeight+2*arc+straightWidth/2,2*straightWidth+straightHeight+3*arc+straightHeight/2};run.Distance=starts[edge];
+                    var crawler=new RunObstacle {Kind=RunnerObstacleKind.Crawler,Distance=(run.Distance+120)%run.Length};run.Obstacles.Add(crawler);bool jumped=false,passed=false;
+                    for(int tick=0;tick<180&&!run.Finished;tick++){
+                        if(jump&&!jumped&&run.Ahead(crawler.Distance)<60){run.Jump();jumped=true;}
+                        run.Tick(.01,window.Collides);double ahead=run.Ahead(crawler.Distance);
+                        if(ahead>run.Length/2&&run.Length-ahead>120){passed=true;break;}
+                    }
+                    Check(jump?passed&&!run.Finished:run.Finished,"actual runner crawler encounter at "+percent+" percent, jump="+jump+", edge="+edge);
+                    window.Close();
+                    }
+                }
+                DisplayZoom.Percent=100;app.Exit();
+            }
         }
         static void CheckZoomText(){
             foreach(float scale in new[]{.5f,.7f,1f,1.5f,2f})using(var actual=new Bitmap(700,120))using(var expected=new Bitmap(700,120))using(var g=Graphics.FromImage(actual))using(var reference=Graphics.FromImage(expected))using(var font=new Font("맑은 고딕",10))using(var nativeFont=new Font("맑은 고딕",10*scale)){

@@ -20,11 +20,11 @@ namespace GuMaGoChi {
             if(!KeepScreenBounds)AutoScrollPosition=Point.Empty;
             MinimumSize=Size.Empty;
             if(!KeepScreenBounds)ClientSize=new Size(DisplayZoom.Pixels(zoomClient.Width,factor),DisplayZoom.Pixels(zoomClient.Height,factor));
-            var previousFont=scaledZoomFont;scaledZoomFont=new Font(zoomFont.FontFamily,Math.Max(.5f,zoomFont.Size*factor),zoomFont.Style,zoomFont.Unit);Font=scaledZoomFont;if(previousFont!=null)previousFont.Dispose();
+            var previousFont=scaledZoomFont;scaledZoomFont=new Font(zoomFont.FontFamily,Math.Max(.5f,zoomFont.Size*factor),zoomFont.Style,zoomFont.Unit);Font=scaledZoomFont;
             ApplyZoom(Controls,factor);
             if(!KeepScreenBounds){Size available=Screen.FromControl(this).WorkingArea.Size;MinimumSize=new Size(Math.Min(available.Width,DisplayZoom.Pixels(zoomMinimum.Width,factor)),Math.Min(available.Height,DisplayZoom.Pixels(zoomMinimum.Height,factor)));}
             if(this is HomeWindow){foreach(Control c in Controls)c.Anchor=factor>1?AnchorStyles.Top|AnchorStyles.Left:zoomLayouts[c].Anchor;AutoScrollMinSize=factor>1?new Size(DisplayZoom.Pixels(zoomClient.Width,factor),DisplayZoom.Pixels(zoomClient.Height,factor)):Size.Empty;AutoScroll=factor>1;}
-            ResumeLayout(true);Invalidate(true);
+            ResumeLayout(true);Invalidate(true);foreach(var layout in zoomLayouts.Values)layout.ReleaseRetired();if(previousFont!=null)previousFont.Dispose();
         }
         void CaptureZoom(Control.ControlCollection controls){foreach(Control c in controls){if(!zoomLayouts.ContainsKey(c))zoomLayouts[c]=new ZoomLayout(c);CaptureZoom(c.Controls);}}
         protected void ZoomNewControls(){if(!zoomCaptured)return;ZoomNewControls(Controls);}

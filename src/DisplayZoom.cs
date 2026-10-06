@@ -14,17 +14,18 @@ namespace GuMaGoChi {
         public static Padding Pad(Padding p,float factor){return new Padding(Pixels(p.Left,factor),Pixels(p.Top,factor),Pixels(p.Right,factor),Pixels(p.Bottom,factor));}
     }
     internal sealed class ZoomLayout {
-        internal Rectangle Bounds;internal Size Minimum,Maximum;internal Padding Padding,Margin;internal Font Font;internal Point TabPadding;internal AnchorStyles Anchor;Font scaledFont;
+        internal Rectangle Bounds;internal Size Minimum,Maximum;internal Padding Padding,Margin;internal Font Font;internal Point TabPadding;internal AnchorStyles Anchor;Font scaledFont;readonly List<Font> retiredFonts=new List<Font>();
         internal ZoomLayout(Control c){Bounds=c.Bounds;Minimum=c.MinimumSize;Maximum=c.MaximumSize;Padding=c.Padding;Margin=c.Margin;Anchor=c.Anchor;Font=(Font)c.Font.Clone();var tab=c as TabControl;if(tab!=null)TabPadding=tab.Padding;}
         internal void Apply(Control c,float factor){
             c.MinimumSize=new Size(DisplayZoom.Pixels(Minimum.Width,factor),DisplayZoom.Pixels(Minimum.Height,factor));
             c.MaximumSize=new Size(DisplayZoom.Pixels(Maximum.Width,factor),DisplayZoom.Pixels(Maximum.Height,factor));
             c.Padding=DisplayZoom.Pad(Padding,factor);c.Margin=DisplayZoom.Pad(Margin,factor);
-            var previous=scaledFont;scaledFont=new Font(Font.FontFamily,Math.Max(.5f,Font.Size*factor),Font.Style,Font.Unit);c.Font=scaledFont;if(previous!=null)previous.Dispose();
+            var previous=scaledFont;scaledFont=new Font(Font.FontFamily,Math.Max(.5f,Font.Size*factor),Font.Style,Font.Unit);c.Font=scaledFont;if(previous!=null)retiredFonts.Add(previous);
             c.Bounds=DisplayZoom.Rect(Bounds,factor);
             var tab=c as TabControl;if(tab!=null)tab.Padding=new Point(DisplayZoom.Pixels(TabPadding.X,factor),DisplayZoom.Pixels(TabPadding.Y,factor));
         }
-        internal void Dispose(){Font.Dispose();if(scaledFont!=null)scaledFont.Dispose();}
+        internal void ReleaseRetired(){foreach(var font in retiredFonts)font.Dispose();retiredFonts.Clear();}
+        internal void Dispose(){ReleaseRetired();Font.Dispose();if(scaledFont!=null)scaledFont.Dispose();}
     }
     public class ZoomPaintControl:Control {
         protected float Zoom {get {var form=FindForm() as GameForm;return form==null?1:form.UiZoom;}}

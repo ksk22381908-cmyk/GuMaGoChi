@@ -184,6 +184,9 @@ namespace GuMaGoChi {
     public class DesktopApp:ApplicationContext {
         public Engine Engine;public Dictionary<string,PetWindow> Windows=new Dictionary<string,PetWindow>();
         public HomeWindow Home; public ActivityWindow Activity;public DefenseWindow Defense;public RunnerWindow Runner;public LunchWindow Lunch;
+        public UpdateWindow Update;
+        public void OpenUpdate(){if(Update==null||Update.IsDisposed)Update=new UpdateWindow(this);Update.Show();Update.Activate();}
+        public bool SaveForUpdate(){if(!persist)return true;try{Storage.Save(Engine.Data);return true;}catch(Exception ex){MessageBox.Show("업데이트 전에 저장하지 못했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);return false;}}
         public bool ManualPause=false,AutoPause=false;bool suspended=false,locked=false,exiting=false,emergencyExiting=false;
         public bool Paused {get{return ManualPause||AutoPause||suspended||locked;}}
         NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer,emergencyTimer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
@@ -337,6 +340,7 @@ namespace GuMaGoChi {
             trayMenu.Items.Add(new ToolStripLabel(AutoPause?"전체 화면 작업 중 · 자동 일시정지":""));
             trayMenu.Items.Add(Item("윈도우 시작 시 자동 실행 "+(Engine.Data.AutoStart?"✓":""),ToggleAutoStart));
             trayMenu.Items.Add(Item("저장 폴더 열기",()=>{Directory.CreateDirectory(Storage.Folder);Process.Start("explorer.exe",Storage.Folder);}));
+            trayMenu.Items.Add(Item("업데이트 확인 · v"+Updates.CurrentText,OpenUpdate));
             trayMenu.Items.Add(ScaleMenu());
             trayMenu.Items.Add(Item("비상탈출 · Space + E",EmergencyExit));
             trayMenu.Items.Add(Item("종료 · 저장 후 닫기",Exit));tray.Icon=needs.Length>0?alertIcon:icon;tray.Text=needs.Length>0?"GuMaGoChi · "+needs.Length+"마리 돌봄 필요":"GuMaGoChi · 고구마와 함께";
@@ -366,7 +370,7 @@ namespace GuMaGoChi {
             foreach(Form window in openWindows)if(!window.IsDisposed)window.Dispose();
             if(persist)Environment.Exit(0);
         }
-        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(emergencyTimer!=null){emergencyTimer.Stop();emergencyTimer.Dispose();}if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
+        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Update!=null&&!Update.IsDisposed)Update.Close();if(emergencyTimer!=null){emergencyTimer.Stop();emergencyTimer.Dispose();}if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
     }
     public class NameDialog:GameForm {
         TextBox input;public string PetName {get{return input.Text.Trim();}}

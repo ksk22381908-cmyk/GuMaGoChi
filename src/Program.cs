@@ -7,6 +7,7 @@ using System.Windows.Forms;
 namespace GuMaGoChi {
     static class Program {
         [STAThread] static void Main(string[] args) {
+            if(args.Length>0&&args[0]=="--apply-update"){Updates.Apply(args);return;}
             if(args.Contains("--self-test")) {try {string report=Tests.Run();File.WriteAllText(Path.Combine(Paths.BaseDirectory,"test-results.txt"),report);Environment.Exit(0);}catch(Exception ex){File.WriteAllText(Path.Combine(Paths.BaseDirectory,"test-results.txt"),ex.ToString());Environment.Exit(1);}return;}
             if(args.Contains("--render-check")) {RenderCheck.Run();return;}
             if(args.Contains("--ui-check")) {try{File.WriteAllText(Path.Combine(Paths.BaseDirectory,"ui-results.txt"),UiCheck.Run());Environment.Exit(0);}catch(Exception ex){File.WriteAllText(Path.Combine(Paths.BaseDirectory,"ui-results.txt"),ex.ToString());Environment.Exit(1);}return;}
@@ -23,7 +24,7 @@ namespace GuMaGoChi {
         static int count=0;
         static void Check(bool condition,string message) {if(!condition)throw new Exception("FAIL: "+message);count++;}
         public static string Run() {
-            count+=DefenseTests.Run();
+            count+=DefenseTests.Run();count+=UpdateTests.Run();
             var mattangData=new SaveData {Seeds=27};var mattangEngine=new Engine(mattangData);
             var removed=mattangEngine.Adopt("맛탕",true);removed.SpeciesId=12;mattangData.Discovered.Add(12);
             var survivor=mattangEngine.Adopt("남은 고구마",true);survivor.Friends[removed.Id]=3;
