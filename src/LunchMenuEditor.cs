@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 namespace GuMaGoChi {
-    public sealed class LunchMenuEditor:Form {
+    public sealed class LunchMenuEditor:GameForm {
         readonly TextBox input;readonly Label count;public List<string> Menus;bool defaults;
         public static List<string> Parse(string text){return text.Split(new[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries).Select(m=>m.Trim()).Where(m=>m.Length>0).Distinct().ToList();}
         public LunchMenuEditor(List<string> saved){Text="내 점심 메뉴 목록";ClientSize=new Size(500,540);Font=new Font("맑은 고딕",10);StartPosition=FormStartPosition.CenterParent;MinimizeBox=MaximizeBox=false;FormBorderStyle=FormBorderStyle.FixedDialog;

@@ -105,7 +105,7 @@ namespace GuMaGoChi {
         public static void Waste(Graphics g,Rectangle r) {using(var b=new SolidBrush(Color.FromArgb(127,87,51))) {g.FillEllipse(b,r.X,r.Y+10,r.Width,r.Height-10);g.FillEllipse(b,r.X+5,r.Y+4,r.Width-10,r.Height-8);g.FillEllipse(b,r.X+10,r.Y,r.Width-20,12);} }
         public static void DisposeImages() {foreach(var i in images.Values)if(i!=null)i.Dispose();images.Clear();Sprites.Dispose();}
     }
-    public class PetWindow:Form {
+    public class PetWindow:GameForm {
         public Pet Pet; public DesktopApp App; public string Bubble="";double bubbleLeft=0,phase=0;
         bool pressed=false,drag=false; Point offset,start;int direction=1;double wanderClock=6,walkX,walkY,headingX=.8,headingY=-.6;bool wandering=true;
         string motion="stand";double motionTime=0;bool walkingNow=false,growthSeen=false;
@@ -113,10 +113,15 @@ namespace GuMaGoChi {
         public static readonly Rectangle SpriteBounds=new Rectangle(18,52,84,84);
         public static readonly Point BallAnchor=new Point(62,115);
         public const int FloorOffset=136;
-        Rectangle Body {get {return SpriteBounds;}}
+        public Rectangle ScaledSpriteBounds {get{return DisplayZoom.Rect(SpriteBounds,UiZoom);}}
+        public Point ScaledBallAnchor {get{return new Point(DisplayZoom.Pixels(BallAnchor.X,UiZoom),DisplayZoom.Pixels(BallAnchor.Y,UiZoom));}}
+        public int ScaledFloorOffset {get{return DisplayZoom.Pixels(FloorOffset,UiZoom);}}
+        Rectangle Body {get {return ScaledSpriteBounds;}}
+        public override void ApplyUiZoom(int percent){UiZoom=DisplayZoom.Normalize(percent)/100f;ClientSize=new Size(DisplayZoom.Pixels(126,UiZoom),DisplayZoom.Pixels(166,UiZoom));Location=Clamp(Location);Pet.X=Left;Pet.Y=Top;walkX=Left;walkY=Top;Invalidate();}
         public PetWindow(DesktopApp app,Pet pet) {
             App=app;Pet=pet;FormBorderStyle=FormBorderStyle.None;ShowInTaskbar=false;TopMost=true;BackColor=Color.Magenta;TransparencyKey=Color.Magenta;ClientSize=new Size(126,166);DoubleBuffered=true;Font=new Font("맑은 고딕",8);
             StartPosition=FormStartPosition.Manual;
+            ApplyUiZoom(app.Engine.Data.DisplayScalePercent);
             if(pet.X==0 && pet.Y==0) {Rectangle area=Screen.PrimaryScreen.WorkingArea;pet.X=area.Left+70+(app.Windows.Count%7)*155;pet.Y=area.Bottom-Height;}
             Location=Clamp(new Point(pet.X,pet.Y));Pet.X=Left;Pet.Y=Top;
             walkX=Left;walkY=Top;MouseDown+=Down;MouseMove+=MoveMouse;MouseUp+=Up;MouseCaptureChanged+=(s,e)=>{if(!Capture){pressed=false;drag=false;walkX=Left;walkY=Top;}};
@@ -130,7 +135,7 @@ namespace GuMaGoChi {
             if(e.Button==MouseButtons.Right) {App.MenuFor(Pet).Show(this,e.Location);return;}
             if(e.Button!=MouseButtons.Left)return;
             if(App.Paused)return;
-            if(e.Y>=138 && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say(Dialogue.Clean(Pet));App.Save();}return;}
+            if(e.Y>=DisplayZoom.Pixels(138,UiZoom) && Pet.Waste>0) {if(App.Engine.Clean(Pet)) {Say(Dialogue.Clean(Pet));App.Save();}return;}
             if(Pet.GrowthReady && Body.Contains(e.Location)) {App.Reveal(Pet);return;}
             if(Body.Contains(e.Location)&&App.Activity==null) {pressed=true;drag=false;Capture=true;offset=e.Location;start=Cursor.Position;}
         }
@@ -162,30 +167,34 @@ namespace GuMaGoChi {
             Invalidate();
         }
         protected override void OnPaint(PaintEventArgs e) {
-            base.OnPaint(e);Graphics g=e.Graphics;
+            base.OnPaint(e);
+            var state=e.Graphics.Save();try{e.Graphics.ScaleTransform(UiZoom,UiZoom);PaintContent(e.Graphics);}finally{e.Graphics.Restore(state);}
+        }
+        void PaintContent(Graphics g){
             if(Bubble!="") {
                 Rectangle r=new Rectangle(2,2,122,47);using(var b=new SolidBrush(Art.Cream))g.FillRectangle(b,r);using(var pen=new Pen(Art.Ink,1))g.DrawRectangle(pen,r);
-                using(var bubbleFont=new Font("맑은 고딕",7))TextRenderer.DrawText(g,Bubble,bubbleFont,new Rectangle(6,5,114,40),Art.Ink,TextFormatFlags.WordBreak|TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
+                using(var bubbleFont=new Font("맑은 고딕",7))ZoomText.DrawText(g,Bubble,bubbleFont,new Rectangle(6,5,114,40),Art.Ink,TextFormatFlags.WordBreak|TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
             }
-            Rectangle body=Body;if(!Pet.Sleeping && !Pet.GrowthReady)body.Y+=(int)(Math.Sin(phase*3)*2);
+            Rectangle body=SpriteBounds;if(!Pet.Sleeping && !Pet.GrowthReady)body.Y+=(int)(Math.Sin(phase*3)*2);
             Art.Pet(g,Pet,body,Pet.GrowthReady?motionTime:motion=="stand"?phase:motionTime,walkingNow?"walk":motion,direction<0);
-            if(Pet.Waste>0) {Art.Waste(g,new Rectangle(7,142,21,18));TextRenderer.DrawText(g,Pet.Name+" · "+Pet.Waste+"개",Font,new Point(32,145),Art.Ink,Art.Cream);}
-            else TextRenderer.DrawText(g,Pet.Name,Font,new Rectangle(14,140,98,20),Art.Ink,Art.Cream,TextFormatFlags.HorizontalCenter);
+            if(Pet.Waste>0) {Art.Waste(g,new Rectangle(7,142,21,18));ZoomText.DrawText(g,Pet.Name+" · "+Pet.Waste+"개",Font,new Point(32,145),Art.Ink,Art.Cream);}
+            else ZoomText.DrawText(g,Pet.Name,Font,new Rectangle(14,140,98,20),Art.Ink,Art.Cream,TextFormatFlags.HorizontalCenter);
         }
     }
     public class DesktopApp:ApplicationContext {
         public Engine Engine;public Dictionary<string,PetWindow> Windows=new Dictionary<string,PetWindow>();
         public HomeWindow Home; public ActivityWindow Activity;public DefenseWindow Defense;public RunnerWindow Runner;public LunchWindow Lunch;
-        public bool ManualPause=false,AutoPause=false;bool suspended=false,locked=false,exiting=false;
+        public bool ManualPause=false,AutoPause=false;bool suspended=false,locked=false,exiting=false,emergencyExiting=false;
         public bool Paused {get{return ManualPause||AutoPause||suspended||locked;}}
-        NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
+        NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer,emergencyTimer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
         Dictionary<string,double> pairCooldown=new Dictionary<string,double>();HashSet<string> warnings=new HashSet<string>();
         Dictionary<string,ContextMenuStrip> petMenus=new Dictionary<string,ContextMenuStrip>();
         public DesktopApp(SaveData data,string warning,bool persistData=true) {
-            persist=persistData;bool starterGift=!data.StarterNutrientsClaimed;Engine=new Engine(data);if(starterGift)Save();icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
+            persist=persistData;bool starterGift=!data.StarterNutrientsClaimed;Engine=new Engine(data);DisplayZoom.Percent=Engine.Data.DisplayScalePercent;if(starterGift)Save();icon=CreateIcon(false);alertIcon=CreateIcon(true);trayMenu=new ContextMenuStrip();tray=new NotifyIcon {Icon=icon,Text="GuMaGoChi · 고구마와 함께",Visible=true,ContextMenuStrip=trayMenu};
             tray.DoubleClick+=(s,e)=>OpenHome(null);tray.MouseClick+=(s,e)=>{if(e.Button==MouseButtons.Left)OpenHome(null);};
             RefreshTray();SystemEvents.PowerModeChanged+=Power;SystemEvents.SessionSwitch+=Session;
             timer=new Timer {Interval=125};timer.Tick+=Tick;timer.Start();
+            emergencyTimer=new Timer {Interval=20};emergencyTimer.Tick+=(s,e)=>CheckEmergencyKeys((Native.GetAsyncKeyState((int)Keys.Space)&0x8000)!=0,(Native.GetAsyncKeyState((int)Keys.E)&0x8000)!=0);emergencyTimer.Start();
             if(data.Pets.Count==0) {OpenHome(null);Adopt(true);}else SyncWindows();
             if(warning!=null)MessageBox.Show(warning,"저장 복구");
         }
@@ -238,7 +247,7 @@ namespace GuMaGoChi {
             foreach(var pair in Windows.ToArray())if(!Engine.Data.Pets.Contains(pair.Value.Pet)){pair.Value.Close();Windows.Remove(pair.Key);}
         }
         public void Say(Pet p,string text) {PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
-        public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
+        public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(emergencyExiting)return;if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
         public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,p.Kind+" · "+p.Name+"\n"+Dialogue.Get(p,3));}});}
         public void OpenHome(Pet p) {if(Home==null||Home.IsDisposed)Home=new HomeWindow(this);Home.RefreshData();if(p!=null)Home.SelectPet(p.Id);Home.Show();Home.Activate();}
@@ -294,6 +303,8 @@ namespace GuMaGoChi {
             menu.Items.Add(Item(p.Active?"비활성화 · 시간 멈추기":"활성화하기",()=>Change(()=>p.Active=!p.Active),!p.Dead&&Activity==null));
             menu.Items.Add(Item("이름 변경",()=>{using(var d=new NameDialog("이름 변경",p.Name))if(d.ShowDialog()==DialogResult.OK)Change(()=>p.Name=d.PetName);}));
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));
+            menu.Items.Add(ScaleMenu());
+            menu.Items.Add(Item("비상탈출 · Space + E",EmergencyExit));
             menu.Items.Add(new ToolStripSeparator());
             var remove=Item("맛탕 만들기",()=>MakeMattang(p),Engine.Data.Pets.Contains(p)&&!p.Dead);remove.ForeColor=Color.Firebrick;menu.Items.Add(remove);StyleMenu(menu.Items);return menu;
         }
@@ -326,12 +337,38 @@ namespace GuMaGoChi {
             trayMenu.Items.Add(new ToolStripLabel(AutoPause?"전체 화면 작업 중 · 자동 일시정지":""));
             trayMenu.Items.Add(Item("윈도우 시작 시 자동 실행 "+(Engine.Data.AutoStart?"✓":""),ToggleAutoStart));
             trayMenu.Items.Add(Item("저장 폴더 열기",()=>{Directory.CreateDirectory(Storage.Folder);Process.Start("explorer.exe",Storage.Folder);}));
+            trayMenu.Items.Add(ScaleMenu());
+            trayMenu.Items.Add(Item("비상탈출 · Space + E",EmergencyExit));
             trayMenu.Items.Add(Item("종료 · 저장 후 닫기",Exit));tray.Icon=needs.Length>0?alertIcon:icon;tray.Text=needs.Length>0?"GuMaGoChi · "+needs.Length+"마리 돌봄 필요":"GuMaGoChi · 고구마와 함께";
         }
         void ToggleAutoStart() {try {using(var key=Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run")) {if(Engine.Data.AutoStart)key.DeleteValue("GuMaGoChi",false);else key.SetValue("GuMaGoChi","\""+Application.ExecutablePath+"\"");}Change(()=>Engine.Data.AutoStart=!Engine.Data.AutoStart);}catch(Exception ex){MessageBox.Show(ex.Message,"자동 실행 설정 실패");}}
-        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
+        public void CheckEmergencyKeys(bool spaceDown,bool eDown){if(spaceDown&&eDown&&!exiting)EmergencyExit();}
+        public void SetDisplayScale(int percent){
+            if(Activity!=null||Runner!=null||(Defense!=null&&Defense.BattleRunning))return;
+            Engine.Data.DisplayScalePercent=DisplayZoom.Normalize(percent);DisplayZoom.Percent=Engine.Data.DisplayScalePercent;
+            foreach(var window in Application.OpenForms.Cast<Form>().OfType<GameForm>().ToArray())window.ApplyUiZoom(DisplayZoom.Percent);
+            foreach(var window in Windows.Values)window.ApplyUiZoom(DisplayZoom.Percent);
+            Save();RefreshTray();
+        }
+        public ToolStripMenuItem ScaleMenu(){
+            var menu=new ToolStripMenuItem("캐릭터·UI 비율 · "+Engine.Data.DisplayScalePercent+"%") {Enabled=Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)};
+            for(int percent=10;percent<=200;percent+=10){int value=percent;var option=Item(percent+"%"+(percent==100?" (기본)":""),()=>SetDisplayScale(value));option.Checked=percent==Engine.Data.DisplayScalePercent;menu.DropDownItems.Add(option);}
+            return menu;
+        }
+        public void EmergencyExit(){
+            if(exiting)return;
+            emergencyExiting=true;
+            ManualPause=true;
+            // Hide every window before closing activities and writing the save.
+            var openWindows=Application.OpenForms.Cast<Form>().ToArray();
+            foreach(Form window in openWindows)window.Hide();
+            Exit();
+            foreach(Form window in openWindows)if(!window.IsDisposed)window.Dispose();
+            if(persist)Environment.Exit(0);
+        }
+        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(emergencyTimer!=null){emergencyTimer.Stop();emergencyTimer.Dispose();}if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
     }
-    public class NameDialog:Form {
+    public class NameDialog:GameForm {
         TextBox input;public string PetName {get{return input.Text.Trim();}}
         public NameDialog(string title,string initial) {
             Text=title;ClientSize=new Size(410,210);AutoScaleMode=AutoScaleMode.Font;FormBorderStyle=FormBorderStyle.FixedDialog;StartPosition=FormStartPosition.CenterScreen;MaximizeBox=false;MinimizeBox=false;BackColor=Art.Cream;Font=new Font("맑은 고딕",10);
