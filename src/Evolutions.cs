@@ -17,12 +17,14 @@ namespace GuMaGoChi {
             new Evolution(4,24,"맹견마","maenggyeonma","묵직하게 집을 지키는 불독 고구마"),
             new Evolution(5,24,"치와마","chiwama","분노로 바들바들 떠는 치와와 고구마"),
             new Evolution(6,12,"해적선장마","pirate-captain","자신만만하게 동료를 이끄는 고구마 선장"),
-            new Evolution(7,12,"유령해적마","ghost-pirate","유령 불꽃으로 장난치는 능청스러운 해적 고구마")
+            new Evolution(7,12,"유령해적마","ghost-pirate","유령 불꽃으로 장난치는 능청스러운 해적 고구마"),
+            new Evolution(8,5,"블루베리마","blueberry","느긋하게 구르며 독 열매를 던지는 능청스러운 베리"),
+            new Evolution(9,5,"라즈베리마","raspberry","과즙처럼 발랄하고 자신만만한 베리")
         };
         public static bool Valid(int id,int parent){return id>=0&&id<All.Length&&All[id].Parent==parent;}
         public static IEnumerable<Evolution> For(int parent){return All.Where(e=>e.Parent==parent);}
         public static bool CanChange(Pet p){return p!=null&&p.Active&&!p.Dead&&!p.Sleeping&&!p.GrowthReady&&For(p.SpeciesId).Any();}
-        // Design-preview release: no unapproved age/activity gates or combat bonuses.
+        // Berry evolutions have distinct basic attacks; other forms keep their existing stats.
         // Choices are reversible while the final evolution rules are being designed.
         public static bool Change(SaveData data,Pet p,int id) {
             if(data==null||!data.Pets.Contains(p)||!CanChange(p)||id==p.EvolutionId||(id!=-1&&!Valid(id,p.SpeciesId)))return false;
@@ -30,7 +32,7 @@ namespace GuMaGoChi {
             if(id>=0&&!data.DiscoveredEvolutions.Contains(id))data.DiscoveredEvolutions.Add(id);
             return true;
         }
-        public static string Status(Pet p){return p.EvolutionId>=0?"2차 진화 · 모습 선택 가능":For(p.SpeciesId).Any()?"2차 진화: 행동 메뉴에서 모습 선택":"추가 성장: 추후 업데이트";}
+        public static string Status(Pet p){return p.EvolutionId>=0?"2차 진화 · 진화 선택 가능":For(p.SpeciesId).Any()?"2차 진화: 행동 메뉴에서 진화 선택":"추가 성장: 추후 업데이트";}
         public static string RevealLine(Pet p) {
             switch(p.EvolutionId){
                 case 0:return "어디서 봐도 고구마구마! 뒤쪽은 보지 말구마!";
@@ -41,6 +43,8 @@ namespace GuMaGoChi {
                 case 5:return "작다고 얕보지 마! 지금 엄청 화났거든!";
                 case 6:return "닻을 올려라! 오늘의 모험은 내가 이끈다!";
                 case 7:return "으흐흐… 보물을 숨긴 곳은 나만 알지!";
+                case 8:return "빙글빙글~ 내 열매는 조금 오래 남을걸?";
+                case 9:return "준비됐지? 상큼하게 쭉 쏴볼게!";
                 default:return "다시 익숙한 모습으로 돌아왔어.";
             }
         }

@@ -13,10 +13,23 @@ namespace GuMaGoChi {
         public Species(int id, string name, string personality, string skill) { Id=id; Name=name; Personality=personality; Skill=skill; }
     }
     public static class Catalog {
+        static readonly Dictionary<int,int> Replacements=new Dictionary<int,int> {{0,16},{2,23},{4,17},{7,1},{19,10},{20,5},{21,6},{27,14},{28,29}};
+        public static int Replacement(int id){int target;return Replacements.TryGetValue(id,out target)?target:id;}
+        public static void ReplaceSavedSpecies(SaveData data){
+            foreach(var pet in data.Pets){
+                pet.SpeciesId=Replacement(pet.SpeciesId);pet.PendingSpecies=Replacement(pet.PendingSpecies);pet.PendingAlternative=Replacement(pet.PendingAlternative);
+                if(pet.PendingAlternative>=0&&pet.PendingAlternative==pet.PendingSpecies)pet.PendingAlternative=-1;
+                if(pet.GrowthHistory!=null)pet.GrowthHistory=pet.GrowthHistory.Select(Replacement).ToList();
+            }
+            data.Discovered=data.Discovered.Select(Replacement).Distinct().ToList();
+        }
+        public static bool Available(int id){return id>=0&&id<All.Length&&!Replacements.ContainsKey(id);}
+        public static IEnumerable<Species> Current {get{return All.Where(s=>Available(s.Id));}}
+        // Keep original IDs for existing pets, albums and saved discoveries.
         public static readonly Species[] All = {
             new Species(0,"밤톨이","소심하지만 성실함","집중"),new Species(1,"꿀떡이","느긋하고 애교 많음","친화"),
             new Species(2,"자몽이","새침한 츤데레","정밀"),new Species(3,"군밤이","차분하고 다정함","힘"),
-            new Species(4,"새싹이","호기심 많은 낙천가","민첩"),new Species(5,"딸기마","관심받고 싶은 새침쟁이","친화"),
+            new Species(4,"새싹이","호기심 많은 낙천가","민첩"),new Species(5,"베리마","관심받고 싶은 새침쟁이","친화"),
             new Species(6,"구름이","몽상가인 게으름뱅이","집중"),new Species(7,"달콩이","조용하고 다정함","친화"),
             new Species(8,"햇살이","열정적인 응원대장","힘"),new Species(9,"눈송이","다혈질 눈송이","정밀"),
             new Species(10,"왕고마","위엄 뒤에 숨은 겁쟁이","힘"),new Species(11,"마법마","시니컬한 호기심쟁이","집중"),
@@ -61,7 +74,7 @@ namespace GuMaGoChi {
         public const double AdultAge=3*3600, AdultExp=180, Life=100*3600, ActivityCooldown=180;
         public const int AdoptPrice=100, DewPrice=8, MedicinePrice=12, NutrientPrice=30;
         public SaveData Data; public Random Random;
-        public Engine(SaveData data, int? seed=null) { Data=data;Data.DisplayScalePercent=DisplayZoom.Normalize(Data.DisplayScalePercent); Random=seed.HasValue ? new Random(seed.Value) : new Random();if(!Data.StarterNutrientsClaimed){Data.Nutrients+=6;Data.StarterNutrientsClaimed=true;}foreach(Pet p in Data.Pets){PrepareGrowth(p);EnsureGrowthChoices(p);} }
+        public Engine(SaveData data, int? seed=null) { Data=data;Data.DisplayScalePercent=DisplayZoom.Normalize(Data.DisplayScalePercent); Random=seed.HasValue ? new Random(seed.Value) : new Random();Catalog.ReplaceSavedSpecies(Data);if(!Data.StarterNutrientsClaimed){Data.Nutrients+=6;Data.StarterNutrientsClaimed=true;}foreach(Pet p in Data.Pets){PrepareGrowth(p);EnsureGrowthChoices(p);} }
         public static double Clamp(double value) { return Math.Max(0,Math.Min(100,value)); }
         public Pet Adopt(string name, bool first=false) {
             bool rescue=!Data.Pets.Any(p=>!p.Dead) && Data.Seeds<AdoptPrice;
@@ -98,7 +111,7 @@ namespace GuMaGoChi {
         public bool CanNourish(Pet p) {return CanCare(p)&&p.SpeciesId<0&&p.GrowthExp<AdultExp;}
         public bool BuyNutrient() {if(Data.Seeds<NutrientPrice)return false;Data.Seeds-=NutrientPrice;Data.Nutrients++;return true;}
         public bool Nourish(Pet p) {if(!CanNourish(p)||Data.Nutrients<=0)return false;Data.Nutrients--;p.GrowthExp=Math.Min(AdultExp,p.GrowthExp+30);PrepareGrowth(p);return true;}
-        public List<Species> Candidates(Pet p) { return Catalog.All.Where(s=>!(p.Training>=12 && s.Id==6)).ToList(); }
+        public List<Species> Candidates(Pet p) { return Catalog.Current.Where(s=>!(p.Training>=12 && s.Id==6)).ToList(); }
         public int ChooseSpecies(Pet p) {return ChooseSpecies(p,-1);}
         int ChooseSpecies(Pet p,int excluded) {
             var candidates=Candidates(p).Where(s=>s.Id!=excluded).ToList(); var weights=candidates.Select(s=> {
@@ -111,11 +124,13 @@ namespace GuMaGoChi {
             return candidates.Last().Id;
         }
         public void EnsureGrowthChoices(Pet p) {
-            if(p.GrowthReady&&!p.Dead&&p.PendingSpecies>=0&&p.PendingAlternative<0)p.PendingAlternative=ChooseSpecies(p,p.PendingSpecies);
+            if(!p.GrowthReady||p.Dead)return;
+            if(!Catalog.Available(p.PendingSpecies))p.PendingSpecies=ChooseSpecies(p,p.PendingAlternative);
+            if(!Catalog.Available(p.PendingAlternative)||p.PendingAlternative==p.PendingSpecies)p.PendingAlternative=ChooseSpecies(p,p.PendingSpecies);
         }
         public bool Reveal(Pet p) {return Reveal(p,p.PendingSpecies);}
         public bool Reveal(Pet p,int choice) {
-            if(!Data.Pets.Contains(p)||!p.GrowthReady||p.SpeciesId>=0||p.PendingSpecies<0||p.Dead||(choice!=p.PendingSpecies&&choice!=p.PendingAlternative)||choice<0)return false;
+            if(!Data.Pets.Contains(p)||!p.GrowthReady||p.SpeciesId>=0||p.PendingSpecies<0||p.Dead||(choice!=p.PendingSpecies&&choice!=p.PendingAlternative)||!Catalog.Available(choice))return false;
             p.SpeciesId=choice;p.PendingSpecies=-1;p.PendingAlternative=-1;p.GrowthReady=false;p.GrowthHistory.Add(p.SpeciesId);
             bool fresh=!Data.Discovered.Contains(p.SpeciesId);if(fresh)Data.Discovered.Add(p.SpeciesId);
             Data.Seeds+=fresh?30:15;return true;
@@ -182,6 +197,7 @@ namespace GuMaGoChi {
                 if(p.PendingAlternative< -1||p.PendingAlternative>=Catalog.All.Length||(p.PendingAlternative>=0&&(!p.GrowthReady||p.PendingAlternative==p.PendingSpecies)))throw new InvalidDataException("진화 선택지 정보가 올바르지 않습니다.");
                 if(p.EvolutionId< -1||(p.EvolutionId>=0&&(!Evolutions.Valid(p.EvolutionId,p.SpeciesId)||p.GrowthReady)))throw new InvalidDataException("2차 진화 정보가 올바르지 않습니다.");
                 if(new[]{p.Hunger,p.Dirt,p.Fatigue,p.Illness}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)||v<0||v>100) || new[]{p.FoodCooldown,p.MedicineCooldown,p.PetCooldown,p.PlayCooldown,p.TrainCooldown,p.WasteClock,p.SleepClock,p.TalkClock}.Any(v=>Double.IsNaN(v)||Double.IsInfinity(v)) || p.Waste<0 || p.Waste>6 || (p.GrowthReady && p.PendingSpecies<0))throw new InvalidDataException("상태 정보가 올바르지 않습니다.");
+                if(p.GrowthHistory!=null&&p.GrowthHistory.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("성장 기록이 올바르지 않습니다.");
                 if(p.Friends==null)p.Friends=new Dictionary<string,int>();if(p.GrowthHistory==null)p.GrowthHistory=new List<int>();
                 if(d.Version==1) {p.GrowthExp=p.SpeciesId>=0||p.GrowthReady?Engine.AdultExp:Math.Min(Engine.AdultExp,p.Age/60);p.PetCooldown=Math.Min(180,Math.Max(0,p.PetCooldown));p.PlayCooldown=Math.Min(180,Math.Max(0,p.PlayCooldown));p.TrainCooldown=Math.Min(180,Math.Max(0,p.TrainCooldown));}
                 if(Double.IsNaN(p.GrowthExp)||Double.IsInfinity(p.GrowthExp)||p.GrowthExp<0||p.GrowthExp>Engine.AdultExp)throw new InvalidDataException("성장 경험치가 올바르지 않습니다.");
@@ -191,7 +207,7 @@ namespace GuMaGoChi {
             if(d.LunchMenus.Count>0&&(d.LunchMenus.Count<5||d.LunchMenus.Count>200||d.LunchMenus.Any(m=>String.IsNullOrWhiteSpace(m)||m.Length>40)||d.LunchMenus.Distinct().Count()!=d.LunchMenus.Count))throw new InvalidDataException("점심 메뉴 목록이 올바르지 않습니다.");
             if(d.DiscoveredEvolutions.Any(i=>i<0||i>=Evolutions.All.Length))throw new InvalidDataException("2차 진화 도감 정보가 올바르지 않습니다.");
             foreach(var p in d.Pets.Where(p=>p.EvolutionId>=0))if(!d.DiscoveredEvolutions.Contains(p.EvolutionId))d.DiscoveredEvolutions.Add(p.EvolutionId);
-            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");d.Version=3;return d;
+            if(d.Discovered.Any(i=>i<0||i>=Catalog.All.Length))throw new InvalidDataException("도감 정보가 올바르지 않습니다.");Catalog.ReplaceSavedSpecies(d);d.Version=3;return d;
         }
         public static SaveData Load(out string warning) {
             warning=null;if(!File.Exists(PathName))return new SaveData();

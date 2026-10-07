@@ -30,19 +30,6 @@
   ],
   "characters": [
     {
-      "id": 0,
-      "name": "밤톨이",
-      "referenceJob": "547ee63c-5f54-4a1c-a055-e9cf2875a246",
-      "jobId": "a95b5a78-b21b-49b3-a881-ce94a680278b",
-      "index": 0,
-      "job_id": "a95b5a78-b21b-49b3-a881-ce94a680278b",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044019_a95b5a78-b21b-49b3-a881-ce94a680278b.png",
-      "file": "00-sheet.png"
-    },
-    {
       "id": 1,
       "name": "꿀떡이",
       "referenceJob": "c0c0ff1f-cab8-4659-95c0-8600ef1724c6",
@@ -56,19 +43,6 @@
       "file": "01-sheet.png"
     },
     {
-      "id": 2,
-      "name": "자몽이",
-      "referenceJob": "28e0a000-aba6-44eb-b2ae-b70e06e0a863",
-      "jobId": "f8ce407b-8e41-4392-b76f-2420a44432cf",
-      "index": 2,
-      "job_id": "f8ce407b-8e41-4392-b76f-2420a44432cf",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044115_f8ce407b-8e41-4392-b76f-2420a44432cf.png",
-      "file": "02-sheet.png"
-    },
-    {
       "id": 3,
       "name": "군밤이",
       "referenceJob": "89aad630-79c0-49dc-8def-afa87f3b7f57",
@@ -80,19 +54,6 @@
       "model": "gpt_image_2_5",
       "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044115_bc419d74-444a-4486-b215-5b65fc7815b8.png",
       "file": "03-sheet.png"
-    },
-    {
-      "id": 4,
-      "name": "새싹이",
-      "referenceJob": "85e71838-1b1e-406c-ab45-f950203f7f8c",
-      "jobId": "df26b33d-4905-4643-a9fe-ae0b844a7205",
-      "index": 4,
-      "job_id": "df26b33d-4905-4643-a9fe-ae0b844a7205",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044115_df26b33d-4905-4643-a9fe-ae0b844a7205.png",
-      "file": "04-sheet.png"
     },
     {
       "id": 5,
@@ -119,19 +80,6 @@
       "model": "gpt_image_2_5",
       "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044141_24ddbe2c-bba7-4881-9ff5-d5a025ca3d20.png",
       "file": "06-sheet.png"
-    },
-    {
-      "id": 7,
-      "name": "달콩이",
-      "referenceJob": "2ee34574-0d32-4c85-b5dc-f0b74934821e",
-      "jobId": "bf9a7038-34da-43f3-9cf1-e0c62a6d07e8",
-      "index": 7,
-      "job_id": "bf9a7038-34da-43f3-9cf1-e0c62a6d07e8",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044142_bf9a7038-34da-43f3-9cf1-e0c62a6d07e8.png",
-      "file": "07-sheet.png"
     },
     {
       "id": 8,
@@ -277,45 +225,6 @@
       "file": "18-sheet.png"
     },
     {
-      "id": 19,
-      "name": "별똥이",
-      "referenceJob": "ba878f25-de4e-4e1d-9147-fc02cbb494f7",
-      "jobId": "e6596d28-ebd9-403e-be7b-dfc33a50a805",
-      "index": 19,
-      "job_id": "e6596d28-ebd9-403e-be7b-dfc33a50a805",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044321_e6596d28-ebd9-403e-be7b-dfc33a50a805.png",
-      "file": "19-sheet.png"
-    },
-    {
-      "id": 20,
-      "name": "꽃송이",
-      "referenceJob": "9bc8964b-e489-4737-8775-3b92f604a38f",
-      "jobId": "efbdcfc3-3b90-4a4a-aa8a-f917a39810e3",
-      "index": 20,
-      "job_id": "efbdcfc3-3b90-4a4a-aa8a-f917a39810e3",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044321_efbdcfc3-3b90-4a4a-aa8a-f917a39810e3.png",
-      "file": "20-sheet.png"
-    },
-    {
-      "id": 21,
-      "name": "버섯마",
-      "referenceJob": "7676ef3b-4e66-4840-a7b9-b913a08b17b0",
-      "jobId": "fcbd4b60-c465-4c72-a9d0-b6d32a2bb189",
-      "index": 21,
-      "job_id": "fcbd4b60-c465-4c72-a9d0-b6d32a2bb189",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044321_fcbd4b60-c465-4c72-a9d0-b6d32a2bb189.png",
-      "file": "21-sheet.png"
-    },
-    {
       "id": 22,
       "name": "개굴마",
       "referenceJob": "06b85a4a-20c6-4237-9348-c1f6ffec95eb",
@@ -379,32 +288,6 @@
       "type": "image",
       "model": "gpt_image_2_5",
       "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044435_b5dd9489-8c67-4f60-8c1b-18e40d5bd295.png"
-    },
-    {
-      "id": 27,
-      "name": "민트마",
-      "referenceJob": "57619f2d-1619-402c-bae1-658f90d88d21",
-      "jobId": "5c5130ae-0278-480c-acaf-25df883a4cf5",
-      "file": "27-sheet.png",
-      "index": 27,
-      "job_id": "5c5130ae-0278-480c-acaf-25df883a4cf5",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044435_5c5130ae-0278-480c-acaf-25df883a4cf5.png"
-    },
-    {
-      "id": 28,
-      "name": "초코마",
-      "referenceJob": "6f48bf52-1bf6-465d-80ae-a60da40cfbe2",
-      "jobId": "6c8bddc7-4026-414d-a1f1-7b3742d38876",
-      "file": "28-sheet.png",
-      "index": 28,
-      "job_id": "6c8bddc7-4026-414d-a1f1-7b3742d38876",
-      "status": "completed",
-      "type": "image",
-      "model": "gpt_image_2_5",
-      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_044435_6c8bddc7-4026-414d-a1f1-7b3742d38876.png"
     },
     {
       "id": 29,

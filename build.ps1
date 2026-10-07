@@ -1,4 +1,4 @@
-param([switch]$SkipRootCopy)
+﻿param([switch]$SkipRootCopy)
 $ErrorActionPreference = 'Stop'
 $projectPath = $PSScriptRoot
 $compilerPath = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
@@ -10,6 +10,7 @@ $sourceFiles = Get-ChildItem (Join-Path $projectPath 'src') -Filter '*.cs' | For
 & $compilerPath /nologo /target:winexe /platform:anycpu /optimize+ /utf8output "/out:$outputPath/GuMaGoChi.exe" "/win32icon:$projectPath/assets/branding/gumagochi.ico" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll $sourceFiles
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed.' }
 Copy-Item -LiteralPath (Join-Path $projectPath 'assets') -Destination $outputPath -Recurse -Force
+& (Join-Path $projectPath 'prune-retired-assets.ps1') -AssetRoot (Join-Path $outputPath 'assets')
 Copy-Item -LiteralPath (Join-Path $projectPath 'GuMaGoChi.exe.config') -Destination $outputPath -Force
 if(-not (Test-Path -LiteralPath (Join-Path $outputPath 'GuMaGoChi.exe'))) { throw 'Compiled EXE is missing. Check antivirus quarantine before replacing the existing EXE.' }
 if(-not $SkipRootCopy){Copy-Item -LiteralPath (Join-Path $outputPath 'GuMaGoChi.exe') -Destination (Join-Path $projectPath 'GuMaGoChi.exe') -Force}

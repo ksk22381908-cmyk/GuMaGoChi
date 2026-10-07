@@ -37,7 +37,7 @@ namespace GuMaGoChi {
             defense.Controls.Add(new Label {Left=30,Top=30,Width=850,Height=130,Text="고구마 버러지 디펜스 · 무한 웨이브\n살아 있는 고구마 최대 5마리 편성 / 아기도 참가 가능\nShift + 왼쪽 클릭: 공격 표식 / 고구마 클릭: 고유 스킬\n10마리 처치마다 씨앗 +1 / 전투 중 육성 시간은 멈춰요."});
             AddButton(defense,"디펜스 시작 · 편성하기",30,185,300,65,app.OpenDefense);
             var settings=new TabPage("저장 · 사용 안내") {BackColor=Art.Cream};tabs.TabPages.Add(settings);
-            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 180 EXP(자동 누적 3시간)예요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n간첩마·냥고마·멍고마: 행동 메뉴에서 2차 진화 모습을 선택할 수 있어요.\n현재는 모습 선택을 자유롭게 바꿀 수 있으며 능력과 수명은 기존 성체와 같아요."});
+            settings.Controls.Add(new Label {Left=26,Top=25,Width=875,Height=210,Text="자동 저장: 돌봄·입양·구매·성장 직후 및 활성 실행 중 30초마다\n저장 위치: "+Storage.Folder+"\n이전 저장본은 save.json.bak으로 유지해요.\n\n수명은 활성 실행 시간 100시간, 성체 성장은 180 EXP(자동 누적 3시간)예요.\n수면은 시간을 포함하고, 비활성·성장 대기·절전·잠금·전체 화면 중에는 멈춰요.\n간첩마·냥고마·멍고마·해적마·베리마: 행동 메뉴에서 2차 진화 모습을 선택할 수 있어요.\n진화를 자유롭게 바꿀 수 있으며 나이·돌봄 기록은 유지돼요. 베리마 진화는 전용 기본 공격을 사용해요."});
             AddButton(settings,"저장 데이터 내보내기",28,260,230,42,Export);
             AddButton(settings,"저장 데이터 가져오기",278,260,230,42,Import);
             AddButton(settings,"모두 잠시 쉬기 / 다시 시작",528,260,280,42,()=>{app.ManualPause=!app.ManualPause;app.SyncWindows();if(app.Activity!=null)app.Activity.SetPaused(app.Paused);RefreshData();});
@@ -72,7 +72,7 @@ namespace GuMaGoChi {
             bag.Text="씨앗 "+app.Engine.Data.Seeds+"개\n공용 가방: 아침 이슬 "+app.Engine.Data.Dew+"개 / 상위 치료 "+app.Engine.Data.Medicine+"개\n성장 영양제 "+app.Engine.Data.Nutrients+"개";
             if(dexCount!=app.Engine.Data.Discovered.Count+app.Engine.Data.DiscoveredEvolutions.Count) {
                 foreach(Control c in dex.Controls.Cast<Control>().ToArray())c.Dispose();dex.Controls.Clear();
-                foreach(Species s in Catalog.All) {bool found=app.Engine.Data.Discovered.Contains(s.Id);dex.Controls.Add(new CollectionCard(found?s.Id:-2,found?s.Name:"???",found?s.Personality+"\n특기: "+s.Skill+"\n"+Evolutions.Status(new Pet {SpeciesId=s.Id}):"아직 만나지 못했어요.") {Width=205,Height=235,Margin=new Padding(7)});}
+                foreach(Species s in Catalog.Current) {bool found=app.Engine.Data.Discovered.Contains(s.Id);dex.Controls.Add(new CollectionCard(found?s.Id:-2,found?s.Name:"???",found?s.Personality+"\n특기: "+s.Skill+"\n"+Evolutions.Status(new Pet {SpeciesId=s.Id}):"아직 만나지 못했어요.") {Width=205,Height=235,Margin=new Padding(7)});}
                 foreach(var evolution in Evolutions.All) {bool found=app.Engine.Data.DiscoveredEvolutions.Contains(evolution.Id);dex.Controls.Add(new CollectionCard(found?evolution.Parent:-2,found?evolution.Name:"2차 진화 ???",found?evolution.Personality+"\n"+Catalog.All[evolution.Parent].Name+"의 2차 진화":"아직 만나지 못했어요.",found?evolution.Id:-1) {Width=205,Height=235,Margin=new Padding(7)});}
                 dexCount=app.Engine.Data.Discovered.Count+app.Engine.Data.DiscoveredEvolutions.Count;
             }

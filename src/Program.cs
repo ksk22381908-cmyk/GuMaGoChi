@@ -60,12 +60,12 @@ namespace GuMaGoChi {
             var economy=new SaveData();var basic=new Engine(economy,5);var baby=basic.Adopt("기본돌봄",true);
             for(int hour=0;hour<8;hour++){for(int minute=0;minute<60;minute++){basic.Tick(60);while(baby.Waste>0&&!baby.GrowthReady)basic.Clean(baby);}if(hour%2==1&&!baby.GrowthReady)basic.Feed(baby,false);}
             basic.Reveal(baby);Check(baby.SpeciesId>=0&&baby.Age==Engine.AdultAge,"Basic care reaches growth after three hours");
-            var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==Catalog.All.Length,"Low interaction retains basic candidates");
+            var untouched=new SaveData();var untouchedEngine=new Engine(untouched,1);var untouchedPet=untouchedEngine.Adopt("기본후보",true);Check(untouchedEngine.Candidates(untouchedPet).Count==Catalog.Current.Count(),"Low interaction retains basic candidates");
             untouchedPet.Training=100;for(int i=0;i<1000;i++)if(untouchedEngine.ChooseSpecies(untouchedPet)==6)throw new Exception("Excluded species selected");Check(true,"Excluded species never selected in repeated draws");
             bool rejected=false;try{Storage.Decode("{\"Version\":4}");}catch{rejected=true;}Check(rejected,"Invalid saves rejected");
             var disease=new SaveData();var sickEngine=new Engine(disease);var sick=sickEngine.Adopt("아픈고구마",true);sick.Illness=99.99;sick.Hunger=100;sickEngine.Tick(60);Check(sick.Dead&&sick.Cause=="질병","Disease can kill before lifespan");
             var speech=new System.Collections.Generic.HashSet<string>();
-            foreach(var species in Catalog.All) {
+            foreach(var species in Catalog.Current) {
                 var speaker=new Pet {SpeciesId=species.Id,Hunger=6};var speechData=new SaveData();speechData.Pets.Add(speaker);var speechEngine=new Engine(speechData);
                 string meal=speechEngine.Feed(speaker,false);
                 Check(speaker.Hunger==0&&!meal.Contains("→")&&!meal.Contains("배고픔")&&speech.Add(meal),"Unique natural feeding dialogue: "+species.Name);
@@ -115,10 +115,10 @@ namespace GuMaGoChi {
             Check(BallPhysics.HitsBody(new System.Drawing.PointF(0,230),new System.Drawing.PointF(400,230),rim)&&!BallPhysics.HitsBody(new System.Drawing.PointF(0,100),new System.Drawing.PointF(400,100),rim),"Swept body collision catches fast ball without distant false hit");
             double power=BallPhysics.Strength(1920,false)*BallPhysics.MaxDrag;Check(Math.Abs(power*power/BallPhysics.Gravity-1888)<1,"Full power reaches screen width");
             var edgePull=BallPhysics.Pull(new System.Drawing.PointF(100,900),new System.Drawing.PointF(16,964),1920,980);Check(Math.Abs(Math.Sqrt(edgePull.X*edgePull.X+edgePull.Y*edgePull.Y)-280)<.01,"Screen edge drag can reach full power without leaving monitor");
-            foreach(var species in Catalog.All){Check(!String.IsNullOrEmpty(Dialogue.Hit(new Pet {SpeciesId=species.Id})),"Species hit reaction");}
+            foreach(var species in Catalog.Current){Check(!String.IsNullOrEmpty(Dialogue.Hit(new Pet {SpeciesId=species.Id})),"Species hit reaction");}
             Check(Dialogue.Options(new Pet {SpeciesId=2},8,"일부러 그런 거 아니지?")[0]=="일부러 그런 거 아니지?"&&Dialogue.Options(new Pet {SpeciesId=30},8,"감… 고구마 살려주구마!")[0]=="감… 고구마 살려주구마!","Requested hit reactions preserved");
             count+=DialogueTests.Run();
-            count+=EvolutionTests.Run();count+=GrowthChoiceTests.Run();
+            count+=EvolutionTests.Run();count+=GrowthChoiceTests.Run();count+=BabySpriteTests.Run();count+=BerryCombatTests.Run();count+=CarrotSpriteTests.Run();
             count+=RunnerTests.Run();
             count+=LunchTests.Run();
             var hitTarget=new Pet();Check(ActivityWindow.CanHit(challengePet,hitTarget)&&!ActivityWindow.CanHit(challengePet,challengePet),"Other pet collision excludes thrower");hitTarget.Sleeping=true;Check(!ActivityWindow.CanHit(challengePet,hitTarget),"Sleeping pet excluded");
@@ -162,14 +162,14 @@ namespace GuMaGoChi {
                 app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
                 pet.Age=Engine.AdultAge-1;pet.GrowthExp=Engine.AdultExp-1.0/60;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.CompleteGrowth(pet,pending);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 Check((string)typeof(PetWindow).GetField("motion",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(w)=="stand","Growth reveal immediately resets burrow motion");
-                using(var sheet=new System.Drawing.Bitmap(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby","burrow-sheet.png")))using(var cell=sheet.Clone(new System.Drawing.Rectangle(768,768,256,256),System.Drawing.Imaging.PixelFormat.Format32bppArgb))using(var clean=Sprites.Cutout(cell,true))Check(clean.Height<128,"Final baby burrow frame excludes previous-row mound fragment");
-                var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
+
+                var fileNames=new[]{"01.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");
                 Check(Sprites.Home!=null,"Underground home background packaged");
                 using(var bmp=new System.Drawing.Bitmap(120,120))using(var g=System.Drawing.Graphics.FromImage(bmp))foreach(string key in new[]{"stand","walk","eat","throw","burrow"}) {
                     g.Clear(System.Drawing.Color.Transparent);Check(Sprites.Draw(g,new System.Drawing.Rectangle(0,0,120,120),key,.625,false),"Sprite loaded: "+key);
                     bool visible=false;for(int y=0;y<120;y++)for(int x=0;x<120;x++){int alpha=bmp.GetPixel(x,y).A;if(alpha>0)visible=true;if(alpha!=0&&alpha!=255)throw new Exception("Sprite halo alpha was not removed");}Check(visible,"Sprite contains visible silhouette: "+key);
                 }
-                for(int id=0;id<Catalog.All.Length;id++)using(var first=new System.Drawing.Bitmap(120,120))using(var next=new System.Drawing.Bitmap(120,120))using(var a=System.Drawing.Graphics.FromImage(first))using(var b=System.Drawing.Graphics.FromImage(next)) {
+                foreach(int id in Catalog.Current.Select(s=>s.Id))using(var first=new System.Drawing.Bitmap(120,120))using(var next=new System.Drawing.Bitmap(120,120))using(var a=System.Drawing.Graphics.FromImage(first))using(var b=System.Drawing.Graphics.FromImage(next)) {
                     Check(Art.ImageFor(id)!=null,"Adult asset: "+id);
                     foreach(string pose in new[]{"stand","walk","eat","throw","sleep","burrow"})for(int poseFrame=0;poseFrame<4;poseFrame++) {
                         b.Clear(System.Drawing.Color.Transparent);
@@ -213,7 +213,7 @@ namespace GuMaGoChi {
                 using(var bmp=new System.Drawing.Bitmap(900,180))using(var g=System.Drawing.Graphics.FromImage(bmp)) {g.Clear(Art.Cream);Art.Pet(g,new Pet(),new System.Drawing.Rectangle(10,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=23},new System.Drawing.Rectangle(190,10,150,150),0);Art.Pet(g,new Pet {GrowthReady=true},new System.Drawing.Rectangle(370,10,150,150),0);Art.Pet(g,new Pet {SpeciesId=10,Sleeping=true},new System.Drawing.Rectangle(550,10,150,150),0);Art.Waste(g,new System.Drawing.Rectangle(780,80,40,30));bmp.Save(Path.Combine(Paths.BaseDirectory,"sprites-preview.png"));}
                 using(var bmp=new System.Drawing.Bitmap(840,1920))using(var g=System.Drawing.Graphics.FromImage(bmp)) {
                     g.Clear(Art.Cream);string[] keys={"stand","walk","eat","throw","sleep","burrow"};
-                    for(int id=0;id<Catalog.All.Length;id++)for(int k=0;k<keys.Length;k++){int x=(id%2)*420+k*70,y=(id/2)*120;Art.Pet(g,new Pet {SpeciesId=id,Sleeping=keys[k]=="sleep",GrowthReady=keys[k]=="burrow"},new System.Drawing.Rectangle(x,y+22,65,85),.875,keys[k]);g.DrawString(id.ToString("00")+" "+keys[k],System.Drawing.SystemFonts.DefaultFont,System.Drawing.Brushes.Black,x,y);}
+                    foreach(int id in Catalog.Current.Select(s=>s.Id))for(int k=0;k<keys.Length;k++){int x=(id%2)*420+k*70,y=(id/2)*120;Art.Pet(g,new Pet {SpeciesId=id,Sleeping=keys[k]=="sleep",GrowthReady=keys[k]=="burrow"},new System.Drawing.Rectangle(x,y+22,65,85),.875,keys[k]);g.DrawString(id.ToString("00")+" "+keys[k],System.Drawing.SystemFonts.DefaultFont,System.Drawing.Brushes.Black,x,y);}
                     bmp.Save(Path.Combine(Paths.BaseDirectory,"adult-actions-preview.png"));
                 }
                 home.Dispose();app.Exit(); // Render mode deliberately does not persist fixture data.

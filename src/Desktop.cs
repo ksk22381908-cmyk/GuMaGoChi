@@ -85,6 +85,7 @@ namespace GuMaGoChi {
             }
         }
         public static void Baby(Graphics g,Rectangle box) {
+            if(Sprites.Draw(g,box,"stand",0,false))return;
             // Temporary code-native pixel art; a commissioned baby sprite can replace this renderer.
             var state=g.Save();g.TranslateTransform(box.X,box.Y);g.ScaleTransform(box.Width/32f,box.Height/32f);
             using(var outline=new SolidBrush(Ink))using(var body=new SolidBrush(Color.FromArgb(180,131,161)))using(var earth=new SolidBrush(Color.FromArgb(120,83,51))) {
@@ -293,7 +294,7 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("성장 영양제 먹이기 · "+Engine.Data.Nutrients+"개 · +30 EXP",()=>Nourish(p),care&&Engine.CanNourish(p)&&Engine.Data.Nutrients>0));
             if(Evolutions.For(p.SpeciesId).Any()) {
                 bool changeable=care&&Activity==null&&(Defense==null||!Defense.BattleRunning);
-                var evolutionMenu=new ToolStripMenuItem("2차 진화 모습 선택") {Enabled=changeable};
+                var evolutionMenu=new ToolStripMenuItem("2차 진화 선택") {Enabled=changeable};
                 foreach(var evolution in Evolutions.For(p.SpeciesId)) {
                     int target=evolution.Id;
                     var choice=Item(evolution.Name,()=>Change(()=>{if(Evolutions.Change(Engine.Data,p,target)){PetWindow window;if(Windows.TryGetValue(p.Id,out window))window.Animate("stand");Say(p,Evolutions.RevealLine(p));}}),p.EvolutionId!=target);

@@ -5,15 +5,6 @@
   "status": "applied-v0.1.8",
   "characters": [
     {
-      "id": 0,
-      "name": "밤톨이",
-      "file": "00.png",
-      "jobId": "547ee63c-5f54-4a1c-a055-e9cf2875a246",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043227_547ee63c-5f54-4a1c-a055-e9cf2875a246.png",
-      "status": "completed",
-      "description": "plain mature purple sweet potato, sturdy rounded body and small green sprout, shy earnest face"
-    },
-    {
       "id": 1,
       "name": "꿀떡이",
       "file": "01.png",
@@ -23,15 +14,6 @@
       "description": "honey jar cap, warm amber highlights, relaxed affectionate smile"
     },
     {
-      "id": 2,
-      "name": "자몽이",
-      "file": "02.png",
-      "jobId": "28e0a000-aba6-44eb-b2ae-b70e06e0a863",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043303_28e0a000-aba6-44eb-b2ae-b70e06e0a863.png",
-      "status": "completed",
-      "description": "pale creamy sweet potato, pink ribbon, aloof blushing face"
-    },
-    {
       "id": 3,
       "name": "군밤이",
       "file": "03.png",
@@ -39,15 +21,6 @@
       "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043227_89aad630-79c0-49dc-8def-afa87f3b7f57.png",
       "status": "completed",
       "description": "purple sweet potato, tiny warm golden flame tuft, calm kindly face"
-    },
-    {
-      "id": 4,
-      "name": "새싹이",
-      "file": "04.png",
-      "jobId": "85e71838-1b1e-406c-ab45-f950203f7f8c",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043227_85e71838-1b1e-406c-ab45-f950203f7f8c.png",
-      "status": "completed",
-      "description": "large lush green sprout crown, lively curious face"
     },
     {
       "id": 5,
@@ -66,15 +39,6 @@
       "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043303_bb284437-74dc-4493-8692-8f59f2262734.png",
       "status": "completed",
       "description": "soft cloud-shaped hat, sleepy dreamy eyes"
-    },
-    {
-      "id": 7,
-      "name": "달콩이",
-      "file": "07.png",
-      "jobId": "2ee34574-0d32-4c85-b5dc-f0b74934821e",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043401_2ee34574-0d32-4c85-b5dc-f0b74934821e.png",
-      "status": "completed",
-      "description": "crescent moon accessory, quiet gentle face"
     },
     {
       "id": 8,
@@ -176,33 +140,6 @@
       "description": "clear astronaut helmet and cream collar, composed quirky face"
     },
     {
-      "id": 19,
-      "name": "별똥이",
-      "file": "19.png",
-      "jobId": "ba878f25-de4e-4e1d-9147-fc02cbb494f7",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043440_ba878f25-de4e-4e1d-9147-fc02cbb494f7.png",
-      "status": "completed",
-      "description": "small golden star crown and star badge, confident competitive face"
-    },
-    {
-      "id": 20,
-      "name": "꽃송이",
-      "file": "20.png",
-      "jobId": "9bc8964b-e489-4737-8775-3b92f604a38f",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043440_9bc8964b-e489-4737-8775-3b92f604a38f.png",
-      "status": "completed",
-      "description": "pink flower wreath and petal accents, sweet subtly jealous face"
-    },
-    {
-      "id": 21,
-      "name": "버섯마",
-      "file": "21.png",
-      "jobId": "7676ef3b-4e66-4840-a7b9-b913a08b17b0",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043519_7676ef3b-4e66-4840-a7b9-b913a08b17b0.png",
-      "status": "completed",
-      "description": "tan spotted mushroom cap, bashful reserved face"
-    },
-    {
       "id": 22,
       "name": "개굴마",
       "file": "22.png",
@@ -246,24 +183,6 @@
       "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043537_7043f59f-87b8-45b2-99f7-6d1be5af01d9.png",
       "status": "completed",
       "description": "carrot cap with green leaves, stubborn determined face"
-    },
-    {
-      "id": 27,
-      "name": "민트마",
-      "file": "27.png",
-      "jobId": "57619f2d-1619-402c-bae1-658f90d88d21",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043537_57619f2d-1619-402c-bae1-658f90d88d21.png",
-      "status": "completed",
-      "description": "fresh mint leaf headpiece, cool teal accents, blunt unimpressed face"
-    },
-    {
-      "id": 28,
-      "name": "초코마",
-      "file": "28.png",
-      "jobId": "6f48bf52-1bf6-465d-80ae-a60da40cfbe2",
-      "url": "https://d8j0ntlcm91z4.cloudfront.net/user_3JM7TxF6IWerUXO7oSFUBJJ24EM/hf_20261001_043537_6f48bf52-1bf6-465d-80ae-a60da40cfbe2.png",
-      "status": "completed",
-      "description": "chocolate-dipped tip and small chocolate square accessory, relaxed confident face"
     },
     {
       "id": 29,
