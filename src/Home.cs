@@ -43,7 +43,7 @@ namespace GuMaGoChi {
             AddButton(settings,"모두 잠시 쉬기 / 다시 시작",528,260,280,42,()=>{app.ManualPause=!app.ManualPause;app.SyncWindows();if(app.Activity!=null)app.Activity.SetPaused(app.Paused);RefreshData();});
             AddButton(settings,"프로그램 종료 · 저장",28,330,230,42,app.Exit);
             AddButton(settings,"업데이트 확인 · v"+Updates.CurrentText,28,390,230,42,app.OpenUpdate);
-            AddButton(settings,"비상탈출 · Space + E",278,330,230,42,app.EmergencyExit);
+            AddButton(settings,"비상탈출 · Space + E 0.5초",278,330,230,42,app.EmergencyExit);
             var scaleButton=new Button {Text="캐릭터·UI 비율",Left=528,Top=330,Width=230,Height=42,BackColor=Art.Cream};scaleButton.Click+=(s,e)=>{if(scaleMenu!=null){if(scaleMenu.Visible)return;scaleMenu.Dispose();}scaleMenu=new ContextMenuStrip();scaleMenu.Items.Add(app.ScaleMenu());scaleMenu.Show(scaleButton,new Point(0,scaleButton.Height));};settings.Controls.Add(scaleButton);Disposed+=(s,e)=>{if(scaleMenu!=null)scaleMenu.Dispose();};
             message=new Label {Left=24,Top=666,Width=940,Height=32,Anchor=AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right,ForeColor=Art.Green};Controls.Add(message);
             FormClosing+=(s,e)=>{if(e.CloseReason==CloseReason.UserClosing){e.Cancel=true;Hide();}};

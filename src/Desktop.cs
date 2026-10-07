@@ -184,12 +184,12 @@ namespace GuMaGoChi {
     public class DesktopApp:ApplicationContext {
         public Engine Engine;public Dictionary<string,PetWindow> Windows=new Dictionary<string,PetWindow>();
         public HomeWindow Home; public ActivityWindow Activity;public DefenseWindow Defense;public RunnerWindow Runner;public LunchWindow Lunch;
-        public UpdateWindow Update;
+        public UpdateWindow Update;GrowthChoiceDialog growthChoice;
         public void OpenUpdate(){if(Update==null||Update.IsDisposed)Update=new UpdateWindow(this);Update.Show();Update.Activate();}
         public bool SaveForUpdate(){if(!persist)return true;try{Storage.Save(Engine.Data);return true;}catch(Exception ex){MessageBox.Show("업데이트 전에 저장하지 못했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);return false;}}
         public bool ManualPause=false,AutoPause=false;bool suspended=false,locked=false,exiting=false,emergencyExiting=false;
         public bool Paused {get{return ManualPause||AutoPause||suspended||locked;}}
-        NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer,emergencyTimer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;
+        NotifyIcon tray;ContextMenuStrip trayMenu;Icon icon,alertIcon;bool persist;Timer timer,emergencyTimer;Stopwatch watch=Stopwatch.StartNew();double last=0,saveClock=0,refreshClock=0,interactionClock=0;long emergencyHoldStarted=-1;
         Dictionary<string,double> pairCooldown=new Dictionary<string,double>();HashSet<string> warnings=new HashSet<string>();
         Dictionary<string,ContextMenuStrip> petMenus=new Dictionary<string,ContextMenuStrip>();
         public DesktopApp(SaveData data,string warning,bool persistData=true) {
@@ -216,7 +216,7 @@ namespace GuMaGoChi {
                     PetWindow w=pair.Value;Pet p=w.Pet;
                     if(p.Dead || p.Home || !p.Active)continue;
                     w.Step(dt,Activity==null || Activity.Pet!=p);
-                    if(p.GrowthReady && w.Bubble=="")w.Say("성장할 준비가 됐어요!\n흙더미를 눌러 주세요.");
+                    if(p.GrowthReady && w.Bubble=="")w.Say("성장할 준비가 됐어요!\n흙더미를 눌러 진화를 선택해 주세요.");
                     if(!p.GrowthReady && !p.Sleeping && p.TalkClock<=0 && !Windows.Values.Any(v=>v.Bubble!="")) {w.Say(Talk(p));p.TalkClock=Engine.Random.Next(900,1801);}
                 }
                 if(interactionClock>=5) {Interact();interactionClock=0;}
@@ -252,7 +252,17 @@ namespace GuMaGoChi {
         public void Say(Pet p,string text) {PetWindow w;if(Windows.TryGetValue(p.Id,out w)&&w.Visible)w.Say(text);else if(Home!=null&&!Home.IsDisposed)Home.ShowMessage(text);}
         public void Save() {if(!persist)return;try{Storage.Save(Engine.Data);warnings.Remove("save");}catch(Exception ex){if(emergencyExiting)return;if(!warnings.Contains("save")){warnings.Add("save");MessageBox.Show("저장에 실패했습니다.\n"+ex.Message,"저장 실패",MessageBoxButtons.OK,MessageBoxIcon.Error);}}}
         public void Change(Action change) {change();Save();SyncWindows();if(Home!=null&&!Home.IsDisposed)Home.RefreshData();RefreshTray();}
-        public void Reveal(Pet p) {if(Paused)return;Change(()=>{if(Engine.Reveal(p)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,p.Kind+" · "+p.Name+"\n"+Dialogue.Get(p,3));}});}
+        public void Reveal(Pet p) {
+            if(Paused||!p.Active||p.Dead||!p.GrowthReady||!Engine.Data.Pets.Contains(p))return;
+            if(growthChoice!=null&&!growthChoice.IsDisposed){growthChoice.Activate();return;}
+            Engine.EnsureGrowthChoices(p);Save();
+            using(var dialog=new GrowthChoiceDialog(p)){
+                growthChoice=dialog;
+                try{if(dialog.ShowDialog()==DialogResult.OK)CompleteGrowth(p,dialog.SelectedSpecies);}
+                finally{growthChoice=null;}
+            }
+        }
+        internal void CompleteGrowth(Pet p,int choice) {if(Paused||!p.Active)return;Change(()=>{if(Engine.Reveal(p,choice)){PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.Animate("stand");Say(p,p.Kind+" · "+p.Name+"\n"+Dialogue.Get(p,3));}});}
         public void OpenHome(Pet p) {if(Home==null||Home.IsDisposed)Home=new HomeWindow(this);Home.RefreshData();if(p!=null)Home.SelectPet(p.Id);Home.Show();Home.Activate();}
         public void OpenDefense(){if(Activity!=null||Runner!=null){OpenHome(null);Home.ShowMessage("놀이·훈련을 끝낸 뒤 디펜스를 시작해 주세요.");return;}if(Defense==null||Defense.IsDisposed)Defense=new DefenseWindow(this);Defense.Show();Defense.Activate();}
         public void Adopt(bool first=false) {
@@ -299,7 +309,7 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("고구마 밭 달리기 · 최고 "+Engine.Data.RunnerBest+"점",()=>StartRunner(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
             menu.Items.Add(Item("점심 뭐 먹지? · 곡선 사다리",()=>OpenLunch(p),care&&Activity==null&&Runner==null&&(Defense==null||!Defense.BattleRunning)));
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(MenuHeading("생활 · 관리"));if(p.GrowthReady)menu.Items.Add(Item("흙더미 열기 · 성장하기",()=>Reveal(p),!Paused));
+            menu.Items.Add(MenuHeading("생활 · 관리"));if(p.GrowthReady)menu.Items.Add(Item("1차 진화 · 두 모습 중 선택",()=>Reveal(p),!Paused));
             menu.Items.Add(Item(p.Home?"외출하기":"집에 가기",()=>Change(()=>{p.Home=!p.Home;if(p.Home)OpenHome(p);}),!p.Dead&&!p.Sleeping&&Activity==null));
             menu.Items.Add(Item(p.Sleeping?"깨우기":"집에서 재우기",()=>Change(()=>{p.Home=true;p.Sleeping=!p.Sleeping;p.SleepClock=0;OpenHome(p);}),!p.Dead&&p.Active&&!p.GrowthReady&&Activity==null));
             menu.Items.Add(Item("위치 옮기기 · 몸을 잡아 드래그",()=>{PetWindow w;if(Windows.TryGetValue(p.Id,out w))w.BeginMove();},!p.Home&&p.Active&&!Paused&&Activity==null));
@@ -307,7 +317,7 @@ namespace GuMaGoChi {
             menu.Items.Add(Item("이름 변경",()=>{using(var d=new NameDialog("이름 변경",p.Name))if(d.ShowDialog()==DialogResult.OK)Change(()=>p.Name=d.PetName);}));
             menu.Items.Add(Item("상태·가방·도감 열기",()=>OpenHome(p)));
             menu.Items.Add(ScaleMenu());
-            menu.Items.Add(Item("비상탈출 · Space + E",EmergencyExit));
+            menu.Items.Add(Item("비상탈출 · Space + E 0.5초",EmergencyExit));
             menu.Items.Add(new ToolStripSeparator());
             var remove=Item("맛탕 만들기",()=>MakeMattang(p),Engine.Data.Pets.Contains(p)&&!p.Dead);remove.ForeColor=Color.Firebrick;menu.Items.Add(remove);StyleMenu(menu.Items);return menu;
         }
@@ -342,11 +352,17 @@ namespace GuMaGoChi {
             trayMenu.Items.Add(Item("저장 폴더 열기",()=>{Directory.CreateDirectory(Storage.Folder);Process.Start("explorer.exe",Storage.Folder);}));
             trayMenu.Items.Add(Item("업데이트 확인 · v"+Updates.CurrentText,OpenUpdate));
             trayMenu.Items.Add(ScaleMenu());
-            trayMenu.Items.Add(Item("비상탈출 · Space + E",EmergencyExit));
+            trayMenu.Items.Add(Item("비상탈출 · Space + E 0.5초",EmergencyExit));
             trayMenu.Items.Add(Item("종료 · 저장 후 닫기",Exit));tray.Icon=needs.Length>0?alertIcon:icon;tray.Text=needs.Length>0?"GuMaGoChi · "+needs.Length+"마리 돌봄 필요":"GuMaGoChi · 고구마와 함께";
         }
         void ToggleAutoStart() {try {using(var key=Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run")) {if(Engine.Data.AutoStart)key.DeleteValue("GuMaGoChi",false);else key.SetValue("GuMaGoChi","\""+Application.ExecutablePath+"\"");}Change(()=>Engine.Data.AutoStart=!Engine.Data.AutoStart);}catch(Exception ex){MessageBox.Show(ex.Message,"자동 실행 설정 실패");}}
-        public void CheckEmergencyKeys(bool spaceDown,bool eDown){if(spaceDown&&eDown&&!exiting)EmergencyExit();}
+        public void CheckEmergencyKeys(bool spaceDown,bool eDown){CheckEmergencyKeys(spaceDown,eDown,watch.ElapsedMilliseconds);}
+        internal void CheckEmergencyKeys(bool spaceDown,bool eDown,long now){
+            if(exiting)return;
+            if(!spaceDown||!eDown){emergencyHoldStarted=-1;return;}
+            if(emergencyHoldStarted<0)emergencyHoldStarted=now;
+            if(now-emergencyHoldStarted>=500)EmergencyExit();
+        }
         public void SetDisplayScale(int percent){
             if(Activity!=null||Runner!=null||(Defense!=null&&Defense.BattleRunning))return;
             Engine.Data.DisplayScalePercent=DisplayZoom.Normalize(percent);DisplayZoom.Percent=Engine.Data.DisplayScalePercent;
@@ -370,7 +386,7 @@ namespace GuMaGoChi {
             foreach(Form window in openWindows)if(!window.IsDisposed)window.Dispose();
             if(persist)Environment.Exit(0);
         }
-        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(Update!=null&&!Update.IsDisposed)Update.Close();if(emergencyTimer!=null){emergencyTimer.Stop();emergencyTimer.Dispose();}if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
+        public void Exit() {if(exiting)return;exiting=true;timer.Stop();if(growthChoice!=null&&!growthChoice.IsDisposed)growthChoice.Close();if(Update!=null&&!Update.IsDisposed)Update.Close();if(emergencyTimer!=null){emergencyTimer.Stop();emergencyTimer.Dispose();}if(Lunch!=null&&!Lunch.IsDisposed)Lunch.Close();if(Runner!=null&&!Runner.IsDisposed)Runner.Close();if(Activity!=null)Activity.CancelActivity();if(Defense!=null&&!Defense.IsDisposed)Defense.Close();Save();SystemEvents.PowerModeChanged-=Power;SystemEvents.SessionSwitch-=Session;foreach(var w in Windows.Values)w.Close();if(Home!=null)Home.Dispose();foreach(var menu in petMenus.Values)if(!menu.IsDisposed)menu.Dispose();petMenus.Clear();tray.Visible=false;tray.Dispose();trayMenu.Dispose();icon.Dispose();alertIcon.Dispose();timer.Dispose();Art.DisposeImages();ExitThread();}
     }
     public class NameDialog:GameForm {
         TextBox input;public string PetName {get{return input.Text.Trim();}}

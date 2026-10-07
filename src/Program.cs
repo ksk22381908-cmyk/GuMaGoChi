@@ -118,7 +118,7 @@ namespace GuMaGoChi {
             foreach(var species in Catalog.All){Check(!String.IsNullOrEmpty(Dialogue.Hit(new Pet {SpeciesId=species.Id})),"Species hit reaction");}
             Check(Dialogue.Options(new Pet {SpeciesId=2},8,"일부러 그런 거 아니지?")[0]=="일부러 그런 거 아니지?"&&Dialogue.Options(new Pet {SpeciesId=30},8,"감… 고구마 살려주구마!")[0]=="감… 고구마 살려주구마!","Requested hit reactions preserved");
             count+=DialogueTests.Run();
-            count+=EvolutionTests.Run();
+            count+=EvolutionTests.Run();count+=GrowthChoiceTests.Run();
             count+=RunnerTests.Run();
             count+=LunchTests.Run();
             var hitTarget=new Pet();Check(ActivityWindow.CanHit(challengePet,hitTarget)&&!ActivityWindow.CanHit(challengePet,challengePet),"Other pet collision excludes thrower");hitTarget.Sleeping=true;Check(!ActivityWindow.CanHit(challengePet,hitTarget),"Sleeping pet excluded");
@@ -160,7 +160,7 @@ namespace GuMaGoChi {
                 down.Invoke(w,new object[]{w,new MouseEventArgs(MouseButtons.Left,1,80,160,0)});app.Activity.EnsureForeground();
                 IntPtr below=Native.GetWindow(app.Activity.Handle,2);bool actorBelow=false;for(int z=0;z<500&&below!=IntPtr.Zero;z++){if(below==w.Handle){actorBelow=true;break;}below=Native.GetWindow(below,2);}Check(actorBelow,"Character click leaves ball overlay above pet");
                 app.Activity.SetPaused(true);app.Activity.SetPaused(false);var command=typeof(ActivityWindow).GetMethod("ProcessCmdKey",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance);Check((bool)command.Invoke(app.Activity,new object[]{new Message(),Keys.Escape})&&app.Activity==null,"Escape command ends activity with control focus");Check(app.Activity==null,"Activity closes cleanly");
-                pet.Age=Engine.AdultAge-1;pet.GrowthExp=Engine.AdultExp-1.0/60;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.Reveal(pet);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
+                pet.Age=Engine.AdultAge-1;pet.GrowthExp=Engine.AdultExp-1.0/60;app.Engine.Tick(1);w.Step(.125,false);int pending=pet.PendingSpecies;app.CompleteGrowth(pet,pending);Check(pet.SpeciesId==pending&&!pet.GrowthReady,"Growth reveals predetermined adult");
                 Check((string)typeof(PetWindow).GetField("motion",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(w)=="stand","Growth reveal immediately resets burrow motion");
                 using(var sheet=new System.Drawing.Bitmap(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby","burrow-sheet.png")))using(var cell=sheet.Clone(new System.Drawing.Rectangle(768,768,256,256),System.Drawing.Imaging.PixelFormat.Format32bppArgb))using(var clean=Sprites.Cutout(cell,true))Check(clean.Height<128,"Final baby burrow frame excludes previous-row mound fragment");
                 var fileNames=new[]{"00.png","29.png"};Check(fileNames.All(file=>File.Exists(Path.Combine(Paths.BaseDirectory,"assets","higgsfield","characters",file))),"Packaged character assets");

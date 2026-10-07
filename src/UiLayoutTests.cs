@@ -95,8 +95,16 @@ namespace GuMaGoChi {
                     app.CheckEmergencyKeys(true,false);app.CheckEmergencyKeys(false,true);app.CheckEmergencyKeys(false,false);
                     Check(desktopPet.Active&&window.Visible&&!home.IsDisposed,"single keys never trigger emergency exit");
                     double ageBefore=desktopPet.Age,expBefore=desktopPet.GrowthExp;
-                    if(byMenu){var menu=app.MenuFor(desktopPet);menu.Items.OfType<ToolStripMenuItem>().Single(i=>i.Text=="비상탈출 · Space + E").PerformClick();}
-                    else app.CheckEmergencyKeys(true,true);
+                    if(byMenu){var menu=app.MenuFor(desktopPet);menu.Items.OfType<ToolStripMenuItem>().Single(i=>i.Text=="비상탈출 · Space + E 0.5초").PerformClick();}
+                    else {
+                        app.CheckEmergencyKeys(true,true,1000);app.CheckEmergencyKeys(true,true,1499);
+                        Check(!home.IsDisposed,"shortcut does not exit before 500 milliseconds");
+                        app.CheckEmergencyKeys(false,true,1499);app.CheckEmergencyKeys(true,true,1500);
+                        app.CheckEmergencyKeys(true,false,1600);app.CheckEmergencyKeys(true,true,1700);
+                        app.CheckEmergencyKeys(true,true,2199);
+                        Check(!home.IsDisposed,"releasing either key resets the hold duration");
+                        app.CheckEmergencyKeys(true,true,2200);
+                    }
                     Check(data.Pets[0].Active&&data.Pets[1].Active&&!data.Pets[2].Active&&window.IsDisposed&&home.IsDisposed,"shortcut and right-click preserve activation while closing windows");
                     var saved=Storage.Decode(Storage.Encode(data));Check(saved.Pets[0].Active&&saved.Pets[1].Active&&!saved.Pets[2].Active&&saved.Pets[0].Age==ageBefore&&saved.Pets[0].GrowthExp==expBefore,"emergency save preserves activation and progress");
                     app.CheckEmergencyKeys(true,true);app.EmergencyExit();app.Exit();
