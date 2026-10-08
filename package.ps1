@@ -2,7 +2,7 @@
 $ErrorActionPreference = 'Stop'
 if(-not $SkipBuild){& (Join-Path $PSScriptRoot 'build.ps1')}
 $releaseRoot = Join-Path $PSScriptRoot 'release'
-$packagePath = Join-Path $releaseRoot 'GuMaGoChi-0.2.11-windows'
+$packagePath = Join-Path $releaseRoot 'GuMaGoChi-0.2.12-windows'
 New-Item -ItemType Directory -Path (Join-Path $packagePath 'assets/higgsfield') -Force | Out-Null
 if(-not $ExecutablePath){$ExecutablePath=Join-Path $PSScriptRoot 'GuMaGoChi.exe'}
 Copy-Item -LiteralPath $ExecutablePath -Destination $packagePath -Force
@@ -28,13 +28,13 @@ foreach($assetKind in @('basic-attacks','skills','enemies')) {
 & (Join-Path $PSScriptRoot 'prune-retired-assets.ps1') -AssetRoot (Join-Path $packagePath 'assets')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot '사용안내.txt') -Destination $packagePath -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'docs/디펜스-구현-사용안내.md') -Destination $packagePath -Force
-$archivePath = Join-Path $releaseRoot 'GuMaGoChi-0.2.11-windows.zip'
+$archivePath = Join-Path $releaseRoot 'GuMaGoChi-0.2.12-windows.zip'
 Compress-Archive -Path $packagePath -DestinationPath $archivePath -Force
 $hash = Get-FileHash -LiteralPath $archivePath -Algorithm SHA256
 [IO.File]::WriteAllText($archivePath + '.sha256', $hash.Hash.ToLowerInvariant() + '  ' + [IO.Path]::GetFileName($archivePath) + "`n", [Text.Encoding]::ASCII)
 $hash | Format-List
 
-if(-not $PreviousPackagePath){$PreviousPackagePath=Join-Path $releaseRoot 'GuMaGoChi-0.2.10-windows'}
+if(-not $PreviousPackagePath){$PreviousPackagePath=Join-Path $releaseRoot 'GuMaGoChi-0.2.11-windows'}
 if(Test-Path -LiteralPath (Join-Path $PreviousPackagePath 'GuMaGoChi.exe')){
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
