@@ -22,6 +22,8 @@ namespace GuMaGoChi {
             var stats=For(pet.SpeciesId);
             if(pet.SpeciesId==5&&pet.EvolutionId==8){stats.Trajectory="parabolic";stats.Interval=1.6;}
             if(pet.SpeciesId==5&&pet.EvolutionId==9){stats.Trajectory="beam";stats.Interval=2;}
+            if(RoyalCombat.King(pet)){stats.Damage=48;stats.Range=280;stats.Interval=2.6;stats.Trajectory="point";stats.Cooldown=30;stats.Skill="왕의 충격파";stats.Line="이 땅을 울려라!";}
+            if(RoyalCombat.Beggar(pet)){stats.Damage=12;stats.Interval=.65;stats.Trajectory="straight";stats.Cooldown=28;stats.Skill="바가지 깨기";stats.Line="내 마지막 바가지다!";}
             return stats;
         }
         public static string BasicTrait(Pet pet){
@@ -29,19 +31,26 @@ namespace GuMaGoChi {
             if(pet.SpeciesId==5&&pet.EvolutionId==9)return "라즈베리 즙 빔을 1초 동안 발사. 빔 위의 적에게 총 공격력 2배의 지속 피해를 줘요.";
             if(CarrotCombatArt.Farmer(pet))return "바구니에서 당근을 꺼내 던져요. 당근마의 공격력과 연속 투척은 유지해요.";
             if(CarrotCombatArt.Spitter(pet))return "먹던 당근 조각을 입으로 뱉어요. 당근마의 공격력과 연속 공격은 유지해요.";
+            if(RoyalCombat.King(pet))return "짧은 사거리에서 2.6초마다 왕홀을 휘둘러 작은 범위에 강한 충격파 피해를 줘요.";
+            if(RoyalCombat.Beggar(pet))return "쓰레기를 직선으로 빠르게 투척. 같은 대상 연속 공격마다 속도가 10%씩 증가해 최대 2배. 대상 변경·처치 시 초기화돼요.";
             return BasicTrait(pet.SpeciesId);
         }
         public static string BasicTrait(int id){switch(id){case -1:return "작은 흙덩이로 공격하는 아기. 성체보다 약해요.";case 0:return "같은 적을 연속 공격하면 피해가 최대 20% 증가.";case 1:return "적을 1초 동안 15% 느리게 해요.";case 2:case 13:case 27:return "딱정벌레 방어력의 절반을 무시해요.";case 3:return "명중 지점 가까운 다른 적에도 50% 피해.";case 9:return "적을 1초 동안 20% 느리게 해요.";case 14:return "2초 동안 적이 받는 피해를 10% 증가.";case 16:return "거대 버러지에게 기본 공격 피해 20% 증가.";case 17:return "기본 공격이 최대 두 적을 관통해요.";case 21:return "명중하면 3초 동안 초당 4의 독 피해.";case 22:return "근처 다른 적에게 50% 피해로 한 번 튕겨요.";case 28:return "네 번째 기본 공격마다 피해가 두 배.";default:return "캐릭터 전용 이펙트로 공격해요.";}}
         static readonly string[] skillDetails={"8초 동안 자신의 공격 간격을 30% 단축.","5초 동안 꿀밭 안의 적 이동 속도 40% 감소.","공격력 4배의 관통탄. 최대 세 적과 방어력 관통.","공격력 3배 폭발 + 4초 동안 초당 공격력 50% 화상.","5초 동안 자신의 공격 간격을 절반으로 단축.","6초 동안 전체 기본 공격력 20% 증가.","범위 내 적 1초 정지 + 3초 동안 40% 감속.","8초 동안 방어선에 피해 10을 막는 보호막.","6초 동안 전체 기본 공격 간격 25% 단축.","공격력 2배 범위 피해 + 3초 동안 50% 감속.","범위 내 적 1초 정지 + 피해 5 보호막.","공격력 4배의 넓은 범위 폭발.","공격력 1.5배 포탄을 한 개씩 세 번 발사.","공격력 2배 범위 피해 + 6초 동안 껍질 방어 제거.","5초 동안 범위 내 적이 받는 피해 25% 증가.","4초 동안 전체 기본 공격 추가 발사 및 간격 15% 단축.","자동 조준은 체력이 가장 높은 적. 한 적에게 공격력 5배 피해, 방어 무시.","공격력 1배 관통탄을 다섯 번 발사. 각 탄 최대 열 적 관통.","3초 동안 적을 끌어당기고 총 공격력 2배 지속 피해.","공격력 5배의 넓은 범위 폭발.","방어선 체력 5 회복. 최대 체력은 100.","5초 동안 포자 범위에 초당 공격력 80% 피해.","공격력 2배 범위 피해 + 4초 동안 40% 감속.","공격력 6배 직선 탄환. 껍질 방어 무시.","공격력 2배 범위 피해 + 1.5초 정지.","공격력 80% 탄환을 한 개씩 열 번 발사.","공격력 1.2배 당근을 한 개씩 다섯 번 빠르게 발사.","공격력 3배 범위 피해 + 2초 동안 30% 감속, 방어 무시.","8초 안에 다음 여섯 번의 기본 공격 피해 두 배.","공격력 80%의 작은 폭발을 표식 주변에 일곱 번 발생.","포물선 폭탄: 공격력 4배 폭발 + 3초 동안 30% 감속."};
+        public static string SkillDetail(Pet pet){if(RoyalCombat.King(pet))return "반경 180의 충격파로 공격력 3배 피해와 2초 기절. 거대 적은 기절 시간이 절반이에요.";if(RoyalCombat.Beggar(pet))return "동냥 바가지를 떨어뜨려 반경 180에 공격력 2.5배 피해와 2초 기절. 거대 적은 기절 시간이 절반이에요.";return SkillDetail(pet.SpeciesId);}
+        public static bool HasDamagingSkill(Pet pet){return RoyalCombat.Evolved(pet)||HasDamagingSkill(pet.SpeciesId);}
         public static string SkillDetail(int id){return (id<0?"흙장난 범위 안의 적을 3초 동안 30% 느리게 해요.":skillDetails[id])+(new[]{1,3,18,21}.Contains(id)?" 장판 반경은 기존의 2배.":"");}
         public static bool HasDamagingSkill(int id){return id>=0&&!new[]{0,1,4,5,6,7,8,10,14,15,20}.Contains(id);}
     }
     public class Defender {
         public Pet Pet;public DefenseStats Stats;public float X,Y;public double ShotClock,SkillClock,Motion=10,BubbleClock;public string BubbleLine="";
         public double PowerTime,SpeedTime,DoubleTime,SelfTime,EmpowerTime;public int EmpowerShots,Shots,LastTarget=-1,Consecutive,Slot;
+        public int RapidTarget=-1,RapidStacks;
+        public void ResetRapid(){RapidTarget=-1;RapidStacks=0;}
+        public void TrackRapid(DefenseEnemy target){if(target==null){ResetRapid();return;}if(RapidTarget==target.Id)RapidStacks=Math.Min(10,RapidStacks+1);else{RapidTarget=target.Id;RapidStacks=0;}}
         public double DamageBonus=1,SpeedBonus=1,SkillBonus=1,CooldownBonus=1;
         public double AttackPower {get{return Stats.Damage*DamageBonus;}}
-        public double AttackInterval {get{return Math.Max(.15,Stats.Interval/SpeedBonus);}}
+        public double AttackInterval {get{return Math.Max(.15,Stats.Interval/(SpeedBonus*(RoyalCombat.Beggar(Pet)?1+RapidStacks*.1:1)));}}
         public double SkillPower {get{return AttackPower*SkillBonus;}}
         public double SkillCooldown {get{return Math.Max(5,Stats.Cooldown*CooldownBonus);}}
         public PointF Point {get{return new PointF(X,Y);}}
@@ -68,6 +77,7 @@ namespace GuMaGoChi {
         public Defender Owner;public PointF Start,Target,Point;public double Age,Duration,Damage,Distance;public string Trajectory;public bool Skill;public int Pierce;
         public HashSet<int> Hit=new HashSet<int>();
     }
+    public class DefensePulse {public Defender Owner;public PointF Point;public double Left,Radius,Damage,Stun;public DefenseEffect Effect;}
     public class DefenseEffect {public int EvolutionId=-1;public int Species;public bool Skill;public PointF Point;public double Age,Life=.3,Radius;public bool Ground;public Defender Follow;}
     public class DefenseBeam {public Defender Owner;public PointF Start,Target;public double Age,Duration=1,Rate;}
     public class DefenseZone {public Defender Owner;public PointF Point;public double Left,Rate,Slow,Radius=170,Pull;}
@@ -75,6 +85,7 @@ namespace GuMaGoChi {
 
     public class DefenseBattle {
         public readonly List<Defender> Team=new List<Defender>();public readonly List<DefenseEnemy> Enemies=new List<DefenseEnemy>();
+        public readonly List<DefensePulse> Pulses=new List<DefensePulse>();
         public readonly List<DefenseBeam> Beams=new List<DefenseBeam>();
         public readonly List<DefenseShot> Shots=new List<DefenseShot>();public readonly List<DefenseEffect> Effects=new List<DefenseEffect>();
         public readonly List<DefenseZone> Zones=new List<DefenseZone>();public readonly List<DefenseVolley> Volleys=new List<DefenseVolley>();
@@ -86,23 +97,28 @@ namespace GuMaGoChi {
         public double HitDistance(PointF a,PointF b){return Distance(new PointF(a.X*HitScaleX,a.Y*HitScaleY),new PointF(b.X*HitScaleX,b.Y*HitScaleY));}
         public double HitSegmentDistance(PointF a,PointF b,PointF p){return SegmentDistance(new PointF(a.X*HitScaleX,a.Y*HitScaleY),new PointF(b.X*HitScaleX,b.Y*HitScaleY),new PointF(p.X*HitScaleX,p.Y*HitScaleY));}
         public void ToggleMarker(PointF point){Marker=Marker.HasValue?(PointF?)null:point;}
-        void OfferCards(){Cards.Clear();var attackers=Team.Where(d=>DefenseStats.HasDamagingSkill(d.Pet.SpeciesId)).ToArray();var kinds=Enumerable.Range(0,8).Where(i=>i!=4&&i!=5||attackers.Length>0).OrderBy(i=>random.Next()).Take(3);foreach(int kind in kinds){Defender target=null;if(kind%2==0)target=kind==4?attackers[random.Next(attackers.Length)]:Team[random.Next(Team.Count)];Cards.Add(new DefenseCard(kind,target));}Notice="라운드 완료 · 강화 카드 1장을 선택해 주세요.";}
+        void OfferCards(){Cards.Clear();var attackers=Team.Where(d=>DefenseStats.HasDamagingSkill(d.Pet)).ToArray();var kinds=Enumerable.Range(0,8).Where(i=>i!=4&&i!=5||attackers.Length>0).OrderBy(i=>random.Next()).Take(3);foreach(int kind in kinds){Defender target=null;if(kind%2==0)target=kind==4?attackers[random.Next(attackers.Length)]:Team[random.Next(Team.Count)];Cards.Add(new DefenseCard(kind,target));}Notice="라운드 완료 · 강화 카드 1장을 선택해 주세요.";}
         public bool ChooseCard(int index){if(!Running||index<0||index>=Cards.Count)return false;var card=Cards[index];foreach(var d in Team.Where(d=>card.Target==null||d==card.Target)){switch(card.Kind/2){case 0:d.DamageBonus*=card.Target==null?1.12:1.3;break;case 1:d.SpeedBonus=Math.Min(4,d.SpeedBonus*(card.Target==null?1.1:1.25));break;case 2:d.SkillBonus*=card.Target==null?1.15:1.35;break;case 3:d.CooldownBonus=Math.Max(5/d.Stats.Cooldown,d.CooldownBonus*(card.Target==null?.9:.8));break;}}Upgrades.Add(card.Title+" · "+card.Scope);Cards.Clear();Between=3;Notice="강화 완료! 다음 라운드까지";return true;}
         public DefenseBattle(SaveData data,IEnumerable<Pet> pets,int seed=0){Data=data;random=seed==0?new Random():new Random(seed);foreach(Pet p in pets.Where(p=>!p.Dead).Take(5))Team.Add(new Defender(p,Team.Count));if(Team.Count==0)throw new ArgumentException("고구마를 한 마리 이상 선택해 주세요.");}
         public static double Distance(PointF a,PointF b){double x=a.X-b.X,y=a.Y-b.Y;return Math.Sqrt(x*x+y*y);}
-        public bool InRange(Defender d,PointF target){return true;}
+        public bool InRange(Defender d,PointF target){return !RoyalCombat.King(d.Pet)||Distance(d.Point,target)<=d.Stats.Range*.7;}
         public DefenseEnemy Closest(Defender d){return Enemies.Where(e=>!e.Dead&&InRange(d,e.Point)).OrderByDescending(e=>e.X).FirstOrDefault();}
         public DefenseEnemy Spawn(int type,float x=0,float y=350){double factor=1+.18*Math.Max(0,Wave-1);double[] hp={42,30,95,80,15,420};var e=new DefenseEnemy {Id=++nextId,Type=type,X=x,Y=y,HP=hp[type]*factor,MaxHP=hp[type]*factor};Enemies.Add(e);return e;}
         public void StartWave(){Wave++;Remaining=Math.Min(50,10+Wave*2);SpawnClock=0;Notice="웨이브 "+Wave;}
         void Save(){if(Persist!=null)Persist();}
-        public void Finish(){if(!Running)return;Running=false;Beams.Clear();if(Completed>Data.DefenseBestWave||Completed==Data.DefenseBestWave&&Kills>Data.DefenseBestKills){Data.DefenseBestWave=Completed;Data.DefenseBestKills=Kills;}Save();Notice="종료 · 완료 "+Completed+"웨이브 / "+Kills+"처치 / 씨앗 +"+Rewards;}
+        public void Finish(){if(!Running)return;Running=false;Beams.Clear();Pulses.Clear();if(Completed>Data.DefenseBestWave||Completed==Data.DefenseBestWave&&Kills>Data.DefenseBestKills){Data.DefenseBestWave=Completed;Data.DefenseBestKills=Kills;}Save();Notice="종료 · 완료 "+Completed+"웨이브 / "+Kills+"처치 / 씨앗 +"+Rewards;}
         public void Kill(DefenseEnemy e){if(e.Dead)return;e.Dead=true;Kills++;if(Kills%10==0){Data.Seeds++;Rewards++;Save();}if(e.Type==3){for(int i=0;i<3;i++)Spawn(4,Math.Max(0,e.X-12-i*8),Math.Max(120,Math.Min(520,e.Y+(i-1)*24)));}}
         public void Damage(DefenseEnemy e,double amount,double pierce=0){if(e.Dead||amount<=0)return;double armor=e.Type==2&&e.ArmorTime<=0?.45:0;e.HP-=amount*(1-armor*(1-pierce))*(e.WeakTime>0?e.Weak:1);if(e.HP<=0)Kill(e);}
         public void SlowEnemy(DefenseEnemy e,double strength,double duration){if(e.Type==5){strength*=.5;duration*=.5;}if(e.SlowTime<=0||strength>=e.Slow){e.Slow=strength;e.SlowTime=Math.Max(e.SlowTime,duration);}}
         public void StopEnemy(DefenseEnemy e,double duration){if(e.StopTime>0||e.StopImmune>0)return;e.StopTime=e.Type==5?duration*.5:duration;}
         public void Area(PointF target,double radius,double damage,double slow=0,double seconds=0,double stop=0,double pierce=0){foreach(var e in Enemies.ToArray())if(!e.Dead&&HitDistance(e.Point,target)<=radius*.7+e.Radius){Damage(e,damage,pierce);if(!e.Dead){if(slow>0)SlowEnemy(e,slow,seconds);if(stop>0)StopEnemy(e,stop);}}}
         void Effect(Defender d,PointF target,bool skill,double life=.3,bool ground=false,Defender follow=null,double radius=0){Effects.Add(new DefenseEffect {Species=d.Pet.SpeciesId,EvolutionId=d.Pet.EvolutionId,Point=target,Skill=skill,Life=life,Ground=ground,Follow=follow,Radius=radius});}
+        void Pulse(Defender d,PointF target,double radius,double damage,double stun,bool skill,double delay){
+            var fx=new DefenseEffect {Species=d.Pet.SpeciesId,EvolutionId=d.Pet.EvolutionId,Point=target,Skill=skill,Life=delay+.4,Radius=radius,Ground=true};
+            Effects.Add(fx);Pulses.Add(new DefensePulse {Owner=d,Point=target,Left=delay,Radius=radius,Damage=damage,Stun=stun,Effect=fx});
+        }
         void Launch(Defender d,PointF target,double damage,bool skill,string trajectory,int pierce=1){d.Motion=0;double distance=Distance(d.Point,target);
+            if(!skill&&RoyalCombat.King(d.Pet)){Pulse(d,target,55,damage,0,false,.5);return;}
             if(!skill&&trajectory=="beam"){
                 if(!Beams.Any(b=>b.Owner==d)){
                     PointF direction=distance<1?new PointF(-1,0):new PointF((target.X-d.X)/(float)distance,(target.Y-d.Y)/(float)distance);
@@ -115,6 +131,7 @@ namespace GuMaGoChi {
         void Volley(Defender d,PointF target,int count,double multiplier,double interval,string trajectory,int pierce=1){Volleys.Add(new DefenseVolley {Owner=d,Target=target,Count=count,Damage=d.SkillPower*multiplier,Interval=interval,Trajectory=trajectory,Pierce=pierce});d.Motion=0;}
         void Zone(Defender d,PointF target,double life,double rate,double slow=0,double pull=0){var zone=new DefenseZone {Owner=d,Point=target,Left=life,Rate=rate,Slow=slow,Pull=pull};Zones.Add(zone);Effect(d,target,true,life,true,radius:zone.Radius);}
         public bool Skill(Defender d){if(!Running||ChoosingCard||Between>0||d.SkillClock>0)return false;var foe=Closest(d);PointF target=Marker??(foe!=null?foe.Point:new PointF(Math.Max(0,d.X-250),d.Y));int id=d.Pet.SpeciesId;bool support=new[]{0,4,5,7,8,15,20,28}.Contains(id);if(!support&&!InRange(d,target))return false;d.SkillClock=d.SkillCooldown;d.BubbleLine=Dialogue.Skill(d.Pet,d.Stats.Line);d.BubbleClock=2;d.Motion=0;double a=d.SkillPower;
+            if(RoyalCombat.Evolved(d.Pet)){Pulse(d,target,180,a*(RoyalCombat.King(d.Pet)?3:2.5),2,true,.5);return true;}
             switch(id){
                 case 0:d.SelfTime=8;Effect(d,d.Point,true,8,false,d);break;
                 case 1:Zone(d,target,5,0,.4);break;
@@ -161,11 +178,12 @@ namespace GuMaGoChi {
                 foreach(var enemy in Enemies.ToArray())if(!enemy.Dead&&HitSegmentDistance(beam.Start,beam.Target,enemy.Point)<enemy.Radius+7*.7)Damage(enemy,beam.Rate*active);
                 beam.Age+=active;if(beam.Age>=beam.Duration-1e-9)Beams.Remove(beam);
             }
-            foreach(var d in Team){d.ShotClock-=dt;if(d.ShotClock>0)continue;var e=Closest(d);PointF? target=Marker??(e==null?(PointF?)null:e.Point);if(!target.HasValue||!InRange(d,target.Value))continue;double power=d.AttackPower*(d.PowerTime>0?1.2:1);d.Shots++;if(d.DoubleTime>0&&d.Stats.Trajectory=="beam")power*=2;if(d.Pet.SpeciesId==28&&d.Shots%4==0)power*=2;if(d.EmpowerShots>0){power*=2;d.EmpowerShots--;}Launch(d,target.Value,power,false,d.Stats.Trajectory,d.Pet.SpeciesId==17?2:1);if(d.DoubleTime>0)Launch(d,target.Value,power,false,d.Stats.Trajectory);double factor=d.DoubleTime>0?.85:1;if(d.SpeedTime>0)factor=Math.Min(factor,.75);if(d.SelfTime>0)factor=Math.Min(factor,d.Pet.SpeciesId==4?.5:.7);d.ShotClock=Math.Max(d.Stats.Trajectory=="beam"?1.1:.1,d.AttackInterval*factor);}
+            foreach(var pulse in Pulses.ToArray()){pulse.Left-=dt;if(pulse.Left<=1e-9){Area(pulse.Point,pulse.Radius,pulse.Damage,stop:pulse.Stun);Pulses.Remove(pulse);}}
+            foreach(var d in Team){if(RoyalCombat.Beggar(d.Pet)&&!Enemies.Any(n=>!n.Dead&&n.Id==d.RapidTarget))d.ResetRapid();d.ShotClock-=dt;if(d.ShotClock>0)continue;var e=Closest(d);PointF? target=Marker??(e==null?(PointF?)null:e.Point);if(!target.HasValue||!InRange(d,target.Value))continue;if(RoyalCombat.Beggar(d.Pet)){var rapidEnemy=Marker.HasValue?Enemies.Where(n=>!n.Dead&&Distance(n.Point,target.Value)<80).OrderBy(n=>Distance(n.Point,target.Value)).FirstOrDefault():e;d.TrackRapid(rapidEnemy);}double power=d.AttackPower*(d.PowerTime>0?1.2:1);d.Shots++;if(d.DoubleTime>0&&d.Stats.Trajectory=="beam")power*=2;if(d.Pet.SpeciesId==28&&d.Shots%4==0)power*=2;if(d.EmpowerShots>0){power*=2;d.EmpowerShots--;}Launch(d,target.Value,power,false,d.Stats.Trajectory,d.Pet.SpeciesId==17?2:1);if(d.DoubleTime>0)Launch(d,target.Value,power,false,d.Stats.Trajectory);double factor=d.DoubleTime>0?.85:1;if(d.SpeedTime>0)factor=Math.Min(factor,.75);if(d.SelfTime>0)factor=Math.Min(factor,d.Pet.SpeciesId==4?.5:.7);d.ShotClock=Math.Max(d.Stats.Trajectory=="beam"?1.1:.1,d.AttackInterval*factor);}
             foreach(var v in Volleys.ToArray()){v.Left-=dt;if(v.Left<=0){Launch(v.Owner,v.Target,v.Damage,true,v.Trajectory,v.Pierce);v.Count--;v.Left+=v.Interval;if(v.Count<=0)Volleys.Remove(v);}}
             foreach(var s in Shots.ToArray()){s.Age+=dt;PointF before=s.Point;double u=s.Age/s.Duration;if(s.Trajectory=="parabolic"){u=Math.Min(1,u);s.Point=new PointF((float)(s.Start.X+(s.Target.X-s.Start.X)*u),(float)(s.Start.Y+(s.Target.Y-s.Start.Y)*u-100*4*u*(1-u)));if(u>=1){Impact(s,s.Target);Shots.Remove(s);}}else {double distance=Math.Max(1,s.Distance);s.Point=new PointF((float)(s.Start.X+(s.Target.X-s.Start.X)/distance*900*s.Age),(float)(s.Start.Y+(s.Target.Y-s.Start.Y)/distance*900*s.Age));foreach(var e in Enemies.ToArray())if(!e.Dead&&!s.Hit.Contains(e.Id)&&HitSegmentDistance(before,s.Point,e.Point)<e.Radius+7*.7){s.Hit.Add(e.Id);if(s.Skill){Damage(e,s.Damage,s.Owner.Pet.SpeciesId==2||s.Owner.Pet.SpeciesId==23?1:0);Effect(s.Owner,e.Point,true);}else {OnBasicHit(s,e);Effect(s.Owner,e.Point,false);}if(s.Hit.Count>=s.Pierce){Shots.Remove(s);break;}}if(s.Age>=s.Duration||s.Point.X<0||s.Point.X>1000||s.Point.Y<100||s.Point.Y>540)Shots.Remove(s);}}
             foreach(var fx in Effects.ToArray()){fx.Age+=dt;if(fx.Follow!=null)fx.Point=fx.Follow.Point;if(fx.Age>=fx.Life)Effects.Remove(fx);}
-            Enemies.RemoveAll(e=>e.Dead);if(Remaining==0&&Enemies.Count==0){Completed=Wave;House=Math.Min(100,House+5);Between=5;Shots.Clear();Beams.Clear();Volleys.Clear();Zones.Clear();Effects.Clear();OfferCards();if(Completed>Data.DefenseBestWave||Completed==Data.DefenseBestWave&&Kills>Data.DefenseBestKills){Data.DefenseBestWave=Completed;Data.DefenseBestKills=Kills;}Save();}
+            Enemies.RemoveAll(e=>e.Dead);if(Remaining==0&&Enemies.Count==0){Completed=Wave;House=Math.Min(100,House+5);Between=5;Shots.Clear();Beams.Clear();Pulses.Clear();Volleys.Clear();Zones.Clear();Effects.Clear();OfferCards();if(Completed>Data.DefenseBestWave||Completed==Data.DefenseBestWave&&Kills>Data.DefenseBestKills){Data.DefenseBestWave=Completed;Data.DefenseBestKills=Kills;}Save();}
         }
         public static double SegmentDistance(PointF a,PointF b,PointF p){double x=b.X-a.X,y=b.Y-a.Y,length=x*x+y*y;if(length==0)return Distance(a,p);double t=Math.Max(0,Math.Min(1,((p.X-a.X)*x+(p.Y-a.Y)*y)/length));return Distance(new PointF((float)(a.X+t*x),(float)(a.Y+t*y)),p);}
     }

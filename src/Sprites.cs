@@ -14,6 +14,7 @@ namespace GuMaGoChi {
             string cacheKey=species+":"+key;Clip cached;if(clips.TryGetValue(cacheKey,out cached))return cached;
             if(species<0)return LoadCharacterAtlas(key,-1,Path.Combine(Paths.BaseDirectory,"assets","higgsfield","baby","baby-b-atlas.png"));
             if(species==5)return LoadCharacterAtlas(key,5,Path.Combine(Paths.BaseDirectory,"assets","higgsfield","berry","berry-atlas.png"));
+            if(species==10)return LoadCharacterAtlas(key,10,Path.Combine(Paths.BaseDirectory,"assets","higgsfield","king","king-atlas.png"));
             if(species==26)return LoadCharacterAtlas(key,26,Path.Combine(Paths.BaseDirectory,"assets","higgsfield","carrot","carrot-atlas.png"));
             if(species==30){LoadSpy();return clips.TryGetValue(cacheKey,out cached)?cached:null;}
             string path=Path.Combine(Paths.BaseDirectory,"assets","higgsfield",key=="stand"?"adults-v2":"adult-actions",species.ToString("00")+(key=="stand"?".png":"-sheet.png"));
@@ -36,7 +37,7 @@ namespace GuMaGoChi {
             string correctedPath=Path.Combine(Path.GetDirectoryName(path),"baby-b-eat-corrected.png");
             using(var source=new Bitmap(path))using(var corrected=species<0&&File.Exists(correctedPath)?new Bitmap(correctedPath):null){
                 var rows=new Rectangle[6];
-                if(species==26)rows=GridRows(source);
+                if(species==26||species==10)rows=GridRows(source);
                 else rows=EvolutionRows(source);
                 var correctedRows=corrected==null?null:EvolutionRows(corrected);
                 for(int row=0;row<keys.Length;row++){
@@ -61,7 +62,7 @@ namespace GuMaGoChi {
             if(!File.Exists(path))return null;
             string[] keys={"stand","walk","eat","throw","sleep","burrow"};int maxWidth=0,maxHeight=0;
             using(var source=new Bitmap(path)) {
-                var rows=id==10||id==11?GridRows(source):EvolutionRows(source);
+                var rows=id>=10?GridRows(source):EvolutionRows(source);
                 int correctedRow=id==2?1:2;
                 string correctedName=id==2?"horangoma-walk-corrected.png":Evolutions.All[id].Asset+"-eat-corrected.png";
                 string correctedPath=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","evolutions",correctedName);

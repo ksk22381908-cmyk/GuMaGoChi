@@ -1,0 +1,37 @@
+name: Unsigned Windows release (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run Windows tests
+        shell: powershell
+        run: ./test.ps1 -SkipRootCopy
+      - name: Package unsigned executable
+        shell: powershell
+        run: ./package.ps1 -SkipBuild -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
+      - name: Publish explicitly unsigned download
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = [Reflection.AssemblyName]::GetAssemblyName("$PWD/bin/GuMaGoChi.exe").Version.ToString(3)
+          $tag = "v$version"
+          if ($env:GITHUB_REF_TYPE -ne 'tag' -or $env:GITHUB_REF_NAME -ne $tag) { throw 'Select the matching version tag for a release.' }
+          gh release create $tag "release/GuMaGoChi-$version-windows.zip" "release/GuMaGoChi-$version-windows.zip.sha256" --verify-tag --title "GuMaGoChi $tag (미서명)" --notes-file "docs/v$version-release-notes.md"
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }
+      - name: Retain Windows package and validation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-windows-validation
+          path: |
+            release/*.zip*
+            bin/GuMaGoChi.exe
+            bin/*preview.png
+            bin/*results.txt

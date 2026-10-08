@@ -21,7 +21,7 @@ namespace GuMaGoChi {
                 Check(!Evolutions.Change(data,pet,evolution.Id),"same selection no-op "+evolution.Id);
                 var loaded=Storage.Decode(Storage.Encode(data));
                 Check(loaded.Version==3&&loaded.Pets[0].EvolutionId==evolution.Id&&loaded.Pets[0].Kind==evolution.Name&&loaded.DiscoveredEvolutions.SequenceEqual(new[]{evolution.Id}),"evolution save roundtrip "+evolution.Id);
-                var defender=new Defender(pet,0);Check(defender.Pet.EvolutionId==evolution.Id&&defender.Pet.Kind==evolution.Name&&defender.Stats.Damage==DefenseStats.For(pet.SpeciesId).Damage,"defense retains appearance and existing stats "+evolution.Id);
+                var defender=new Defender(pet,0);Check(defender.Pet.EvolutionId==evolution.Id&&defender.Pet.Kind==evolution.Name&&defender.Stats.Damage==DefenseStats.For(pet).Damage,"defense retains appearance and existing stats "+evolution.Id);
                 foreach(string pose in poses)for(int frame=0;frame<4;frame++)using(var image=new Bitmap(84,84,PixelFormat.Format32bppArgb))using(var g=Graphics.FromImage(image)) {
                     g.Clear(Color.Transparent);double time=frame*(pose=="sleep"?.5:.25);
                     Check(Sprites.Draw(g,new Rectangle(0,0,84,84),pose,time,false,pet.SpeciesId,pet.EvolutionId),"frame loads "+evolution.Id+":"+pose+":"+frame);

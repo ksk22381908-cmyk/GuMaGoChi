@@ -113,7 +113,8 @@ namespace GuMaGoChi {
                 PointF pull=BallPhysics.Pull(source,dragPoint,Width,Height);float vx=pull.X*BallPhysics.Strength(Width,Pet.Skill=="힘"),vy=pull.Y*BallPhysics.Strength(Width,Pet.Skill=="힘");
                 for(int i=1;i<=6;i++) {float t=i*.08f,x=source.X+vx*t,y=source.Y+vy*t+325*t*t;if(y>floor)break;g.FillEllipse(Brushes.DarkOliveGreen,x-3,y-3,6,6);}
             }
-            if(CarrotCombatArt.Evolved(Pet))CarrotCombatArt.Projectile(g,ball,Pet,28);
+            if(RoyalCombat.Beggar(Pet))RoyalCombat.Trash(g,ball,28);
+            else if(CarrotCombatArt.Evolved(Pet))CarrotCombatArt.Projectile(g,ball,Pet,28);
             else {g.FillEllipse(Brushes.Orange,ball.X-14,ball.Y-14,28,28);using(var p=new Pen(Art.Ink,2))g.DrawEllipse(p,ball.X-14,ball.Y-14,28,28);
                 g.DrawArc(Pens.White,ball.X-9,ball.Y-9,16,16,200,85);}
             if(!flying&&!returning&&!dragging)TextRenderer.DrawText(g,"당겨서 쏘기",Font,new Point((int)ball.X-40,(int)ball.Y-48),Art.Ink,Art.Cream);
