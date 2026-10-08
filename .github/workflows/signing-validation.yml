@@ -1,0 +1,32 @@
+name: Signing pipeline validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse packaging and signature scripts
+        shell: powershell
+        run: |
+          foreach ($file in @('package.ps1','verify-signature.ps1')) {
+            $tokens = $null; $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile("$PWD/$file", [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) { throw ($errors | Out-String) }
+          }
+      - name: Confirm unsigned releases are rejected
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $status = (Get-AuthenticodeSignature ./GuMaGoChi.exe).Status
+          if ($status -ne 'NotSigned') { throw 'Expected unsigned source executable for negative test.' }
+          $rejected = $false
+          try { ./package.ps1 -SkipBuild -RequireSignature -ExecutablePath "$PWD/GuMaGoChi.exe" }
+          catch {
+            if ($_.Exception.Message -notlike '*valid trusted Authenticode signature*') { throw }
+            $rejected = $true
+          }
+          if (-not $rejected) { throw 'Unsigned executable was allowed into a signed release.' }
+          if (Test-Path ./release/GuMaGoChi-0.2.12-windows.zip) { throw 'Rejected executable was packaged.' }

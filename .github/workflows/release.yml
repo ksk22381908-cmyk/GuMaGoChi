@@ -6,17 +6,63 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  id-token: write
 jobs:
   release:
     runs-on: windows-2022
+    environment: release-signing
     steps:
       - uses: actions/checkout@v4
+      - name: Check signing configuration
+        shell: powershell
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          SIGNING_ENDPOINT: ${{ vars.SIGNING_ENDPOINT }}
+          SIGNING_ACCOUNT_NAME: ${{ vars.SIGNING_ACCOUNT_NAME }}
+          SIGNING_CERTIFICATE_PROFILE: ${{ vars.SIGNING_CERTIFICATE_PROFILE }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($name in @('AZURE_CLIENT_ID','AZURE_TENANT_ID','AZURE_SUBSCRIPTION_ID','SIGNING_ENDPOINT','SIGNING_ACCOUNT_NAME','SIGNING_CERTIFICATE_PROFILE')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) { throw "Missing $name. See docs/code-signing.md." }
+          }
       - name: Build and run Framework tests
         shell: powershell
         run: ./test.ps1 -SkipRootCopy
+      - name: Azure login with OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Sign executable and timestamp
+        uses: azure/artifact-signing-action@v2
+        with:
+          endpoint: ${{ vars.SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ vars.SIGNING_CERTIFICATE_PROFILE }}
+          files-folder: ${{ github.workspace }}\bin
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          exclude-environment-credential: true
+          exclude-workload-identity-credential: true
+          exclude-managed-identity-credential: true
+          exclude-shared-token-cache-credential: true
+          exclude-visual-studio-credential: true
+          exclude-visual-studio-code-credential: true
+          exclude-azure-cli-credential: false
+          exclude-azure-powershell-credential: true
+          exclude-azure-developer-cli-credential: true
+          exclude-interactive-browser-credential: true
+      - name: Verify trusted signature and timestamp
+        shell: powershell
+        run: ./verify-signature.ps1 -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
       - name: Package verified executable
         shell: powershell
-        run: ./package.ps1 -SkipBuild -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
+        run: ./package.ps1 -SkipBuild -RequireSignature -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
       - name: Publish Windows download
         shell: powershell
         env:

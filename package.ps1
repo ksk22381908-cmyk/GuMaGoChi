@@ -1,10 +1,11 @@
-﻿param([switch]$SkipBuild,[string]$ExecutablePath,[string]$PreviousPackagePath)
+﻿param([switch]$SkipBuild,[switch]$RequireSignature,[string]$ExecutablePath,[string]$PreviousPackagePath)
 $ErrorActionPreference = 'Stop'
 if(-not $SkipBuild){& (Join-Path $PSScriptRoot 'build.ps1')}
 $releaseRoot = Join-Path $PSScriptRoot 'release'
 $packagePath = Join-Path $releaseRoot 'GuMaGoChi-0.2.12-windows'
 New-Item -ItemType Directory -Path (Join-Path $packagePath 'assets/higgsfield') -Force | Out-Null
 if(-not $ExecutablePath){$ExecutablePath=Join-Path $PSScriptRoot 'GuMaGoChi.exe'}
+if($RequireSignature){& (Join-Path $PSScriptRoot 'verify-signature.ps1') -ExecutablePath $ExecutablePath}
 Copy-Item -LiteralPath $ExecutablePath -Destination $packagePath -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'GuMaGoChi.exe.config') -Destination $packagePath -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/higgsfield/characters') -Destination (Join-Path $packagePath 'assets/higgsfield') -Recurse -Force
