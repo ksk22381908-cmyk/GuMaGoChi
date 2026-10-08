@@ -64,7 +64,7 @@ jobs:
         shell: powershell
         run: ./package.ps1 -SkipBuild -RequireSignature -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
       - name: Publish Windows download
-        shell: powershell
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -72,7 +72,7 @@ jobs:
           $version = [Reflection.AssemblyName]::GetAssemblyName("$PWD/bin/GuMaGoChi.exe").Version.ToString(3)
           $tag = "v$version"
           if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne $tag) { throw 'Tag and executable version do not match.' }
-          gh release create $tag "release/GuMaGoChi-$version-windows.zip" "release/GuMaGoChi-$version-windows.zip.sha256" --verify-tag --title "GuMaGoChi $tag - 당근마 진화 디자인" --notes-file "docs/v$version-release-notes.md"
+          gh release create $tag "release/GuMaGoChi-$version-windows.zip" "release/GuMaGoChi-$version-windows.zip.sha256" --verify-tag --title "GuMaGoChi $tag" --notes-file "docs/v$version-release-notes.md"
           if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }
       - name: Keep package and render previews
         if: always()
