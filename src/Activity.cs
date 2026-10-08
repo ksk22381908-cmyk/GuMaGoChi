@@ -23,7 +23,7 @@ namespace GuMaGoChi {
         }
         void ResetBall() {
             PetWindow actor;if(app.Windows.TryGetValue(Pet.Id,out actor))actor.Animate("stand");
-            PetWindow actorWindow;app.Windows.TryGetValue(Pet.Id,out actorWindow);Point anchor=actorWindow==null?PetWindow.BallAnchor:actorWindow.ScaledBallAnchor;int floorOffset=actorWindow==null?PetWindow.FloorOffset:actorWindow.ScaledFloorOffset;
+            PetWindow actorWindow;app.Windows.TryGetValue(Pet.Id,out actorWindow);Point anchor=actorWindow==null?CarrotCombatArt.ActivityAnchor(Pet):actorWindow.ScaledBallAnchor;int floorOffset=actorWindow==null?PetWindow.FloorOffset:actorWindow.ScaledFloorOffset;
             floor=Math.Max(80,Math.Min(Height-12,Pet.Y-Top+floorOffset));
             source=new PointF(Math.Max(42,Math.Min(Width-56,Pet.X-Left+anchor.X)),(float)floor-(floorOffset-anchor.Y));ball=source;
             int distance=training?(int)(Width*(run.Stage==0?.22:run.Stage==1?.48:.88)):(Pet.SpeciesId<0?210:320);
@@ -113,8 +113,9 @@ namespace GuMaGoChi {
                 PointF pull=BallPhysics.Pull(source,dragPoint,Width,Height);float vx=pull.X*BallPhysics.Strength(Width,Pet.Skill=="힘"),vy=pull.Y*BallPhysics.Strength(Width,Pet.Skill=="힘");
                 for(int i=1;i<=6;i++) {float t=i*.08f,x=source.X+vx*t,y=source.Y+vy*t+325*t*t;if(y>floor)break;g.FillEllipse(Brushes.DarkOliveGreen,x-3,y-3,6,6);}
             }
-            g.FillEllipse(Brushes.Orange,ball.X-14,ball.Y-14,28,28);using(var p=new Pen(Art.Ink,2))g.DrawEllipse(p,ball.X-14,ball.Y-14,28,28);
-            g.DrawArc(Pens.White,ball.X-9,ball.Y-9,16,16,200,85);
+            if(CarrotCombatArt.Evolved(Pet))CarrotCombatArt.Projectile(g,ball,Pet,28);
+            else {g.FillEllipse(Brushes.Orange,ball.X-14,ball.Y-14,28,28);using(var p=new Pen(Art.Ink,2))g.DrawEllipse(p,ball.X-14,ball.Y-14,28,28);
+                g.DrawArc(Pens.White,ball.X-9,ball.Y-9,16,16,200,85);}
             if(!flying&&!returning&&!dragging)TextRenderer.DrawText(g,"당겨서 쏘기",Font,new Point((int)ball.X-40,(int)ball.Y-48),Art.Ink,Art.Cream);
         }
     }

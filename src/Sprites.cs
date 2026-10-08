@@ -36,7 +36,7 @@ namespace GuMaGoChi {
             string correctedPath=Path.Combine(Path.GetDirectoryName(path),"baby-b-eat-corrected.png");
             using(var source=new Bitmap(path))using(var corrected=species<0&&File.Exists(correctedPath)?new Bitmap(correctedPath):null){
                 var rows=new Rectangle[6];
-                if(species==26){for(int row=0;row<6;row++){int top=row*source.Height/6,bottom=(row+1)*source.Height/6;rows[row]=new Rectangle(0,top,source.Width,bottom-top);}}
+                if(species==26)rows=GridRows(source);
                 else rows=EvolutionRows(source);
                 var correctedRows=corrected==null?null:EvolutionRows(corrected);
                 for(int row=0;row<keys.Length;row++){
@@ -61,7 +61,7 @@ namespace GuMaGoChi {
             if(!File.Exists(path))return null;
             string[] keys={"stand","walk","eat","throw","sleep","burrow"};int maxWidth=0,maxHeight=0;
             using(var source=new Bitmap(path)) {
-                var rows=EvolutionRows(source);
+                var rows=id==10||id==11?GridRows(source):EvolutionRows(source);
                 int correctedRow=id==2?1:2;
                 string correctedName=id==2?"horangoma-walk-corrected.png":Evolutions.All[id].Asset+"-eat-corrected.png";
                 string correctedPath=Path.Combine(Paths.BaseDirectory,"assets","higgsfield","evolutions",correctedName);
@@ -100,6 +100,24 @@ namespace GuMaGoChi {
         }
         static bool WhitePixel(int pixel){Color c=Color.FromArgb(pixel);return c.A<230||(c.R>=225&&c.G>=225&&c.B>=225&&Math.Max(c.R,Math.Max(c.G,c.B))-Math.Min(c.R,Math.Min(c.G,c.B))<25);}
         static bool BackgroundPixel(int pixel){Color c=Color.FromArgb(pixel);return c.A<230||(c.R>=180&&c.G>=180&&c.B>=180&&Math.Max(c.R,Math.Max(c.G,c.B))-Math.Min(c.R,Math.Min(c.G,c.B))<45);}
+        static Rectangle[] GridRows(Bitmap source) {
+            // Generated sheets can cross the nominal row edge (especially sprouts).
+            // Keep each complete pose by choosing the nearest transparent scanline.
+            var edges=new int[7];edges[6]=source.Height;
+            for(int row=1;row<6;row++){
+                int nominal=row*source.Height/6;edges[row]=nominal;
+                int radius=Math.Max(1,source.Height/48);
+                bool found=false;
+                for(int offset=0;offset<=radius&&!found;offset++)foreach(int y in new[]{nominal-offset,nominal+offset}){
+                    if(y<=edges[row-1]||y>=source.Height)continue;
+                    bool empty=true;for(int x=0;x<source.Width;x++)if(source.GetPixel(x,y).A>=230){empty=false;break;}
+                    if(empty){edges[row]=y;found=true;break;}
+                }
+            }
+            var rows=new Rectangle[6];
+            for(int row=0;row<6;row++)rows[row]=new Rectangle(0,edges[row],source.Width,edges[row+1]-edges[row]);
+            return rows;
+        }
         static Rectangle[] EvolutionRows(Bitmap source) {
             int w=source.Width,h=source.Height;var pixels=new int[w*h];var bands=new List<Rectangle>();
             var data=source.LockBits(new Rectangle(0,0,w,h),ImageLockMode.ReadOnly,PixelFormat.Format32bppArgb);

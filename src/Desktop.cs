@@ -115,7 +115,7 @@ namespace GuMaGoChi {
         public static readonly Point BallAnchor=new Point(62,115);
         public const int FloorOffset=136;
         public Rectangle ScaledSpriteBounds {get{return DisplayZoom.Rect(SpriteBounds,UiZoom);}}
-        public Point ScaledBallAnchor {get{return new Point(DisplayZoom.Pixels(BallAnchor.X,UiZoom),DisplayZoom.Pixels(BallAnchor.Y,UiZoom));}}
+        public Point ScaledBallAnchor {get{Point anchor=CarrotCombatArt.ActivityAnchor(Pet);return new Point(DisplayZoom.Pixels(anchor.X,UiZoom),DisplayZoom.Pixels(anchor.Y,UiZoom));}}
         public int ScaledFloorOffset {get{return DisplayZoom.Pixels(FloorOffset,UiZoom);}}
         Rectangle Body {get {return ScaledSpriteBounds;}}
         public override void ApplyUiZoom(int percent){UiZoom=DisplayZoom.Normalize(percent)/100f;ClientSize=new Size(DisplayZoom.Pixels(126,UiZoom),DisplayZoom.Pixels(166,UiZoom));Location=Clamp(Location);Pet.X=Left;Pet.Y=Top;walkX=Left;walkY=Top;Invalidate();}

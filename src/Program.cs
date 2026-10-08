@@ -24,7 +24,7 @@ namespace GuMaGoChi {
         static int count=0;
         static void Check(bool condition,string message) {if(!condition)throw new Exception("FAIL: "+message);count++;}
         public static string Run() {
-            count+=DefenseTests.Run();count+=UpdateTests.Run();
+            count+=DefenseTests.Run();count+=CarrotCombatTests.Run();count+=UpdateTests.Run();
             var mattangData=new SaveData {Seeds=27};var mattangEngine=new Engine(mattangData);
             var removed=mattangEngine.Adopt("맛탕",true);removed.SpeciesId=12;mattangData.Discovered.Add(12);
             var survivor=mattangEngine.Adopt("남은 고구마",true);survivor.Friends[removed.Id]=3;

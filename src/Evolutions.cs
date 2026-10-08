@@ -19,7 +19,9 @@ namespace GuMaGoChi {
             new Evolution(6,12,"해적선장마","pirate-captain","자신만만하게 동료를 이끄는 고구마 선장"),
             new Evolution(7,12,"유령해적마","ghost-pirate","유령 불꽃으로 장난치는 능청스러운 해적 고구마"),
             new Evolution(8,5,"블루베리마","blueberry","느긋하게 구르며 독 열매를 던지는 능청스러운 베리"),
-            new Evolution(9,5,"라즈베리마","raspberry","과즙처럼 발랄하고 자신만만한 베리")
+            new Evolution(9,5,"라즈베리마","raspberry","과즙처럼 발랄하고 자신만만한 베리"),
+            new Evolution(10,26,"농부마","farmer","직접 기른 당근을 바구니에 담는 성실한 농부"),
+            new Evolution(11,26,"황달마","hwangdal","당근을 너무 좋아해 얼굴이 노르스름해진 통통한 먹보")
         };
         public static bool Valid(int id,int parent){return id>=0&&id<All.Length&&All[id].Parent==parent;}
         public static IEnumerable<Evolution> For(int parent){return All.Where(e=>e.Parent==parent);}
@@ -45,6 +47,8 @@ namespace GuMaGoChi {
                 case 7:return "으흐흐… 보물을 숨긴 곳은 나만 알지!";
                 case 8:return "빙글빙글~ 내 열매는 조금 오래 남을걸?";
                 case 9:return "준비됐지? 상큼하게 쭉 쏴볼게!";
+                case 10:return "직접 기른 당근이야! 바구니 가득 챙겨왔어.";
+                case 11:return "오물오물… 당근은 한 입만 더 먹을래!";
                 default:return "다시 익숙한 모습으로 돌아왔어.";
             }
         }

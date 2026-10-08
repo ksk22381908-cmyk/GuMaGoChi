@@ -1,0 +1,39 @@
+name: Windows release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run Framework tests
+        shell: powershell
+        run: ./test.ps1 -SkipRootCopy
+      - name: Package verified executable
+        shell: powershell
+        run: ./package.ps1 -SkipBuild -ExecutablePath "$PWD/bin/GuMaGoChi.exe"
+      - name: Publish Windows download
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = [Reflection.AssemblyName]::GetAssemblyName("$PWD/bin/GuMaGoChi.exe").Version.ToString(3)
+          $tag = "v$version"
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne $tag) { throw 'Tag and executable version do not match.' }
+          gh release create $tag "release/GuMaGoChi-$version-windows.zip" "release/GuMaGoChi-$version-windows.zip.sha256" --verify-tag --title "GuMaGoChi $tag - 당근마 진화 디자인" --notes-file "docs/v$version-release-notes.md"
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed.' }
+      - name: Keep package and render previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-validation
+          path: |
+            release/*.zip*
+            bin/*preview.png
+            bin/*results.txt
